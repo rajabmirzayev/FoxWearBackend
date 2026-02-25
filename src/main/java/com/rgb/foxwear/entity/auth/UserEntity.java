@@ -1,6 +1,7 @@
-package com.rgb.foxwear.entity;
+package com.rgb.foxwear.entity.auth;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.rgb.foxwear.entity.BaseAuditEntity;
 import com.rgb.foxwear.enums.Gender;
 import com.rgb.foxwear.enums.Role;
 import com.rgb.foxwear.enums.UserStatus;
