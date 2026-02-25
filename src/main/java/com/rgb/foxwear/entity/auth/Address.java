@@ -1,4 +1,4 @@
-package com.rgb.foxwear.entity;
+package com.rgb.foxwear.entity.auth;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
