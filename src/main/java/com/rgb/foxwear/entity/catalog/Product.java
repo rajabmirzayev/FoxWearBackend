@@ -1,0 +1,68 @@
+package com.rgb.foxwear.entity.catalog;
+
+import com.rgb.foxwear.entity.BaseAuditEntity;
+import com.rgb.foxwear.enums.Gender;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "products", schema = "catalog")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class Product extends BaseAuditEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
+
+    @NotBlank
+    @Column(nullable = false)
+    String title;
+
+    @NotNull
+    @Column(name = "original_price", precision = 10, scale = 2, nullable = false)
+    BigDecimal originalPrice;
+
+    @Column(name = "discount_price", precision = 10, scale = 2)
+    BigDecimal discountPrice;
+
+    @Column(name = "discount_rate")
+    Short discountRate;
+
+    @Column(name = "has_discount")
+    boolean hasDiscount = false;
+
+    @NotBlank
+    @Size(max = 100)
+    @Column(unique = true, nullable = false, length = 100)
+    String slug; // ? name on link
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    Gender gender;
+
+    @Column(columnDefinition = "TEXT")
+    String description;
+
+    @Column(name = "is_active")
+    boolean isActive = true;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    WearCategory category;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<ColorOption> colors = new ArrayList<>();
+
+}
