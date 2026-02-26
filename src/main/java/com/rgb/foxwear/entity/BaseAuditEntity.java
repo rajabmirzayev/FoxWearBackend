@@ -23,11 +23,11 @@ public abstract class BaseAuditEntity {
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    @JsonFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
     LocalDateTime createdAt;
 
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
-    @JsonFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
     LocalDateTime updatedAt;
 }
