@@ -58,8 +58,9 @@ public class Product extends BaseAuditEntity {
     @Column(name = "is_active")
     boolean isActive = true;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
     WearCategory category;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
