@@ -75,4 +75,14 @@ public class Product extends BaseAuditEntity {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     List<ColorOption> colors = new ArrayList<>();
 
+    @PrePersist
+    @PreUpdate
+    void prePersistAndUpdate() {
+        int discount = this.discountRate == null ? 0 : this.discountRate;
+
+        if (discount > 0) {
+            hasDiscount = true;
+        }
+    }
+
 }
