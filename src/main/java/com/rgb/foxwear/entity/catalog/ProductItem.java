@@ -7,7 +7,13 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Entity
-@Table(name = "product_item", schema = "catalog")
+@Table(
+        name = "product_item",
+        schema = "catalog",
+        check = {
+                @CheckConstraint(name = "check_stock_integrity", constraint = "stock_remaining <= stock_quantity AND stock_remaining >= 0")
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
