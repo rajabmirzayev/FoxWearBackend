@@ -14,6 +14,8 @@ import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(
@@ -106,5 +108,8 @@ public class Order extends BaseAuditEntity {
     @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
     @Column(name = "delivered_at", nullable = false)
     LocalDateTime deliveredAt;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<OrderItem> items = new ArrayList<>();
 
 }
