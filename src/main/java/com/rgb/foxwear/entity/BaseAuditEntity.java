@@ -1,4 +1,4 @@
-package com.rgb.foxwear.entity.auth;
+package com.rgb.foxwear.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
