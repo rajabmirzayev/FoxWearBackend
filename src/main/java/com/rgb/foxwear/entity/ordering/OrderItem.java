@@ -7,6 +7,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Entity
 @Table(name = "order_items", schema = "ordering")
@@ -69,7 +70,8 @@ public class OrderItem {
 
         this.subTotal = this.priceAtPurchase
                 .subtract(discount)
-                .multiply(BigDecimal.valueOf(quantity));
+                .multiply(BigDecimal.valueOf(quantity))
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
 }
