@@ -102,7 +102,7 @@ public class UserEntity extends BaseAuditEntity {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     List<ProductLike> likedProducts = new ArrayList<>();
 
-    //    @OneToMany(mappedBy = "user")
-    //    List<Card> savedCards = new ArrayList<>();
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY,  cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Card> savedCards = new ArrayList<>();
 
 }
