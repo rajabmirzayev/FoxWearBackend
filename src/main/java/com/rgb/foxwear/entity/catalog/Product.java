@@ -3,9 +3,7 @@ package com.rgb.foxwear.entity.catalog;
 import com.rgb.foxwear.entity.BaseAuditEntity;
 import com.rgb.foxwear.enums.Gender;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,7 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "products", schema = "catalog")
+@Table(
+        name = "products",
+        schema = "catalog",
+        check = {
+                @CheckConstraint(name = "check_prices", constraint = "original_price > 0 AND (discount_price IS NULL OR discount_price < original_price)"),
+                @CheckConstraint(name = "check_discount_rate", constraint = "discount_rate >= 0 AND discount_rate <= 100")
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,18 +32,22 @@ public class Product extends BaseAuditEntity {
     Long id;
 
     @NotBlank
-    @Column(nullable = false)
+    @Size(max = 100)
+    @Column(nullable = false, length = 100)
     String title;
 
     @NotNull
+    @DecimalMin(value = "0.0", inclusive = false)
     @Column(name = "original_price", precision = 10, scale = 2, nullable = false)
     BigDecimal originalPrice;
 
     @Column(name = "discount_price", precision = 10, scale = 2)
     BigDecimal discountPrice;
 
+    @Min(0)
+    @Max(100)
     @Column(name = "discount_rate")
-    Short discountRate;
+    Integer discountRate;
 
     @Column(name = "has_discount")
     boolean hasDiscount = false;
