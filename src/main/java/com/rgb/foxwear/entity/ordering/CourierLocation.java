@@ -46,5 +46,5 @@ public class CourierLocation {
     LocalDateTime lastUpdatedAt;
 
     @Column(name = "is_active")
-    boolean isActive = true;
+    boolean isActive = false;
 }
