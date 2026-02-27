@@ -9,7 +9,7 @@ public class StringHelper {
                 text.substring(1).toLowerCase();
     }
 
-    public static String tiUpper(String text) {
+    public static String toUpper(String text) {
         text = text != null ? text.trim() : "";
 
         return text.toUpperCase();
