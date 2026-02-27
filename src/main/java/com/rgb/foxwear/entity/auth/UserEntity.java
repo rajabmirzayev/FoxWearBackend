@@ -62,6 +62,7 @@ public class UserEntity extends BaseAuditEntity {
     @Column(nullable = false)
     String password;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     Gender gender;
