@@ -1,0 +1,52 @@
+package com.rgb.foxwear.exception;
+
+import com.rgb.foxwear.dto.ApiResponse;
+import com.rgb.foxwear.enums.ErrorCode;
+import lombok.NonNull;
+import org.springframework.boot.webmvc.error.DefaultErrorAttributes;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<@NonNull ApiResponse<?>> handleMethodArgumentNotValidException(Errors errors) {
+        Map<String, String> errorMap = new HashMap<>();
+
+        errors.getFieldErrors().forEach(error -> {
+            errorMap.put(error.getField(), error.getDefaultMessage());
+        });
+
+        var iterator = errorMap.entrySet().iterator();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(iterator.next().getValue().toString(), ErrorCode.VALIDATION, errorMap));
+    }
+
+    @ExceptionHandler(PasswordMismatchException.class)
+    public ResponseEntity<@NonNull ApiResponse<?>> handlePasswordMismatchException(PasswordMismatchException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.PASSWORD_MISMATCH));
+    }
+
+    @ExceptionHandler(UnderageUserException.class)
+    public ResponseEntity<@NonNull ApiResponse<?>> handleUnderageUserException(UnderageUserException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.UNDERAGE));
+    }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<@NonNull ApiResponse<?>> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.USER_ALREADY_EXISTS));
+    }
+
+}
