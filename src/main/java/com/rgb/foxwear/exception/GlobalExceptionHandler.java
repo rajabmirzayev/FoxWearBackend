@@ -31,6 +31,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(iterator.next().getValue().toString(), ErrorCode.VALIDATION, errorMap));
     }
 
+    // Authentication error handlers
     @ExceptionHandler(PasswordMismatchException.class)
     public ResponseEntity<@NonNull ApiResponse<?>> handlePasswordMismatchException(PasswordMismatchException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -43,10 +44,17 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.UNDERAGE));
     }
 
+    // User error handlers
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<@NonNull ApiResponse<?>> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.USER_ALREADY_EXISTS));
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<@NonNull ApiResponse<?>> handleUserNotFoundException(UserNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.USER_NOT_FOUND));
     }
 
 }
