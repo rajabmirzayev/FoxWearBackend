@@ -66,10 +66,8 @@ public class Address {
     @Column(nullable = false)
     Boolean isDefault = false;
 
-    @NotNull
     Double latitude;
 
-    @NotNull
     Double longitude;
 
     @ManyToOne(fetch = FetchType.LAZY)

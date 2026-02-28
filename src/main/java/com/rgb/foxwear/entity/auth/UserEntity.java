@@ -2,12 +2,15 @@ package com.rgb.foxwear.entity.auth;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.rgb.foxwear.entity.BaseAuditEntity;
+import com.rgb.foxwear.entity.interaction.ProductLike;
+import com.rgb.foxwear.entity.ordering.Cart;
 import com.rgb.foxwear.enums.Gender;
 import com.rgb.foxwear.enums.Role;
 import com.rgb.foxwear.enums.UserStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -59,6 +62,7 @@ public class UserEntity extends BaseAuditEntity {
     @Column(nullable = false)
     String password;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     Gender gender;
@@ -91,10 +95,14 @@ public class UserEntity extends BaseAuditEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Address> addresses = new ArrayList<>();
 
-//    @OneToMany(mappedBy = "user")
-//    List<Cart> savedCarts = new ArrayList<>();
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "cart_id")
+    Cart cart;
 
-//    @OneToMany(mappedBy = "user")
-//    List<ProductLike> likedProducts = new ArrayList<>();
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    List<ProductLike> likedProducts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Card> savedCards = new ArrayList<>();
 
 }
