@@ -1,0 +1,71 @@
+databaseChangeLog:
+  - changeSet:
+      id: 01032026-10
+      author: rajabmirzayev
+      changes:
+        - createTable:
+            schemaName: catalog
+            tableName: coupons
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: code
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: discount_type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value
+                  type: DECIMAL(10, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: min_order_amount
+                  type: DECIMAL(10, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: expiry_date
+                  type: DATE
+              - column:
+                  name: usage_limit
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: used_count
+                  type: INTEGER
+                  defaultValueNumeric: 0
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - sql:
+            dbms: postgresql
+            sql: ALTER TABLE catalog.coupons ADD CONSTRAINT check_used_count_limit CHECK (used_count <= usage_limit)

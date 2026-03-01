@@ -5,3 +5,17 @@ databaseChangeLog:
       file: classpath://db/changelog/v-01/create-address-table.yaml
   - include:
       file: classpath://db/changelog/v-01/create-card-table.yaml
+  - include:
+      file: classpath://db/changelog/v-01/create-wear-category-table.yaml
+  - include:
+      file: classpath://db/changelog/v-01/create-product-table.yaml
+  - include:
+      file: classpath://db/changelog/v-01/create-product-size-table.yaml
+  - include:
+      file: classpath://db/changelog/v-01/create-color-option-table.yaml
+  - include:
+      file: classpath://db/changelog/v-01/create-color-option-image-table.yaml
+  - include:
+      file: classpath://db/changelog/v-01/create-product-item-table.yaml
+  - include:
+      file: classpath://db/changelog/v-01/create-coupon-table.yaml
