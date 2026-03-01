@@ -1,4 +1,4 @@
-package com.rgb.foxwear.service;
+package com.rgb.foxwear.service.implementation.auth;
 
 import com.rgb.foxwear.dto.request.auth.CreateUserRequest;
 import com.rgb.foxwear.dto.response.auth.CreateUserResponse;
@@ -8,6 +8,7 @@ import com.rgb.foxwear.exception.PasswordMismatchException;
 import com.rgb.foxwear.exception.UnderageUserException;
 import com.rgb.foxwear.exception.UserAlreadyExistsException;
 import com.rgb.foxwear.repository.UserRepository;
+import com.rgb.foxwear.service.abstraction.auth.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -18,10 +19,11 @@ import java.time.Period;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ModelMapper mapper;
 
+    @Override
     @Transactional
     public CreateUserResponse createUser(
             CreateUserRequest request
