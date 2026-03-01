@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: classpath://db/changelog/v-01/create-user-table.yaml
+  - include:
+      file: classpath://db/changelog/v-01/create-address-table.yaml
+  - include:
+      file: classpath://db/changelog/v-01/create-card-table.yaml
