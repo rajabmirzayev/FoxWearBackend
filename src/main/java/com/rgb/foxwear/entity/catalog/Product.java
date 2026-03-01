@@ -57,6 +57,7 @@ public class Product extends BaseAuditEntity {
     @Column(unique = true, nullable = false, length = 100)
     String slug; // ? name on link
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     Gender gender;
