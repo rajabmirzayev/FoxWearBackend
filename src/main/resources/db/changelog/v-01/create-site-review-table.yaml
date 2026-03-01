@@ -1,0 +1,52 @@
+databaseChangeLog:
+  - changeSet:
+      id: 01032026-11
+      author: rajabmirzayev
+      changes:
+        - createTable:
+            schemaName: interaction
+            tableName: site_reviews
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: rate
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_site_reviews_user
+                    referencedTableSchemaName: auth
+                    referencedTableName: users
+                    referencedColumnNames: id
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - sql:
+            dbms: postgresql
+            sql: ALTER TABLE interaction.site_reviews ADD CONSTRAINT check_site_review_rate CHECK (rate >= 1 AND rate <= 5)
