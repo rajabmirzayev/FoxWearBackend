@@ -1,4 +1,4 @@
-package com.rgb.foxwear.service;
+package com.rgb.foxwear.service.implementation.auth;
 
 import com.rgb.foxwear.dto.request.auth.CreateAddressRequest;
 import com.rgb.foxwear.dto.response.auth.CreateAddressResponse;
@@ -7,6 +7,7 @@ import com.rgb.foxwear.entity.auth.UserEntity;
 import com.rgb.foxwear.exception.UserNotFoundException;
 import com.rgb.foxwear.repository.AddressRepository;
 import com.rgb.foxwear.repository.UserRepository;
+import com.rgb.foxwear.service.abstraction.auth.AddressService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -16,11 +17,12 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class AddressService {
+public class AddressServiceImpl implements AddressService {
     private final AddressRepository addressRepository;
     private final UserRepository userRepository;
     private final ModelMapper mapper;
 
+    @Override
     @Transactional
     public CreateAddressResponse createAddress(
             CreateAddressRequest request, Long userId
