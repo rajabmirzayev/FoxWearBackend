@@ -53,12 +53,12 @@ public class Order extends BaseAuditEntity {
 
     @NotNull
     @DecimalMin(value = "0.0", inclusive = false)
-    @Column(name = "total_original_price", nullable = false)
+    @Column(name = "total_original_price", precision = 12, scale = 2, nullable = false)
     BigDecimal totalOriginalPrice;
 
     @NotNull
     @DecimalMin("0.0")
-    @Column(name = "total_discount_price", nullable = false)
+    @Column(name = "total_discount_price", precision = 12, scale = 2, nullable = false)
     BigDecimal totalDiscountPrice;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -85,12 +85,10 @@ public class Order extends BaseAuditEntity {
     @Column(name = "address_snapshot", nullable = false, length = 700)
     String addressSnapshot;
 
-    @NotNull
-    @Column(name = "latitude_snapshot", nullable = false)
+    @Column(name = "latitude_snapshot")
     Double latitudeSnapshot;
 
-    @NotNull
-    @Column(name = "longitude_snapshot", nullable = false)
+    @Column(name = "longitude_snapshot")
     Double longitudeSnapshot;
 
     @Size(max = 500)
@@ -102,11 +100,11 @@ public class Order extends BaseAuditEntity {
     String trackingNumber;
 
     @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
-    @Column(name = "estimated_delivery_date", nullable = false)
+    @Column(name = "estimated_delivery_date")
     LocalDateTime estimatedDeliveryDate;
 
     @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
-    @Column(name = "delivered_at", nullable = false)
+    @Column(name = "delivered_at")
     LocalDateTime deliveredAt;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)

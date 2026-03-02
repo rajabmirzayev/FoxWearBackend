@@ -25,9 +25,7 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", unique = true, nullable = false)
+    @OneToOne(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     UserEntity user;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)

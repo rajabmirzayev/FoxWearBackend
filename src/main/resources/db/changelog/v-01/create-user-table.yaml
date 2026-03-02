@@ -1,0 +1,95 @@
+databaseChangeLog:
+  - changeSet:
+      id: 01032026-01
+      author: rajabmirzayev
+      changes:
+        - createTable:
+            schemaName: auth
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: first_name
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: username
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: phone_number
+                  type: VARCHAR(17)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: gender
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: birth_date
+                  type: DATE
+              - column:
+                  name: profile_picture
+                  type: TEXT
+              - column:
+                  name: role
+                  type: VARCHAR(20)
+                  defaultValue: USER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  defaultValue: PENDING
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_email_verified
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: is_phone_number_verified
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: two_factor_enabled
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: cart_id
+                  type: BIGINT
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP

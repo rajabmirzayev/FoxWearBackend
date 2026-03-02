@@ -1,0 +1,34 @@
+databaseChangeLog:
+  - changeSet:
+      id: 01032026-08
+      author: rajabmirzayev
+      changes:
+        - createTable:
+            schemaName: catalog
+            tableName: color_option_images
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: image
+                  type: VARCHAR(10000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: color_option_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    referencedTableName: product_color_options
+                    referencedTableSchemaName: catalog
+                    referencedColumnNames: id
+                    foreignKeyName: fk_color_image_option
+              - column:
+                  name: is_main
+                  type: BOOLEAN
+                  defaultValueBoolean: false

@@ -1,0 +1,77 @@
+databaseChangeLog:
+  - changeSet:
+      id: 01032026-05
+      author: rajabmirzayev
+      changes:
+        - createTable:
+            schemaName: catalog
+            tableName: products
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: original_price
+                  type: DECIMAL(10, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: discount_price
+                  type: DECIMAL(10, 2)
+              - column:
+                  name: discount_rate
+                  type: INT
+              - column:
+                  name: has_discount
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: slug
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: gender
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+              - column:
+                  name: category_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    referencedTableName: categories
+                    referencedTableSchemaName: catalog
+                    referencedColumnNames: id
+                    foreignKeyName: fk_product_category
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - sql:
+            dbms: postgresql
+            sql: ALTER TABLE catalog.products ADD CONSTRAINT check_prices CHECK (original_price > 0 AND (discount_price IS NULL OR discount_price < original_price))
+        - sql:
+            dbms: postgresql
+            sql: ALTER TABLE catalog.products ADD CONSTRAINT check_discount_rate CHECK (discount_rate >= 0 AND discount_rate <= 100)

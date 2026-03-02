@@ -1,0 +1,60 @@
+databaseChangeLog:
+  - changeSet:
+      id: 01032026-15
+      author: rajabmirzayev
+      changes:
+        - createTable:
+            schemaName: ordering
+            tableName: cart_items
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: cart_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_cart_items_cart
+                    referencedTableSchemaName: ordering
+                    referencedTableName: carts
+                    referencedColumnNames: id
+              - column:
+                  name: product_item_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_cart_items_product_item
+                    referencedTableSchemaName: catalog
+                    referencedTableName: product_item
+                    referencedColumnNames: id
+              - column:
+                  name: quantity
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: original_unit_price
+                  type: DECIMAL(12, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: actual_unit_price
+                  type: DECIMAL(12, 2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: sub_total
+                  type: DECIMAL(12, 2)
+                  constraints:
+                    nullable: false
+        - sql:
+            dbms: postgresql
+            sql: ALTER TABLE ordering.cart_items ADD CONSTRAINT check_cart_item_prices CHECK (original_unit_price >= 0 AND actual_unit_price >= 0 AND sub_total >= 0)
+        - sql:
+            dbms: postgresql
+            sql: ALTER TABLE ordering.cart_items ADD CONSTRAINT check_cart_item_quantity CHECK (quantity >= 1)
