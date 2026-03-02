@@ -33,9 +33,8 @@ public class WearCategory extends BaseAuditEntity {
     @Column(nullable = false, length = 200)
     String subtitle;
 
-    @NotBlank
     @Size(max = 255)
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     String link;
 
     @NotBlank

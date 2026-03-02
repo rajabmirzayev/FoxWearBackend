@@ -31,6 +31,12 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(iterator.next().getValue().toString(), ErrorCode.VALIDATION, errorMap));
     }
 
+    @ExceptionHandler(InvalidArgumentException.class)
+    public ResponseEntity<@NonNull ApiResponse<?>> handleInvalidArgumentException(InvalidArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.INVALID_ARGUMENT));
+    }
+
     // Authentication error handlers
     @ExceptionHandler(PasswordMismatchException.class)
     public ResponseEntity<@NonNull ApiResponse<?>> handlePasswordMismatchException(PasswordMismatchException ex) {
@@ -55,6 +61,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<@NonNull ApiResponse<?>> handleUserNotFoundException(UserNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.USER_NOT_FOUND));
+    }
+    
+    // Product error handlers
+    @ExceptionHandler(WearCategoryNotFound.class)
+    public ResponseEntity<@NonNull ApiResponse<?>> handleWearCategoryNotFound(WearCategoryNotFound ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.WEAR_CATEGORY_NOT_FOUND));
     }
 
 }
