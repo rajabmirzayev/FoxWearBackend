@@ -41,8 +41,20 @@ public class ProductServiceImpl implements ProductService {
 
         Product savedProduct = productRepository.save(product);
 
-        var response = mapper.map(savedProduct, CreateProductResponse.class);
-        response.setCategory(mapper.map(savedProduct.getCategory(), CreateCategoryResponse.class));
+        return getCreateProductResponse(savedProduct);
+    }
+
+    private CreateProductResponse getCreateProductResponse(Product product) {
+        var response = mapper.map(product, CreateProductResponse.class);
+        response.setCategory(
+                mapper.map(product.getCategory(), CreateCategoryResponse.class)
+        );
+
+        if (response.getCategory().getParent() != null) {
+            response.getCategory().setParent(
+                    mapper.map(product.getCategory().getParent(), CreateCategoryResponse.class)
+            );
+        }
 
         return response;
     }

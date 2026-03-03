@@ -1,6 +1,5 @@
 package com.rgb.foxwear.dto.response.catalog;
 
-import com.rgb.foxwear.entity.catalog.WearCategory;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -16,6 +15,6 @@ public class CreateCategoryResponse {
     String subtitle;
     String link;
     String mainImage;
-    WearCategory parent;
-    
+    CreateCategoryResponse parent;
+
 }
