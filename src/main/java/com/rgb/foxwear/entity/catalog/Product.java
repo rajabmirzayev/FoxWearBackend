@@ -16,7 +16,7 @@ import java.util.List;
         name = "products",
         schema = "catalog",
         check = {
-                @CheckConstraint(name = "check_prices", constraint = "original_price > 0 AND (discount_price IS NULL OR discount_price < original_price)"),
+                @CheckConstraint(name = "check_prices", constraint = "original_price > 0 AND discount_price < original_price"),
                 @CheckConstraint(name = "check_discount_rate", constraint = "discount_rate >= 0 AND discount_rate <= 100")
         }
 )
@@ -83,6 +83,10 @@ public class Product extends BaseAuditEntity {
 
         if (discount > 0) {
             hasDiscount = true;
+        }
+
+        if (this.discountPrice == null) {
+            this.discountPrice = BigDecimal.ZERO;
         }
     }
 

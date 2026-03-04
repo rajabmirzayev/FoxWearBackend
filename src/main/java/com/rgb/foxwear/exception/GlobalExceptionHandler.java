@@ -70,4 +70,10 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.WEAR_CATEGORY_NOT_FOUND));
     }
 
+    @ExceptionHandler(ProductSizeNotFoundException.class)
+    public ResponseEntity<@NonNull ApiResponse<?>> handleProductSizeNotFoundException(ProductSizeNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.PRODUCT_SIZE_NOT_FOUND));
+    }
+
 }
