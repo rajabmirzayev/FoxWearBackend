@@ -8,12 +8,13 @@ public enum ErrorCode {
     USER_NOT_FOUND("USR_002"),
 
     WEAR_CATEGORY_NOT_FOUND("WEAR_001"),
+    PRODUCT_SIZE_NOT_FOUND("WEAR_002"),
 
     VALIDATION("GEN_001"),
     INVALID_ARGUMENT("GEN_002"),
 
     PASSWORD_MISMATCH("AUTH_001"),
-    UNDERAGE("AUTH_002"),;
+    UNDERAGE("AUTH_002");
 
     private final String code;
 

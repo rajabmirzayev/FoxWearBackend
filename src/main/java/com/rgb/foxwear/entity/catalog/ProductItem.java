@@ -16,6 +16,7 @@ import lombok.experimental.FieldDefaults;
 )
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -52,5 +53,10 @@ public class ProductItem extends BaseAuditEntity {
 
     @Column(name = "is_deleted")
     boolean isDeleted = false;
+
+    @PrePersist
+    public void prePersist() {
+        this.stockRemaining = this.stockQuantity;
+    }
 
 }

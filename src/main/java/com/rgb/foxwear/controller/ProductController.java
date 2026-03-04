@@ -1,8 +1,8 @@
 package com.rgb.foxwear.controller;
 
 import com.rgb.foxwear.dto.ApiResponse;
-import com.rgb.foxwear.dto.request.catalog.CreateProductRequest;
-import com.rgb.foxwear.dto.response.catalog.CreateProductResponse;
+import com.rgb.foxwear.dto.request.catalog.ProductCreateRequest;
+import com.rgb.foxwear.dto.response.catalog.ProductCreateResponse;
 import com.rgb.foxwear.service.abstraction.catalog.ProductService;
 import jakarta.validation.Valid;
 import lombok.NonNull;
@@ -20,8 +20,8 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<@NonNull ApiResponse<CreateProductResponse>> createProduct(
-            @Valid @RequestBody CreateProductRequest request
+    public ResponseEntity<@NonNull ApiResponse<ProductCreateResponse>> createProduct(
+            @Valid @RequestBody ProductCreateRequest request
     ) {
         var response = productService.createProduct(request);
         return ResponseEntity.ok(ApiResponse.success(response));

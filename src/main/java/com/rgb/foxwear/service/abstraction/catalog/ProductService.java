@@ -1,8 +1,8 @@
 package com.rgb.foxwear.service.abstraction.catalog;
 
-import com.rgb.foxwear.dto.request.catalog.CreateProductRequest;
-import com.rgb.foxwear.dto.response.catalog.CreateProductResponse;
+import com.rgb.foxwear.dto.request.catalog.ProductCreateRequest;
+import com.rgb.foxwear.dto.response.catalog.ProductCreateResponse;
 
 public interface ProductService {
-    CreateProductResponse createProduct(CreateProductRequest request);
+    ProductCreateResponse createProduct(ProductCreateRequest request);
 }
