@@ -18,7 +18,7 @@ spring:
     change-log: classpath:/db/changelog/db.changelog-master.yaml
 
 jwt:
-  secret: fox-wear-application-secret-key-0911
+  secret: Zm94LXdlYXItYXBwbGljYXRpb24tc2VjcmV0LWtleS0wOTEx
   expiration: 900000 # 15 deq
 
 springdoc:
