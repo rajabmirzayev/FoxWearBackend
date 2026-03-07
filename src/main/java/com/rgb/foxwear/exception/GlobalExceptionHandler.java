@@ -50,7 +50,6 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.UNDERAGE));
     }
 
-    // User error handlers
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<@NonNull ApiResponse<?>> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -62,7 +61,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.USER_NOT_FOUND));
     }
-    
+
     // Product error handlers
     @ExceptionHandler(WearCategoryNotFound.class)
     public ResponseEntity<@NonNull ApiResponse<?>> handleWearCategoryNotFound(WearCategoryNotFound ex) {

@@ -4,9 +4,6 @@ import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
-    USER_ALREADY_EXISTS("USR_001"),
-    USER_NOT_FOUND("USR_002"),
-
     WEAR_CATEGORY_NOT_FOUND("WEAR_001"),
     PRODUCT_SIZE_NOT_FOUND("WEAR_002"),
 
@@ -14,7 +11,9 @@ public enum ErrorCode {
     INVALID_ARGUMENT("GEN_002"),
 
     PASSWORD_MISMATCH("AUTH_001"),
-    UNDERAGE("AUTH_002");
+    UNDERAGE("AUTH_002"),
+    USER_NOT_FOUND("AUTH_003"),
+    USER_ALREADY_EXISTS("AUTH_004");
 
     private final String code;
 
