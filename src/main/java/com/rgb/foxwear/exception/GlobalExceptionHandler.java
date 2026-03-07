@@ -3,7 +3,6 @@ package com.rgb.foxwear.exception;
 import com.rgb.foxwear.dto.ApiResponse;
 import com.rgb.foxwear.enums.ErrorCode;
 import lombok.NonNull;
-import org.springframework.boot.webmvc.error.DefaultErrorAttributes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
@@ -21,14 +20,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<@NonNull ApiResponse<?>> handleMethodArgumentNotValidException(Errors errors) {
         Map<String, String> errorMap = new HashMap<>();
 
-        errors.getFieldErrors().forEach(error -> {
-            errorMap.put(error.getField(), error.getDefaultMessage());
-        });
+        errors.getFieldErrors().forEach(error -> errorMap.put(
+                error.getField(),
+                error.getDefaultMessage()
+        ));
 
         var iterator = errorMap.entrySet().iterator();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(iterator.next().getValue().toString(), ErrorCode.VALIDATION, errorMap));
+                .body(ApiResponse.error(iterator.next().getValue(), ErrorCode.VALIDATION, errorMap));
     }
 
     @ExceptionHandler(InvalidArgumentException.class)
