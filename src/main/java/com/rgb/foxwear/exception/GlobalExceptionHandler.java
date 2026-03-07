@@ -6,6 +6,8 @@ import lombok.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -75,6 +77,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.UNAUTHORIZED));
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<@NonNull ApiResponse<Void>> handleDisabled(DisabledException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.EMAIL_NOT_VERIFIED));
+    }
+
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<@NonNull ApiResponse<Void>> handleLocked(LockedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.FORBIDDEN));
     }
 
     // Product error handlers
