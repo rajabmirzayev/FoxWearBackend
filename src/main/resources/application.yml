@@ -17,6 +17,10 @@ spring:
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.yaml
 
+jwt:
+  secret: fox-wear-application-secret-key-0911
+  expiration: 900000 # 15 deq
+
 springdoc:
   swagger-ui:
     path: /swagger
