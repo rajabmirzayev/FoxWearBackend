@@ -3,13 +3,14 @@ package com.rgb.foxwear.service.implementation.auth;
 import com.rgb.foxwear.dto.request.auth.LoginRequest;
 import com.rgb.foxwear.dto.request.auth.RegisterRequest;
 import com.rgb.foxwear.dto.response.auth.AuthResponse;
+import com.rgb.foxwear.entity.auth.RefreshToken;
 import com.rgb.foxwear.entity.auth.UserEntity;
 import com.rgb.foxwear.entity.ordering.Cart;
 import com.rgb.foxwear.exception.PasswordMismatchException;
 import com.rgb.foxwear.exception.UnderageUserException;
 import com.rgb.foxwear.exception.UserAlreadyExistsException;
 import com.rgb.foxwear.exception.UserNotFoundException;
-import com.rgb.foxwear.repository.UserRepository;
+import com.rgb.foxwear.repository.auth.UserRepository;
 import com.rgb.foxwear.service.abstraction.auth.AuthService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper mapper;
 
@@ -67,9 +69,28 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new UserNotFoundException("Username or password is invalid"));
 
         String token = jwtService.generateToken(user);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+
 
         return AuthResponse.builder()
                 .accessToken(token)
+                .refreshToken(refreshToken.getToken())
+                .username(user.getUsername())
+                .role(user.getRole())
+                .build();
+    }
+
+    @Override
+    public AuthResponse refresh(String refreshToken) {
+        RefreshToken verified = refreshTokenService.verifyRefreshToken(refreshToken);
+
+        UserEntity user = verified.getUser();
+        String newAccessToken = jwtService.generateToken(user);
+        RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user);
+
+        return AuthResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken.getToken())
                 .username(user.getUsername())
                 .role(user.getRole())
                 .build();

@@ -1,11 +1,13 @@
-package com.rgb.foxwear.repository;
+package com.rgb.foxwear.repository.auth;
 
 import com.rgb.foxwear.entity.auth.UserEntity;
 import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Repository
 public interface UserRepository extends JpaRepository<@NonNull UserEntity, @NonNull Long> {
     boolean existsByUsername(String username);
 

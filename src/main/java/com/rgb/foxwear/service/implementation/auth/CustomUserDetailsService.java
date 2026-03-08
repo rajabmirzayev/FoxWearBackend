@@ -3,7 +3,7 @@ package com.rgb.foxwear.service.implementation.auth;
 import com.rgb.foxwear.entity.auth.UserEntity;
 import com.rgb.foxwear.enums.UserStatus;
 import com.rgb.foxwear.exception.UserNotFoundException;
-import com.rgb.foxwear.repository.UserRepository;
+import com.rgb.foxwear.repository.auth.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.security.authentication.DisabledException;

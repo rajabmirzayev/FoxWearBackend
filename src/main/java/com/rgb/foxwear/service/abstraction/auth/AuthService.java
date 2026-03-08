@@ -7,4 +7,5 @@ import com.rgb.foxwear.dto.response.auth.AuthResponse;
 public interface AuthService {
     void register(RegisterRequest registerRequest);
     AuthResponse login(LoginRequest loginRequest);
+    AuthResponse refresh(String refreshToken);
 }
