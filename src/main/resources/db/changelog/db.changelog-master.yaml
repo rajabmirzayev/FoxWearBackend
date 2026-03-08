@@ -41,4 +41,6 @@ databaseChangeLog:
       file: classpath://db/changelog/v-02/change-check-constraint-product-table.yaml
   - include:
       file: classpath://db/changelog/v-03/create-refresh-token-table.yaml
+  - include:
+      file: classpath:/db/changelog/v-03/add-is-deleted-column-to-product-table.yaml
 
