@@ -8,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@SuppressWarnings("unused") // TODO delete when use
 public class CreateCategoryResponse {
 
     Long id;

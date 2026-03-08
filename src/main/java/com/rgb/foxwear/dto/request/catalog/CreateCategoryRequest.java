@@ -10,6 +10,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@SuppressWarnings("unused") // TODO delete when use
 public class CreateCategoryRequest {
     
     @NotBlank(message = "Category name is required")

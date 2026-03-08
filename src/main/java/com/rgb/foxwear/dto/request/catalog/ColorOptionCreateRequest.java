@@ -1,8 +1,5 @@
 package com.rgb.foxwear.dto.request.catalog;
 
-import com.rgb.foxwear.entity.catalog.ProductItem;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
