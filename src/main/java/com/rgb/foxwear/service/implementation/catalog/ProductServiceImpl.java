@@ -7,8 +7,11 @@ import com.rgb.foxwear.dto.response.catalog.ImageCreateResponse;
 import com.rgb.foxwear.dto.response.catalog.ItemCreateResponse;
 import com.rgb.foxwear.dto.response.catalog.ProductCreateResponse;
 import com.rgb.foxwear.entity.catalog.*;
+import com.rgb.foxwear.exception.InvalidArgumentException;
+import com.rgb.foxwear.exception.ProductNotFoundException;
 import com.rgb.foxwear.exception.ProductSizeNotFoundException;
 import com.rgb.foxwear.exception.WearCategoryNotFound;
+import com.rgb.foxwear.repository.catalog.ColorOptionRepository;
 import com.rgb.foxwear.repository.catalog.ProductRepository;
 import com.rgb.foxwear.repository.catalog.ProductSizeRepository;
 import com.rgb.foxwear.repository.catalog.WearCategoryRepository;
@@ -28,8 +31,12 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final WearCategoryRepository categoryRepository;
     private final ProductSizeRepository productSizeRepository;
+    private final ColorOptionRepository colorOptionRepository;
     private final ModelMapper mapper;
 
+    /**
+     * Creates a new product including its category association and color options.
+     */
     @Override
     @Transactional
     public ProductCreateResponse createProduct(ProductCreateRequest request) {
@@ -46,23 +53,7 @@ public class ProductServiceImpl implements ProductService {
 
         // 3. Process color options, including images and individual product items (sizes/stock)
         List<ColorOption> colorOptions = request.getColors().stream()
-                .map(color -> {
-                    ColorOption colorOption = mapper.map(color, ColorOption.class);
-
-                    colorOption.setId(null);
-                    colorOption.setProduct(product);
-                    colorOption.setColorName(StringHelper.capitalize(colorOption.getColorName()));
-                    colorOption.setColorCode(colorOption.getColorCode().trim());
-
-                    // Map nested images and items using helper methods
-                    List<ColorOptionImage> images = mapImages(color, colorOption);
-                    List<ProductItem> items = mapItems(color, colorOption);
-
-                    colorOption.setImages(images);
-                    colorOption.setItems(items);
-
-                    return colorOption;
-                })
+                .map(color -> mapToColorOption(color, product))
                 .toList();
 
         product.setColors(colorOptions);
@@ -70,7 +61,47 @@ public class ProductServiceImpl implements ProductService {
         // 4. Persist the complete product hierarchy and return response
         Product savedProduct = productRepository.save(product);
 
-        return getResponse(savedProduct);
+        return getProductResponse(savedProduct);
+    }
+
+    /**
+     * Adds a new color option to an existing product.
+     */
+    @Override
+    @Transactional
+    public ColorOptionCreateResponse addColorToProduct(Long productId, ColorOptionCreateRequest request) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found!"));
+
+        ColorOption colorOption = mapToColorOption(request, product);
+
+        // If the product is used within this method (for future)
+        product.getColors().add(colorOption);
+
+        var savedColor =colorOptionRepository.save(colorOption);
+
+        return getColorResponse(savedColor);
+    }
+
+    /**
+     * Maps a {@link ColorOptionCreateRequest} to a {@link ColorOption} entity, including nested images and items.
+     */
+    private ColorOption mapToColorOption(ColorOptionCreateRequest colorOptionCreateRequest, Product product) {
+        ColorOption colorOption = mapper.map(colorOptionCreateRequest, ColorOption.class);
+
+        colorOption.setId(null);
+        colorOption.setProduct(product);
+        colorOption.setColorName(StringHelper.capitalize(colorOption.getColorName()));
+        colorOption.setColorCode(colorOption.getColorCode().trim());
+
+        // Map nested images and items using helper methods
+        List<ColorOptionImage> images = mapImages(colorOptionCreateRequest, colorOption);
+        List<ProductItem> items = mapItems(colorOptionCreateRequest, colorOption);
+
+        colorOption.setImages(images);
+        colorOption.setItems(items);
+
+        return colorOption;
     }
 
     /**
@@ -113,36 +144,42 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Transforms the saved {@link Product} entity and its nested hierarchy into a {@link ProductCreateResponse} DTO.
      */
-    private ProductCreateResponse getResponse(Product product) {
+    private ProductCreateResponse getProductResponse(Product product) {
         ProductCreateResponse response = mapper.map(product, ProductCreateResponse.class);
         response.setCategoryName(product.getCategory().getName());
 
         List<ColorOptionCreateResponse> colors = product.getColors().stream()
-                .map(color -> {
-                    ColorOptionCreateResponse colorResponse = mapper.map(color, ColorOptionCreateResponse.class);
-
-                    List<ImageCreateResponse> images = color.getImages().stream()
-                            .map(image -> {
-                                ImageCreateResponse imageResponse = mapper.map(image, ImageCreateResponse.class);
-                                imageResponse.setIsMain(image.isMain());
-
-                                return imageResponse;
-                            })
-                            .toList();
-
-                    List<ItemCreateResponse> items = color.getItems().stream()
-                            .map(item -> mapper.map(item, ItemCreateResponse.class))
-                            .toList();
-
-                    colorResponse.setImages(images);
-                    colorResponse.setItems(items);
-
-                    return colorResponse;
-                })
+                .map(this::getColorResponse)
                 .toList();
 
         response.setColors(colors);
 
         return response;
     }
+
+    /**
+     * Transforms a {@link ColorOption} entity and its nested images and items into a {@link ColorOptionCreateResponse} DTO.
+     */
+    private ColorOptionCreateResponse getColorResponse(ColorOption color) {
+        ColorOptionCreateResponse colorResponse = mapper.map(color, ColorOptionCreateResponse.class);
+
+        List<ImageCreateResponse> images = color.getImages().stream()
+                .map(image -> {
+                    ImageCreateResponse imageResponse = mapper.map(image, ImageCreateResponse.class);
+                    imageResponse.setIsMain(image.isMain());
+
+                    return imageResponse;
+                })
+                .toList();
+
+        List<ItemCreateResponse> items = color.getItems().stream()
+                .map(item -> mapper.map(item, ItemCreateResponse.class))
+                .toList();
+
+        colorResponse.setImages(images);
+        colorResponse.setItems(items);
+
+        return colorResponse;
+    }
+
 }

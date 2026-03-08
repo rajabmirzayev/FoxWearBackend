@@ -106,4 +106,10 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.PRODUCT_SIZE_NOT_FOUND));
     }
 
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<@NonNull ApiResponse<?>> handleProductNotFoundException(ProductNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.PRODUCT_NOT_FOUND));
+    }
+
 }
