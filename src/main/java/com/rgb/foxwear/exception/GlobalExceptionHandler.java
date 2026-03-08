@@ -94,8 +94,8 @@ public class GlobalExceptionHandler {
     }
 
     // Product error handlers
-    @ExceptionHandler(WearCategoryNotFound.class)
-    public ResponseEntity<@NonNull ApiResponse<?>> handleWearCategoryNotFound(WearCategoryNotFound ex) {
+    @ExceptionHandler(WearCategoryNotFoundException.class)
+    public ResponseEntity<@NonNull ApiResponse<?>> handleWearCategoryNotFound(WearCategoryNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.WEAR_CATEGORY_NOT_FOUND));
     }
@@ -104,6 +104,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<@NonNull ApiResponse<?>> handleProductSizeNotFoundException(ProductSizeNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.PRODUCT_SIZE_NOT_FOUND));
+    }
+
+    @ExceptionHandler(ProductIsDeletedException.class)
+    public ResponseEntity<@NonNull ApiResponse<?>> handleProductIsDeletedException(ProductIsDeletedException ex) {
+        return ResponseEntity.status(HttpStatus.GONE)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.PRODUCT_IS_DELETED));
     }
 
     @ExceptionHandler(ProductNotFoundException.class)

@@ -2,19 +2,10 @@ package com.rgb.foxwear.service.implementation.catalog;
 
 import com.rgb.foxwear.dto.request.catalog.ColorOptionCreateRequest;
 import com.rgb.foxwear.dto.request.catalog.ProductCreateRequest;
-import com.rgb.foxwear.dto.response.catalog.ColorOptionCreateResponse;
-import com.rgb.foxwear.dto.response.catalog.ImageCreateResponse;
-import com.rgb.foxwear.dto.response.catalog.ItemCreateResponse;
-import com.rgb.foxwear.dto.response.catalog.ProductCreateResponse;
+import com.rgb.foxwear.dto.response.catalog.*;
 import com.rgb.foxwear.entity.catalog.*;
-import com.rgb.foxwear.exception.InvalidArgumentException;
-import com.rgb.foxwear.exception.ProductNotFoundException;
-import com.rgb.foxwear.exception.ProductSizeNotFoundException;
-import com.rgb.foxwear.exception.WearCategoryNotFound;
-import com.rgb.foxwear.repository.catalog.ColorOptionRepository;
-import com.rgb.foxwear.repository.catalog.ProductRepository;
-import com.rgb.foxwear.repository.catalog.ProductSizeRepository;
-import com.rgb.foxwear.repository.catalog.WearCategoryRepository;
+import com.rgb.foxwear.exception.*;
+import com.rgb.foxwear.repository.catalog.*;
 import com.rgb.foxwear.service.abstraction.catalog.ProductService;
 import com.rgb.foxwear.util.CodeGenerator;
 import com.rgb.foxwear.util.StringHelper;
@@ -34,6 +25,7 @@ public class ProductServiceImpl implements ProductService {
     private final WearCategoryRepository categoryRepository;
     private final ProductSizeRepository productSizeRepository;
     private final ColorOptionRepository colorOptionRepository;
+    private final ProductItemRepository productItemRepository;
     private final ModelMapper mapper;
 
     /**
@@ -49,7 +41,7 @@ public class ProductServiceImpl implements ProductService {
         WearCategory category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> {
                     log.error("Category not found with ID: {}", request.getCategoryId());
-                    return new WearCategoryNotFound("Category not found");
+                    return new WearCategoryNotFoundException("Category not found");
                 });
 
         // 2. Map request to Product entity and set basic details
@@ -131,6 +123,37 @@ public class ProductServiceImpl implements ProductService {
 
         productRepository.delete(product);
         log.info("Product hard deleted successfully with ID: {}", id);
+    }
+
+    /**
+     * Updates the stock quantity for a specific product item.
+     */
+    @Override
+    @Transactional
+    public ItemUpdateResponse updateStock(Long itemId, Integer count) {
+        log.info("Updating stock for item ID: {} to count: {}", itemId, count);
+
+        if (count < 0) {
+            throw new InvalidArgumentException("Stock quantity cannot be negative!");
+        }
+
+        ProductItem productItem = productItemRepository.findById(itemId)
+                .orElseThrow(() -> {
+                    log.error("Product item not found with ID: {}", itemId);
+                    return new ProductNotFoundException("Product item not found with id " + itemId);
+                });
+
+        if (productItem.isDeleted()) {
+            log.warn("Attempted to update stock for deleted item ID: {}", itemId);
+            throw new ProductIsDeletedException("Product item is deleted!");
+        }
+
+        productItem.setStockQuantity(count);
+        productItem.setStockRemaining(count);
+
+        log.info("Stock updated successfully for item ID: {}", productItem.getId());
+
+        return mapper.map(productItem, ItemUpdateResponse.class);
     }
 
     /**

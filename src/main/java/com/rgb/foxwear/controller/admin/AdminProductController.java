@@ -4,6 +4,7 @@ import com.rgb.foxwear.dto.ApiResponse;
 import com.rgb.foxwear.dto.request.catalog.ColorOptionCreateRequest;
 import com.rgb.foxwear.dto.request.catalog.ProductCreateRequest;
 import com.rgb.foxwear.dto.response.catalog.ColorOptionCreateResponse;
+import com.rgb.foxwear.dto.response.catalog.ItemUpdateResponse;
 import com.rgb.foxwear.dto.response.catalog.ProductCreateResponse;
 import com.rgb.foxwear.service.abstraction.catalog.ProductService;
 import jakarta.validation.Valid;
@@ -58,5 +59,15 @@ public class AdminProductController {
     ) {
         productService.deleteProduct(id);
         return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @PatchMapping("/colors/{itemId}/stock")
+    public ResponseEntity<@NonNull ApiResponse<ItemUpdateResponse>> updateStock(
+            @PathVariable Long itemId,
+            @RequestParam Integer count
+    ) {
+        var response = productService.updateStock(itemId, count);
+
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

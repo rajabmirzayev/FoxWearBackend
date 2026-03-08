@@ -6,6 +6,7 @@ import lombok.Getter;
 public enum ErrorCode {
     WEAR_CATEGORY_NOT_FOUND("WEAR_001"),
     PRODUCT_SIZE_NOT_FOUND("WEAR_002"),
+    PRODUCT_IS_DELETED("WEAR_003"),
     PRODUCT_NOT_FOUND("WEAR_004"),
 
     VALIDATION("VALID_001"),
