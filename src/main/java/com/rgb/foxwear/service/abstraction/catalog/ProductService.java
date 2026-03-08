@@ -7,6 +7,7 @@ import com.rgb.foxwear.dto.response.catalog.ItemUpdateResponse;
 import com.rgb.foxwear.dto.response.catalog.ProductCreateResponse;
 
 public interface ProductService {
+
     ProductCreateResponse createProduct(ProductCreateRequest request);
 
     ColorOptionCreateResponse addColorToProduct(Long productId, ColorOptionCreateRequest request);
@@ -17,5 +18,10 @@ public interface ProductService {
 
     void deleteProduct(Long id);
 
+    void softDeleteProductItem(Long id);
+
+    void deleteProductItem(Long id);
+
     ItemUpdateResponse updateStock(Long itemId, Integer count);
+
 }

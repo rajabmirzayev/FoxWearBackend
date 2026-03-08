@@ -61,7 +61,7 @@ public class AdminProductController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-    @PatchMapping("/colors/{itemId}/stock")
+    @PatchMapping("/item/{itemId}/stock")
     public ResponseEntity<@NonNull ApiResponse<ItemUpdateResponse>> updateStock(
             @PathVariable Long itemId,
             @RequestParam Integer count
@@ -69,5 +69,21 @@ public class AdminProductController {
         var response = productService.updateStock(itemId, count);
 
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @DeleteMapping("/item/soft")
+    public ResponseEntity<@NonNull ApiResponse<Void>> softDeleteItem(
+            @RequestParam Long id
+    ) {
+        productService.softDeleteProductItem(id);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @DeleteMapping("/item")
+    public ResponseEntity<@NonNull ApiResponse<Void>> deleteItem(
+            @RequestParam Long id
+    ) {
+        productService.deleteProductItem(id);
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

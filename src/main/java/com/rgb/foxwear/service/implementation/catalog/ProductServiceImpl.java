@@ -126,6 +126,32 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
+     * Marks a specific product item as deleted.
+     */
+    @Override
+    @Transactional
+    public void softDeleteProductItem(Long id) {
+        ProductItem item = findProductItemOrThrow(id);
+
+        if (!item.isDeleted()) {
+            item.setDeleted(true);
+            log.info("Product item soft deleted successfully with ID: {}", id);
+        }
+    }
+
+    /**
+     * Permanently deletes a specific product item from the database.
+     */
+    @Override
+    @Transactional
+    public void deleteProductItem(Long id) {
+        ProductItem item = findProductItemOrThrow(id);
+
+        productItemRepository.delete(item);
+        log.info("Product item hard deleted successfully with ID: {}", id);
+    }
+
+    /**
      * Updates the stock quantity for a specific product item.
      */
     @Override
@@ -137,11 +163,7 @@ public class ProductServiceImpl implements ProductService {
             throw new InvalidArgumentException("Stock quantity cannot be negative!");
         }
 
-        ProductItem productItem = productItemRepository.findById(itemId)
-                .orElseThrow(() -> {
-                    log.error("Product item not found with ID: {}", itemId);
-                    return new ProductNotFoundException("Product item not found with id " + itemId);
-                });
+        ProductItem productItem = findProductItemOrThrow(itemId);
 
         if (productItem.isDeleted()) {
             log.warn("Attempted to update stock for deleted item ID: {}", itemId);
@@ -157,13 +179,24 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * Helper method to find a product by ID or throw a {@link ProductNotFoundException}.
+     * Helper method to find a {@link Product} by ID or throw a {@link ProductNotFoundException}.
      */
     private Product findProductOrThrow(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Product not found with ID: {}", id);
                     return new ProductNotFoundException("Product not found!");
+                });
+    }
+
+    /**
+     * Helper method to find a {@link ProductItem} by ID or throw a {@link ProductNotFoundException}.
+     */
+    private ProductItem findProductItemOrThrow(Long id) {
+        return productItemRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Product item not found with ID: {}", id);
+                    return new ProductNotFoundException("Product item not found!");
                 });
     }
 
@@ -270,6 +303,9 @@ public class ProductServiceImpl implements ProductService {
         return colorResponse;
     }
 
+    /**
+     * Validates that the price and discount information in the {@link ProductCreateRequest} are logically consistent.
+     */
     private void checkPrices(ProductCreateRequest request) {
         if (request.getOriginalPrice().compareTo(java.math.BigDecimal.ZERO) <= 0) {
             throw new InvalidArgumentException("Original price must be greater than zero");
