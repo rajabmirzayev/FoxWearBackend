@@ -80,11 +80,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ColorOptionCreateResponse addColorToProduct(Long productId, ColorOptionCreateRequest request) {
         log.info("Adding color {} to product ID: {}", request.getColorName(), productId);
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> {
-                    log.error("Product not found with ID: {}", productId);
-                    return new ProductNotFoundException("Product not found!");
-                });
+        Product product = findProductOrThrow(productId);
 
         ColorOption colorOption = mapToColorOption(request, product);
 
@@ -95,6 +91,57 @@ public class ProductServiceImpl implements ProductService {
         log.info("Color option added successfully with ID: {}", savedColor.getId());
 
         return getColorResponse(savedColor);
+    }
+
+    /**
+     * Updates the active status of a product.
+     */
+    @Override
+    @Transactional
+    public void updateProductActivity(Long id, boolean isActive) {
+        Product product = findProductOrThrow(id);
+
+        if (product.isActive() != isActive) {
+            product.setActive(isActive);
+            log.info("Product ID: {} activity updated to: {}", id, isActive);
+        }
+    }
+
+    /**
+     * Marks a product as deleted without removing it from the database.
+     */
+    @Override
+    @Transactional
+    public void softDeleteProduct(Long id) {
+        Product product = findProductOrThrow(id);
+
+        if (!product.isDeleted()) {
+            product.setDeleted(true);
+            log.info("Product soft deleted successfully with ID: {}", id);
+        }
+    }
+
+    /**
+     * Permanently deletes a product from the database.
+     */
+    @Override
+    @Transactional
+    public void deleteProduct(Long id) {
+        Product product = findProductOrThrow(id);
+
+        productRepository.delete(product);
+        log.info("Product hard deleted successfully with ID: {}", id);
+    }
+
+    /**
+     * Helper method to find a product by ID or throw a {@link ProductNotFoundException}.
+     */
+    private Product findProductOrThrow(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Product not found with ID: {}", id);
+                    return new ProductNotFoundException("Product not found!");
+                });
     }
 
     /**
@@ -152,7 +199,7 @@ public class ProductServiceImpl implements ProductService {
                             .productSize(productSize)
                             .sku(CodeGenerator.generateSku())
                             .stockQuantity(item.getStockQuantity())
-                            .stockRemaining(item.getStockQuantity()) // Initialize remaining stock
+                            .stockRemaining(item.getStockQuantity())
                             .isDeleted(false)
                             .build();
                 })

@@ -68,6 +68,9 @@ public class Product extends BaseAuditEntity {
     @Column(name = "is_active")
     boolean isActive = true;
 
+    @Column(name = "is_deleted", nullable = false)
+    boolean isDeleted = false;
+
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)

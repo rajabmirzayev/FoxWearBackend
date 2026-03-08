@@ -10,4 +10,10 @@ public interface ProductService {
     ProductCreateResponse createProduct(ProductCreateRequest request);
 
     ColorOptionCreateResponse addColorToProduct(Long productId, ColorOptionCreateRequest request);
+
+    void updateProductActivity(Long id, boolean isActive);
+
+    void softDeleteProduct(Long id);
+
+    void deleteProduct(Long id);
 }
