@@ -53,6 +53,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public AuthResponse login(LoginRequest loginRequest) {
         try {
             authenticationManager.authenticate(
@@ -81,6 +82,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public AuthResponse refresh(String refreshToken) {
         RefreshToken verified = refreshTokenService.verifyRefreshToken(refreshToken);
 
