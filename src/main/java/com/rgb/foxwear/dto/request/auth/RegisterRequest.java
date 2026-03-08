@@ -14,8 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CreateUserRequest {
-
+public class RegisterRequest {
     @NotBlank(message = "First name is required")
     @Size(min = 3, max = 30, message = "First name must be between 3 and 30 characters")
     String firstName;

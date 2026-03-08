@@ -3,9 +3,11 @@ package com.rgb.foxwear.exception;
 import com.rgb.foxwear.dto.ApiResponse;
 import com.rgb.foxwear.enums.ErrorCode;
 import lombok.NonNull;
-import org.springframework.boot.webmvc.error.DefaultErrorAttributes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,14 +23,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<@NonNull ApiResponse<?>> handleMethodArgumentNotValidException(Errors errors) {
         Map<String, String> errorMap = new HashMap<>();
 
-        errors.getFieldErrors().forEach(error -> {
-            errorMap.put(error.getField(), error.getDefaultMessage());
-        });
+        errors.getFieldErrors().forEach(error -> errorMap.put(
+                error.getField(),
+                error.getDefaultMessage()
+        ));
 
         var iterator = errorMap.entrySet().iterator();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(iterator.next().getValue().toString(), ErrorCode.VALIDATION, errorMap));
+                .body(ApiResponse.error(iterator.next().getValue(), ErrorCode.VALIDATION, errorMap));
     }
 
     @ExceptionHandler(InvalidArgumentException.class)
@@ -50,7 +53,6 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.UNDERAGE));
     }
 
-    // User error handlers
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<@NonNull ApiResponse<?>> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -62,12 +64,46 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.USER_NOT_FOUND));
     }
-    
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<@NonNull ApiResponse<Void>> handleInvalidToken(InvalidTokenException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.INVALID_TOKEN));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<@NonNull ApiResponse<Void>> handleBadCredentials(BadCredentialsException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.UNAUTHORIZED));
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<@NonNull ApiResponse<Void>> handleDisabled(DisabledException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.EMAIL_NOT_VERIFIED));
+    }
+
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<@NonNull ApiResponse<Void>> handleLocked(LockedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.FORBIDDEN));
+    }
+
     // Product error handlers
     @ExceptionHandler(WearCategoryNotFound.class)
     public ResponseEntity<@NonNull ApiResponse<?>> handleWearCategoryNotFound(WearCategoryNotFound ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.WEAR_CATEGORY_NOT_FOUND));
+    }
+
+    @ExceptionHandler(ProductSizeNotFoundException.class)
+    public ResponseEntity<@NonNull ApiResponse<?>> handleProductSizeNotFoundException(ProductSizeNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.PRODUCT_SIZE_NOT_FOUND));
     }
 
 }

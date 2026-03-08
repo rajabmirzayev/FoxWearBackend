@@ -17,6 +17,11 @@ spring:
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.yaml
 
+jwt:
+  secret: Zm94LXdlYXItYXBwbGljYXRpb24tc2VjcmV0LWtleS0wOTEx
+  expiration: 900000 # 15 deq
+  refresh-expiration: 604800000 # 7 gun
+
 springdoc:
   swagger-ui:
     path: /swagger

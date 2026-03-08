@@ -37,3 +37,8 @@ databaseChangeLog:
       file: classpath://db/changelog/v-01/create-courier-location-table.yaml
   - include:
       file: classpath://db/changelog/v-02/add-foreign-key-user-table.yaml
+  - include:
+      file: classpath://db/changelog/v-02/change-check-constraint-product-table.yaml
+  - include:
+      file: classpath://db/changelog/v-03/create-refresh-token-table.yaml
+

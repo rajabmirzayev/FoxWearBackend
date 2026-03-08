@@ -14,4 +14,8 @@ public class StringHelper {
 
         return text.toUpperCase();
     }
+
+    public static String generateSlug(String text) {
+        return text.toLowerCase().replace(" ", "-") + "-" + System.currentTimeMillis();
+    }
 }

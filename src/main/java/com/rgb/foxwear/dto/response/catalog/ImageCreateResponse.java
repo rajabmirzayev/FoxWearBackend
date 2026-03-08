@@ -3,18 +3,15 @@ package com.rgb.foxwear.dto.response.catalog;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-@Data
-@NoArgsConstructor
+@Getter
+@Setter
 @AllArgsConstructor
-@Builder
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CreateCategoryResponse {
+public class ImageCreateResponse {
 
     Long id;
-    String name;
-    String subtitle;
-    String link;
-    String mainImage;
-    CreateCategoryResponse parent;
+    String image;
+    Boolean isMain;
 
 }
