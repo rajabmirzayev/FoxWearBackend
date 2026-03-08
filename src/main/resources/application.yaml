@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: FoxWear
+  profiles:
+    active: auth, dev
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+springdoc:
+  swagger-ui:
+    path: /swagger
+
+server:
+  port: 8080

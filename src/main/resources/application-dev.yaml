@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    username: rgb
+    password: 1234
+    url: jdbc:postgresql://localhost:5432/foxwear_db
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
