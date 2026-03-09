@@ -94,6 +94,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public CategoryCreateResponse createCategory(CategoryCreateRequest request) {
         log.info("Creating new category with name: {}", request.getName());
+        checkCategory(request);
 
         WearCategory category = mapper.map(request, WearCategory.class);
         category.setId(null);
@@ -369,6 +370,21 @@ public class ProductServiceImpl implements ProductService {
 
         if (request.getDiscountRate() != null && (request.getDiscountRate() < 0 || request.getDiscountRate() > 100)) {
             throw new InvalidArgumentException("Discount rate must be between 0 and 100");
+        }
+    }
+
+    /**
+     * Validates that the category name and link are unique before creation.
+     */
+    private void checkCategory(CategoryCreateRequest request) {
+        if (categoryRepository.findByName(request.getName()).isPresent()) {
+            log.warn("Category with name {} already exists", request.getName());
+            throw new WearCategoryAlreadyExistsException("Category already exists with this name");
+        }
+
+        if (categoryRepository.findByLink(request.getLink()).isPresent()) {
+            log.warn("Category with link {} already exists", request.getLink());
+            throw new WearCategoryAlreadyExistsException("Category already exists with this link");
         }
     }
 }

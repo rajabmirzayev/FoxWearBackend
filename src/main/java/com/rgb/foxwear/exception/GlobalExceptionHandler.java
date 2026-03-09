@@ -124,4 +124,9 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.SIZE_ALREADY_EXISTS));
     }
 
+    @ExceptionHandler(WearCategoryAlreadyExistsException.class)
+    public ResponseEntity<@NonNull ApiResponse<?>> handleWearCategoryAlreadyExistsException(WearCategoryAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.WEAR_CATEGORY_ALREADY_EXISTS));
+    }
 }
