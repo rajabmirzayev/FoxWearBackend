@@ -1,9 +1,6 @@
 package com.rgb.foxwear.service.abstraction.catalog;
 
-import com.rgb.foxwear.dto.request.catalog.CategoryCreateRequest;
-import com.rgb.foxwear.dto.request.catalog.ColorOptionCreateRequest;
-import com.rgb.foxwear.dto.request.catalog.ProductCreateRequest;
-import com.rgb.foxwear.dto.request.catalog.SizeCreateRequest;
+import com.rgb.foxwear.dto.request.catalog.*;
 import com.rgb.foxwear.dto.response.catalog.*;
 
 public interface ProductService {
@@ -15,6 +12,8 @@ public interface ProductService {
     CategoryCreateResponse createCategory(CategoryCreateRequest request);
 
     SizeCreateResponse createSize(SizeCreateRequest request);
+
+    ProductUpdateResponse updateProduct(ProductUpdateRequest request, Long id);
 
     void updateProductActivity(Long id, boolean isActive);
 

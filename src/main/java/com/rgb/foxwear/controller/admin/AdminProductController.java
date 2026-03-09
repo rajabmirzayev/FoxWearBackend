@@ -1,10 +1,7 @@
 package com.rgb.foxwear.controller.admin;
 
 import com.rgb.foxwear.dto.ApiResponse;
-import com.rgb.foxwear.dto.request.catalog.CategoryCreateRequest;
-import com.rgb.foxwear.dto.request.catalog.ColorOptionCreateRequest;
-import com.rgb.foxwear.dto.request.catalog.ProductCreateRequest;
-import com.rgb.foxwear.dto.request.catalog.SizeCreateRequest;
+import com.rgb.foxwear.dto.request.catalog.*;
 import com.rgb.foxwear.dto.response.catalog.*;
 import com.rgb.foxwear.service.abstraction.catalog.ProductService;
 import jakarta.validation.Valid;
@@ -59,6 +56,15 @@ public class AdminProductController {
     ) {
         productService.updateProductActivity(id, isActive);
         return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<@NonNull ApiResponse<ProductUpdateResponse>> updateProduct(
+            @Valid @RequestBody ProductUpdateRequest request,
+            @PathVariable Long id
+    ) {
+        var response = productService.updateProduct(request, id);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @DeleteMapping("/soft")

@@ -1,6 +1,5 @@
 package com.rgb.foxwear.dto.response.catalog;
 
-import com.rgb.foxwear.entity.catalog.ColorOption;
 import com.rgb.foxwear.entity.catalog.ProductSize;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -13,7 +12,6 @@ import lombok.experimental.FieldDefaults;
 public class ItemUpdateResponse {
 
     Long id;
-    ColorOption colorOption;
     ProductSize productSize;
     String sku;
     Integer stockQuantity;

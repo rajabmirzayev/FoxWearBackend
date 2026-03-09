@@ -9,10 +9,10 @@ import java.util.List;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ColorOptionCreateRequest implements ColorOptionDTO {
+public class ColorOptionUpdateRequest implements ColorOptionDTO {
 
     @NotBlank(message = "Color name is required")
     @Size(max = 30, message = "Color name must not exceed 30 characters")
@@ -22,8 +22,8 @@ public class ColorOptionCreateRequest implements ColorOptionDTO {
     @Size(max = 30, message = "Color code must not exceed 30 characters")
     String colorCode;
 
-    List<ImageCreateRequest> images;
+    List<ImageUpdateRequest> images;
 
-    List<ItemCreateRequest> items;
+    List<ItemUpdateRequest> items;
 
 }

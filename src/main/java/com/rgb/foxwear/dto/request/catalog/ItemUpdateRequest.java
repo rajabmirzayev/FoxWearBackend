@@ -7,10 +7,10 @@ import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ItemCreateRequest implements ItemDTO {
+public class ItemUpdateRequest implements ItemDTO {
 
     @NotNull(message = "Size ID is required")
     Long sizeId;

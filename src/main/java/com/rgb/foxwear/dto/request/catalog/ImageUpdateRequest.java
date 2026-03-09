@@ -8,10 +8,10 @@ import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ImageCreateRequest implements ImageDTO {
+public class ImageUpdateRequest implements ImageDTO {
 
     @NotBlank(message = "Image URL is required")
     @Size(max = 10000, message = "Image URL must not exceed 10000 characters")

@@ -1,9 +1,6 @@
 package com.rgb.foxwear.service.implementation.catalog;
 
-import com.rgb.foxwear.dto.request.catalog.CategoryCreateRequest;
-import com.rgb.foxwear.dto.request.catalog.ColorOptionCreateRequest;
-import com.rgb.foxwear.dto.request.catalog.ProductCreateRequest;
-import com.rgb.foxwear.dto.request.catalog.SizeCreateRequest;
+import com.rgb.foxwear.dto.request.catalog.*;
 import com.rgb.foxwear.dto.response.catalog.*;
 import com.rgb.foxwear.entity.catalog.*;
 import com.rgb.foxwear.exception.*;
@@ -17,6 +14,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -40,11 +38,7 @@ public class ProductServiceImpl implements ProductService {
         checkPrices(request);
 
         // 1. Validate and retrieve the category
-        WearCategory category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> {
-                    log.error("Category not found with ID: {}", request.getCategoryId());
-                    return new WearCategoryNotFoundException("Category not found");
-                });
+        WearCategory category = findCategoryOrThrow(request.getCategoryId());
 
         // 2. Map request to Product entity and set basic details
         Product product = mapper.map(request, Product.class);
@@ -64,7 +58,7 @@ public class ProductServiceImpl implements ProductService {
         Product savedProduct = productRepository.save(product);
         log.info("Product created successfully with ID: {}", savedProduct.getId());
 
-        return getProductResponse(savedProduct);
+        return getProductCreateResponse(savedProduct);
     }
 
     /**
@@ -84,7 +78,7 @@ public class ProductServiceImpl implements ProductService {
         var savedColor = colorOptionRepository.save(colorOption);
         log.info("Color option added successfully with ID: {}", savedColor.getId());
 
-        return getColorResponse(savedColor);
+        return getColorCreateResponse(savedColor);
     }
 
     /**
@@ -123,7 +117,7 @@ public class ProductServiceImpl implements ProductService {
     public SizeCreateResponse createSize(SizeCreateRequest request) {
         log.info("Creating new size with value: {}", request.getSizeValue());
 
-        if(productSizeRepository.findBySizeValue(request.getSizeValue()).isPresent()) {
+        if (productSizeRepository.findBySizeValue(request.getSizeValue()).isPresent()) {
             log.warn("Size with value {} already exists", request.getSizeValue());
             throw new SizeAlreadyExistsException("Size already exists");
         }
@@ -138,7 +132,33 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * Updates the active status of a product.
+     * Updates an existing product's details and its color options.
+     */
+    @Override
+    @Transactional
+    public ProductUpdateResponse updateProduct(ProductUpdateRequest request, Long id) {
+        log.info("Updating product ID: {} with title: {}", id, request.getTitle());
+        checkPrices(request);
+
+        Product product = findProductOrThrow(id);
+        WearCategory category = findCategoryOrThrow(request.getCategoryId());
+
+        updateProductFields(product, request, category);
+
+        List<ColorOption> colorOptions = request.getColors().stream()
+                .map(color -> mapToColorOption(color, product))
+                .toList();
+
+        product.getColors().clear();
+        product.getColors().addAll(colorOptions);
+
+        log.info("Product updated successfully with ID: {}", product.getId());
+
+        return getProductUpdateResponse(product);
+    }
+
+    /**
+     * Updates the activity of a product.
      */
     @Override
     @Transactional
@@ -253,10 +273,21 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
+     * Helper method to find a {@link WearCategory} by ID or throw a {@link WearCategoryNotFoundException}.
+     */
+    private WearCategory findCategoryOrThrow(Long id) {
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Category not found with ID: {}", id);
+                    return new WearCategoryNotFoundException("Category not found");
+                });
+    }
+
+    /**
      * Maps a {@link ColorOptionCreateRequest} to a {@link ColorOption} entity, including nested images and items.
      */
-    private ColorOption mapToColorOption(ColorOptionCreateRequest colorOptionCreateRequest, Product product) {
-        ColorOption colorOption = mapper.map(colorOptionCreateRequest, ColorOption.class);
+    private ColorOption mapToColorOption(ColorOptionDTO colorOptionDTO, Product product) {
+        ColorOption colorOption = mapper.map(colorOptionDTO, ColorOption.class);
 
         colorOption.setId(null);
         colorOption.setProduct(product);
@@ -264,8 +295,8 @@ public class ProductServiceImpl implements ProductService {
         colorOption.setColorCode(colorOption.getColorCode().trim());
 
         // Map nested images and items using helper methods
-        List<ColorOptionImage> images = mapImages(colorOptionCreateRequest, colorOption);
-        List<ProductItem> items = mapItems(colorOptionCreateRequest, colorOption);
+        List<ColorOptionImage> images = mapImages(colorOptionDTO, colorOption);
+        List<ProductItem> items = mapItems(colorOptionDTO, colorOption);
 
         colorOption.setImages(images);
         colorOption.setItems(items);
@@ -276,7 +307,7 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Maps image requests to {@link ColorOptionImage} entities and associates them with a {@link ColorOption}.
      */
-    private List<ColorOptionImage> mapImages(ColorOptionCreateRequest color, ColorOption colorOption) {
+    private List<ColorOptionImage> mapImages(ColorOptionDTO color, ColorOption colorOption) {
         return color.getImages().stream()
                 .map(image -> {
                     ColorOptionImage colorOptionImage = mapper.map(image, ColorOptionImage.class);
@@ -293,7 +324,7 @@ public class ProductServiceImpl implements ProductService {
      * Maps item requests to {@link ProductItem} entities, looks up the corresponding {@link ProductSize},
      * and generates unique SKUs.
      */
-    private List<ProductItem> mapItems(ColorOptionCreateRequest color, ColorOption colorOption) {
+    private List<ProductItem> mapItems(ColorOptionDTO color, ColorOption colorOption) {
         return color.getItems().stream()
                 .map(item -> {
                     ProductSize productSize = productSizeRepository.findById(item.getSizeId())
@@ -317,12 +348,28 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Transforms the saved {@link Product} entity and its nested hierarchy into a {@link ProductCreateResponse} DTO.
      */
-    private ProductCreateResponse getProductResponse(Product product) {
+    private ProductCreateResponse getProductCreateResponse(Product product) {
         ProductCreateResponse response = mapper.map(product, ProductCreateResponse.class);
         response.setCategoryName(product.getCategory().getName());
 
         List<ColorOptionCreateResponse> colors = product.getColors().stream()
-                .map(this::getColorResponse)
+                .map(this::getColorCreateResponse)
+                .toList();
+
+        response.setColors(colors);
+
+        return response;
+    }
+
+    /**
+     * Transforms the updated {@link Product} entity and its nested hierarchy into a {@link ProductUpdateResponse} DTO.
+     */
+    private ProductUpdateResponse getProductUpdateResponse(Product product) {
+        ProductUpdateResponse response = mapper.map(product, ProductUpdateResponse.class);
+        response.setCategoryName(product.getCategory().getName());
+
+        List<ColorOptionUpdateResponse> colors = product.getColors().stream()
+                .map(this::getColorUpdateResponse)
                 .toList();
 
         response.setColors(colors);
@@ -333,13 +380,13 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Transforms a {@link ColorOption} entity and its nested images and items into a {@link ColorOptionCreateResponse} DTO.
      */
-    private ColorOptionCreateResponse getColorResponse(ColorOption color) {
+    private ColorOptionCreateResponse getColorCreateResponse(ColorOption color) {
         ColorOptionCreateResponse colorResponse = mapper.map(color, ColorOptionCreateResponse.class);
 
         List<ImageCreateResponse> images = color.getImages().stream()
                 .map(image -> {
                     ImageCreateResponse imageResponse = mapper.map(image, ImageCreateResponse.class);
-                    imageResponse.setIsMain(image.isMain());
+                    imageResponse.setMain(image.isMain());
 
                     return imageResponse;
                 })
@@ -356,19 +403,76 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
+     * Transforms a {@link ColorOption} entity and its nested images and items into a {@link ColorOptionUpdateResponse} DTO.
+     */
+    private ColorOptionUpdateResponse getColorUpdateResponse(ColorOption color) {
+        ColorOptionUpdateResponse colorResponse = mapper.map(color, ColorOptionUpdateResponse.class);
+
+        List<ImageUpdateResponse> images = color.getImages().stream()
+                .map(image -> {
+                    ImageUpdateResponse imageResponse = mapper.map(image, ImageUpdateResponse.class);
+                    imageResponse.setMain(image.isMain());
+
+                    return imageResponse;
+                })
+                .toList();
+
+        List<ItemUpdateResponse> items = color.getItems().stream()
+                .map(item -> mapper.map(item, ItemUpdateResponse.class))
+                .toList();
+
+        colorResponse.setImages(images);
+        colorResponse.setItems(items);
+
+        return colorResponse;
+    }
+
+    /**
+     * Updates the basic fields of a {@link Product} entity from a {@link ProductUpdateRequest}.
+     */
+    private void updateProductFields(Product product, ProductUpdateRequest request, WearCategory category) {
+        product.setCategory(category);
+        product.setTitle(StringHelper.capitalize(request.getTitle()));
+        product.setSlug(StringHelper.generateSlug(request.getTitle()));
+        product.setOriginalPrice(request.getOriginalPrice());
+        product.setDiscountPrice(request.getDiscountPrice());
+        product.setDiscountRate(request.getDiscountRate());
+        product.setGender(request.getGender());
+        product.setDescription(request.getDescription());
+    }
+
+    /**
      * Validates that the price and discount information in the {@link ProductCreateRequest} are logically consistent.
      */
     private void checkPrices(ProductCreateRequest request) {
-        if (request.getOriginalPrice().compareTo(java.math.BigDecimal.ZERO) <= 0) {
+        validatePrices(request.getOriginalPrice(), request.getDiscountPrice(), request.getDiscountRate());
+    }
+
+    /**
+     * Validates that the price and discount information in the {@link ProductUpdateRequest} are logically consistent.
+     */
+    private void checkPrices(ProductUpdateRequest request) {
+        validatePrices(request.getOriginalPrice(), request.getDiscountPrice(), request.getDiscountRate());
+    }
+
+    /**
+     * Validates that the price and discount information are logically consistent.
+     *
+     * @param originalPrice the original price of the product
+     * @param discountPrice the discounted price of the product
+     * @param discountRate the percentage of the discount
+     */
+    private void validatePrices(BigDecimal originalPrice, BigDecimal discountPrice, Integer discountRate) {
+        if (originalPrice.compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidArgumentException("Original price must be greater than zero");
         }
 
-        if (request.getDiscountPrice() != null &&
-                request.getOriginalPrice().compareTo(request.getDiscountPrice()) <= 0) {
+        if (discountPrice != null &&
+                originalPrice.compareTo(discountPrice) <= 0) {
             throw new InvalidArgumentException("Original price must be greater than discount price");
         }
 
-        if (request.getDiscountRate() != null && (request.getDiscountRate() < 0 || request.getDiscountRate() > 100)) {
+        if (discountRate != null && (discountRate < 0 || discountRate > 100)) {
             throw new InvalidArgumentException("Discount rate must be between 0 and 100");
         }
     }
