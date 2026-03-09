@@ -4,10 +4,8 @@ import com.rgb.foxwear.dto.ApiResponse;
 import com.rgb.foxwear.dto.request.catalog.CategoryCreateRequest;
 import com.rgb.foxwear.dto.request.catalog.ColorOptionCreateRequest;
 import com.rgb.foxwear.dto.request.catalog.ProductCreateRequest;
-import com.rgb.foxwear.dto.response.catalog.CategoryCreateResponse;
-import com.rgb.foxwear.dto.response.catalog.ColorOptionCreateResponse;
-import com.rgb.foxwear.dto.response.catalog.ItemUpdateResponse;
-import com.rgb.foxwear.dto.response.catalog.ProductCreateResponse;
+import com.rgb.foxwear.dto.request.catalog.SizeCreateRequest;
+import com.rgb.foxwear.dto.response.catalog.*;
 import com.rgb.foxwear.service.abstraction.catalog.ProductService;
 import jakarta.validation.Valid;
 import lombok.NonNull;
@@ -43,6 +41,14 @@ public class AdminProductController {
             @Valid @RequestBody CategoryCreateRequest request
     ) {
         var response = productService.createCategory(request);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/size")
+    public ResponseEntity<@NonNull ApiResponse<SizeCreateResponse>> createSize(
+            @Valid @RequestBody SizeCreateRequest request
+    ) {
+        var response = productService.createSize(request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -96,10 +102,4 @@ public class AdminProductController {
         productService.deleteProductItem(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
-
-    // update api
-
-    // category create
-
-    // size create
 }

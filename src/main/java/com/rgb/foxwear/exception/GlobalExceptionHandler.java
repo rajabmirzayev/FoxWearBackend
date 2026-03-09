@@ -118,4 +118,10 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.PRODUCT_NOT_FOUND));
     }
 
+    @ExceptionHandler(SizeAlreadyExistsException.class)
+    public ResponseEntity<@NonNull ApiResponse<?>> handleSizeAlreadyExistsException(SizeAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.SIZE_ALREADY_EXISTS));
+    }
+
 }

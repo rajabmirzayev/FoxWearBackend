@@ -3,6 +3,7 @@ package com.rgb.foxwear.service.implementation.catalog;
 import com.rgb.foxwear.dto.request.catalog.CategoryCreateRequest;
 import com.rgb.foxwear.dto.request.catalog.ColorOptionCreateRequest;
 import com.rgb.foxwear.dto.request.catalog.ProductCreateRequest;
+import com.rgb.foxwear.dto.request.catalog.SizeCreateRequest;
 import com.rgb.foxwear.dto.response.catalog.*;
 import com.rgb.foxwear.entity.catalog.*;
 import com.rgb.foxwear.exception.*;
@@ -111,6 +112,28 @@ public class ProductServiceImpl implements ProductService {
         log.info("Category created successfully with ID: {}", savedCategory.getId());
 
         return mapper.map(savedCategory, CategoryCreateResponse.class);
+    }
+
+    /**
+     * Creates a new product size definition.
+     */
+    @Override
+    @Transactional
+    public SizeCreateResponse createSize(SizeCreateRequest request) {
+        log.info("Creating new size with value: {}", request.getSizeValue());
+
+        if(productSizeRepository.findBySizeValue(request.getSizeValue()).isPresent()) {
+            log.warn("Size with value {} already exists", request.getSizeValue());
+            throw new SizeAlreadyExistsException("Size already exists");
+        }
+
+        ProductSize size = mapper.map(request, ProductSize.class);
+        size.setId(null);
+
+        var savedSize = productSizeRepository.save(size);
+        log.info("Size created successfully with ID: {}", savedSize.getId());
+
+        return mapper.map(savedSize, SizeCreateResponse.class);
     }
 
     /**
