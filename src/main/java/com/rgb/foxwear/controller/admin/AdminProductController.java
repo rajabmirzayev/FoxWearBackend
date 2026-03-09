@@ -1,8 +1,10 @@
 package com.rgb.foxwear.controller.admin;
 
 import com.rgb.foxwear.dto.ApiResponse;
+import com.rgb.foxwear.dto.request.catalog.CategoryCreateRequest;
 import com.rgb.foxwear.dto.request.catalog.ColorOptionCreateRequest;
 import com.rgb.foxwear.dto.request.catalog.ProductCreateRequest;
+import com.rgb.foxwear.dto.response.catalog.CategoryCreateResponse;
 import com.rgb.foxwear.dto.response.catalog.ColorOptionCreateResponse;
 import com.rgb.foxwear.dto.response.catalog.ItemUpdateResponse;
 import com.rgb.foxwear.dto.response.catalog.ProductCreateResponse;
@@ -33,6 +35,14 @@ public class AdminProductController {
             @Valid @RequestBody ColorOptionCreateRequest request
     ) {
         var response = productService.addColorToProduct(productId, request);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/category")
+    public ResponseEntity<@NonNull ApiResponse<CategoryCreateResponse>> createCategory(
+            @Valid @RequestBody CategoryCreateRequest request
+    ) {
+        var response = productService.createCategory(request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -86,4 +96,10 @@ public class AdminProductController {
         productService.deleteProductItem(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
+
+    // update api
+
+    // category create
+
+    // size create
 }

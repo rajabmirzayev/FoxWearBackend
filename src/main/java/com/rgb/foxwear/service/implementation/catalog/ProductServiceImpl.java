@@ -1,5 +1,6 @@
 package com.rgb.foxwear.service.implementation.catalog;
 
+import com.rgb.foxwear.dto.request.catalog.CategoryCreateRequest;
 import com.rgb.foxwear.dto.request.catalog.ColorOptionCreateRequest;
 import com.rgb.foxwear.dto.request.catalog.ProductCreateRequest;
 import com.rgb.foxwear.dto.response.catalog.*;
@@ -83,6 +84,33 @@ public class ProductServiceImpl implements ProductService {
         log.info("Color option added successfully with ID: {}", savedColor.getId());
 
         return getColorResponse(savedColor);
+    }
+
+    /**
+     * Creates a new product category, optionally associating it with a parent category.
+     */
+    @Override
+    @Transactional
+    public CategoryCreateResponse createCategory(CategoryCreateRequest request) {
+        log.info("Creating new category with name: {}", request.getName());
+
+        WearCategory category = mapper.map(request, WearCategory.class);
+        category.setId(null);
+        category.setName(StringHelper.capitalize(request.getName()));
+
+        if (request.getParentId() != null) {
+            WearCategory parent = categoryRepository.findById(request.getParentId())
+                    .orElseThrow(() -> {
+                        log.error("Parent category not found with ID: {}", request.getParentId());
+                        return new WearCategoryNotFoundException("Parent category not found");
+                    });
+            category.setParent(parent);
+        }
+
+        WearCategory savedCategory = categoryRepository.save(category);
+        log.info("Category created successfully with ID: {}", savedCategory.getId());
+
+        return mapper.map(savedCategory, CategoryCreateResponse.class);
     }
 
     /**

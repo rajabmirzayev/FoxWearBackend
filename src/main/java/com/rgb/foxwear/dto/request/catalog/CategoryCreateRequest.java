@@ -10,9 +10,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@SuppressWarnings("unused") // TODO delete when use
-public class CreateCategoryRequest {
-    
+public class CategoryCreateRequest {
+
     @NotBlank(message = "Category name is required")
     @Size(max = 30, message = "Category name must not exceed 30 characters")
     String name;
