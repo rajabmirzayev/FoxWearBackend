@@ -49,15 +49,6 @@ public class AdminProductController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @PatchMapping("/{id}/activate")
-    public ResponseEntity<@NonNull ApiResponse<Void>> updateProductStatus(
-            @PathVariable Long id,
-            @RequestParam boolean isActive
-    ) {
-        productService.updateProductActivity(id, isActive);
-        return ResponseEntity.ok(ApiResponse.success(null));
-    }
-
     @PutMapping("/{id}")
     public ResponseEntity<@NonNull ApiResponse<ProductUpdateResponse>> updateProduct(
             @Valid @RequestBody ProductUpdateRequest request,
@@ -67,19 +58,12 @@ public class AdminProductController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @DeleteMapping("/soft")
-    public ResponseEntity<@NonNull ApiResponse<Void>> softDeleteProduct(
-            @RequestParam Long id
+    @PatchMapping("/{id}/activate")
+    public ResponseEntity<@NonNull ApiResponse<Void>> updateProductStatus(
+            @PathVariable Long id,
+            @RequestParam boolean isActive
     ) {
-        productService.softDeleteProduct(id);
-        return ResponseEntity.ok(ApiResponse.success(null));
-    }
-
-    @DeleteMapping
-    public ResponseEntity<@NonNull ApiResponse<Void>> deleteProduct(
-            @RequestParam Long id
-    ) {
-        productService.deleteProduct(id);
+        productService.updateProductActivity(id, isActive);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
@@ -93,17 +77,33 @@ public class AdminProductController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @DeleteMapping("/item/soft")
+    @DeleteMapping("/{id}/soft")
+    public ResponseEntity<@NonNull ApiResponse<Void>> softDeleteProduct(
+            @PathVariable Long id
+    ) {
+        productService.softDeleteProduct(id);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<@NonNull ApiResponse<Void>> deleteProduct(
+            @PathVariable Long id
+    ) {
+        productService.deleteProduct(id);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @DeleteMapping("/item/{id}/soft")
     public ResponseEntity<@NonNull ApiResponse<Void>> softDeleteItem(
-            @RequestParam Long id
+            @PathVariable Long id
     ) {
         productService.softDeleteProductItem(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-    @DeleteMapping("/item")
+    @DeleteMapping("/item/{id}")
     public ResponseEntity<@NonNull ApiResponse<Void>> deleteItem(
-            @RequestParam Long id
+            @PathVariable Long id
     ) {
         productService.deleteProductItem(id);
         return ResponseEntity.ok(ApiResponse.success(null));
