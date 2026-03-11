@@ -144,7 +144,7 @@ public class ProductServiceImpl implements ProductService {
      * Retrieves a paginated list of products filtered by admin-defined criteria.
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<@NonNull ProductGetAllResponse> getAllProductWithAdminFilter(ProductAdminFilterRequest filter) {
         log.info("Fetching products with admin filter: {}", filter);
         Pageable pageable = PageRequest.of(
@@ -197,10 +197,24 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
+     * Retrieves a list of all available product categories.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> getAllCategories() {
+        log.info("Fetching all categories");
+        List<WearCategory> categories = categoryRepository.findAll();
+
+        return categories.stream()
+                .map(this::getCategoryResponse)
+                .toList();
+    }
+
+    /**
      * Retrieves a category by its unique identifier.
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public CategoryResponse getCategoryById(Long id) {
         log.info("Fetching category with ID: {}", id);
         WearCategory category = findCategoryOrThrow(id);

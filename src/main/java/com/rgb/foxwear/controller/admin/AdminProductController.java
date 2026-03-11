@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/admin/products")
 @RequiredArgsConstructor
@@ -63,6 +65,12 @@ public class AdminProductController {
             @PathVariable Long id
     ) {
         var response = productService.getProductWithId(id);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/category")
+    public ResponseEntity<@NonNull ApiResponse<List<CategoryResponse>>> getAllCategories(){
+        var response = productService.getAllCategories();
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

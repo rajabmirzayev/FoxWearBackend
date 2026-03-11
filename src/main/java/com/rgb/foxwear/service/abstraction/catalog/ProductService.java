@@ -5,6 +5,8 @@ import com.rgb.foxwear.dto.response.catalog.*;
 import lombok.NonNull;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public interface ProductService {
 
     ProductCreateResponse createProduct(ProductCreateRequest request);
@@ -18,6 +20,8 @@ public interface ProductService {
     Page<@NonNull ProductGetAllResponse> getAllProductWithAdminFilter(ProductAdminFilterRequest filter);
 
     ProductGetResponse getProductWithId(Long id);
+
+    List<CategoryResponse> getAllCategories();
 
     CategoryResponse getCategoryById(Long id);
 
