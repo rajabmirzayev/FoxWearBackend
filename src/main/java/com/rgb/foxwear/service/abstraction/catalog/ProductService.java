@@ -17,6 +17,8 @@ public interface ProductService {
 
     Page<@NonNull ProductGetAllResponse> getAllProductWithAdminFilter(ProductAdminFilterRequest filter);
 
+    ProductGetResponse getProductWithId(Long id);
+
     ProductUpdateResponse updateProduct(ProductUpdateRequest request, Long id);
 
     void updateProductActivity(Long id, boolean isActive);

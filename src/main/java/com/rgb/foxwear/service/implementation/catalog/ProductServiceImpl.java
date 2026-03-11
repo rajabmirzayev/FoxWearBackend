@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j  // add logs and comments where it needs it
+@Slf4j
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final WearCategoryRepository categoryRepository;
@@ -179,6 +179,21 @@ public class ProductServiceImpl implements ProductService {
 
             return productResponse;
         });
+    }
+
+    /**
+     * Retrieves a detailed view of a single product by its ID.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public ProductGetResponse getProductWithId(Long id) {
+        log.info("Fetching detailed product information for ID: {}", id);
+        Product product = findProductOrThrow(id);
+
+        ProductGetResponse productResponse = mapper.map(product, ProductGetResponse.class);
+        productResponse.setCategory(mapper.map(product.getCategory(), CategoryGetAllResponse.class));
+
+        return productResponse;
     }
 
     /**
