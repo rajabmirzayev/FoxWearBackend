@@ -4,6 +4,7 @@ import com.rgb.foxwear.dto.ApiResponse;
 import com.rgb.foxwear.dto.request.catalog.*;
 import com.rgb.foxwear.dto.response.catalog.*;
 import com.rgb.foxwear.service.abstraction.catalog.ProductService;
+import org.springframework.data.domain.Page;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,14 @@ public class AdminProductController {
             @Valid @RequestBody SizeCreateRequest request
     ) {
         var response = productService.createSize(request);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping
+    public ResponseEntity<@NonNull ApiResponse<Page<@NonNull ProductGetAllResponse>>> getAllProduct(
+            @Valid @ModelAttribute ProductAdminFilterRequest request
+    ) {
+        var response = productService.getAllProductWithAdminFilter(request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

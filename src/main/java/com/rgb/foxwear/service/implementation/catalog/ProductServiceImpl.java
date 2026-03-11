@@ -5,12 +5,19 @@ import com.rgb.foxwear.dto.response.catalog.*;
 import com.rgb.foxwear.entity.catalog.*;
 import com.rgb.foxwear.exception.*;
 import com.rgb.foxwear.repository.catalog.*;
+import com.rgb.foxwear.repository.catalog.specification.ProductSpecification;
 import com.rgb.foxwear.service.abstraction.catalog.ProductService;
 import com.rgb.foxwear.util.CodeGenerator;
 import com.rgb.foxwear.util.StringHelper;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -129,6 +136,33 @@ public class ProductServiceImpl implements ProductService {
         log.info("Size created successfully with ID: {}", savedSize.getId());
 
         return mapper.map(savedSize, SizeCreateResponse.class);
+    }
+
+    @Override
+    @Transactional
+    public Page<@NonNull ProductGetAllResponse> getAllProductWithAdminFilter(ProductAdminFilterRequest filter) {
+        Pageable pageable = PageRequest.of(
+                filter.getPage(),
+                filter.getSize(),
+                Sort.by(filter.getDirection(), filter.getSortBy())
+        );
+
+        var products = productRepository.findAll(buildSpecification(filter), pageable);
+
+        return products.map(product -> {
+            ProductGetAllResponse productResponse = mapper.map(product, ProductGetAllResponse.class);
+            var colors = product.getColors().stream()
+                    .map(this::getColorOptionGetAllResponse)
+                    .toList();
+
+            productResponse.setCategory(
+                    mapper.map(product.getCategory(), CategoryGetAllResponse.class)
+            );
+
+            productResponse.setColors(colors);
+
+            return productResponse;
+        });
     }
 
     /**
@@ -427,6 +461,22 @@ public class ProductServiceImpl implements ProductService {
         return colorResponse;
     }
 
+    private ColorOptionGetAllResponse getColorOptionGetAllResponse(ColorOption color) {
+        ColorOptionGetAllResponse colorResponse = mapper.map(color, ColorOptionGetAllResponse.class);
+        var images = colorResponse.getImages().stream()
+                .map(image -> mapper.map(image, ColorOptionImageGetAllResponse.class))
+                .toList();
+
+        var items = colorResponse.getItems().stream()
+                .map(item -> mapper.map(item, ItemGetAllResponse.class))
+                .toList();
+
+        colorResponse.setImages(images);
+        colorResponse.setItems(items);
+
+        return colorResponse;
+    }
+
     /**
      * Updates the basic fields of a {@link Product} entity from a {@link ProductUpdateRequest}.
      */
@@ -460,7 +510,7 @@ public class ProductServiceImpl implements ProductService {
      *
      * @param originalPrice the original price of the product
      * @param discountPrice the discounted price of the product
-     * @param discountRate the percentage of the discount
+     * @param discountRate  the percentage of the discount
      */
     private void validatePrices(BigDecimal originalPrice, BigDecimal discountPrice, Integer discountRate) {
         if (originalPrice.compareTo(BigDecimal.ZERO) <= 0) {
@@ -490,5 +540,14 @@ public class ProductServiceImpl implements ProductService {
             log.warn("Category with link {} already exists", request.getLink());
             throw new WearCategoryAlreadyExistsException("Category already exists with this link");
         }
+    }
+
+    private Specification<@NonNull Product> buildSpecification(ProductAdminFilterRequest filter) {
+        return Specification
+                .where(ProductSpecification.hasGender(filter.getGender()))
+                .and(ProductSpecification.hasCategory(filter.getCategoryId()))
+                .and(ProductSpecification.isActive(filter.getIsActive()))
+                .and(ProductSpecification.isDeleted(filter.getIsDeleted()))
+                .and(ProductSpecification.hasKeyword(filter.getKeyword()));
     }
 }

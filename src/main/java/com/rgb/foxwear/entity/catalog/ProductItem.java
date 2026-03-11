@@ -32,7 +32,7 @@ public class ProductItem extends BaseAuditEntity {
     ColorOption colorOption;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_size_id", nullable = false)
     ProductSize productSize;
 

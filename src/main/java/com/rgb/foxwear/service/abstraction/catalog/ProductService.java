@@ -2,6 +2,8 @@ package com.rgb.foxwear.service.abstraction.catalog;
 
 import com.rgb.foxwear.dto.request.catalog.*;
 import com.rgb.foxwear.dto.response.catalog.*;
+import lombok.NonNull;
+import org.springframework.data.domain.Page;
 
 public interface ProductService {
 
@@ -12,6 +14,8 @@ public interface ProductService {
     CategoryCreateResponse createCategory(CategoryCreateRequest request);
 
     SizeCreateResponse createSize(SizeCreateRequest request);
+
+    Page<@NonNull ProductGetAllResponse> getAllProductWithAdminFilter(ProductAdminFilterRequest filter);
 
     ProductUpdateResponse updateProduct(ProductUpdateRequest request, Long id);
 
