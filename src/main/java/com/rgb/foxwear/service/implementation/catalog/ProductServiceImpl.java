@@ -22,7 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -153,12 +155,28 @@ public class ProductServiceImpl implements ProductService {
 
         var products = productRepository.findAll(buildSpecification(filter), pageable);
 
+        String searchKeyword = filter.getKeyword() == null ? null : filter.getKeyword().toLowerCase();
+        String filterColor = filter.getColor() == null ? null : filter.getColor().toLowerCase();
+        String filterSize = filter.getProductSize() == null ? null : filter.getProductSize().toLowerCase();
+
         return products.map(product -> {
             ProductGetAllResponse productResponse = mapper.map(product, ProductGetAllResponse.class);
             productResponse.setCategory(mapper.map(product.getCategory(), CategoryGetAllResponse.class));
             productResponse.setColors(product.getColors().stream()
                     .map(this::getColorOptionGetAllResponse)
-                    .toList());
+                    .collect(Collectors.toCollection(ArrayList::new)));
+
+            if (productResponse.getColors() != null) {
+                var matchingColor = productResponse.getColors().stream()
+                        .filter(c -> isMatch(c, searchKeyword, filterColor, filterSize))
+                        .findFirst();
+
+                matchingColor.ifPresent(color -> {
+                    productResponse.getColors().remove(color);
+                    productResponse.getColors().addFirst(color);
+                });
+            }
+
             return productResponse;
         });
     }
@@ -554,6 +572,42 @@ public class ProductServiceImpl implements ProductService {
                 .and(ProductSpecification.hasCategory(filter.getCategoryId()))
                 .and(ProductSpecification.isActive(filter.getIsActive()))
                 .and(ProductSpecification.isDeleted(filter.getIsDeleted()))
-                .and(ProductSpecification.hasKeyword(filter.getKeyword()));
+                .and(ProductSpecification.hasColor(filter.getColor()))
+                .and(ProductSpecification.hasSize(filter.getProductSize()))
+                .and(ProductSpecification.searchByTitleOrSkuOrDescription(filter.getKeyword()));
     }
+
+    /**
+     * Checks if a color option matches search criteria (keyword, specific color, or specific size).
+     */
+    private boolean isMatch(ColorOptionGetAllResponse color, String keyword, String filterColor, String filterSize) {
+        // 1. Check specific color filter
+        if (filterColor != null && !filterColor.isBlank()) {
+            if (color.getColorName().toLowerCase().contains(filterColor)) return true;
+        }
+
+        // 2. Check specific size filter
+        if (filterSize != null && !filterSize.isBlank()) {
+            boolean sizeMatch = color.getItems().stream().anyMatch(item ->
+                    item.getProductSize() != null &&
+                            item.getProductSize().getSizeValue().toLowerCase().contains(filterSize));
+            if (sizeMatch) return true;
+        }
+
+        // 3. Check general keyword
+        if (keyword != null && !keyword.isBlank()) {
+            String search = keyword.toLowerCase();
+            if (color.getColorName().toLowerCase().contains(search)) return true;
+
+            return color.getItems().stream().anyMatch(item -> {
+                boolean skuMatches = item.getSku().toLowerCase().contains(search);
+                boolean sizeMatches = item.getProductSize() != null &&
+                        item.getProductSize().getSizeValue().toLowerCase().contains(search);
+                return skuMatches || sizeMatches;
+            });
+        }
+
+        return false;
+    }
+
 }

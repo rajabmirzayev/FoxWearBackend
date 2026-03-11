@@ -29,4 +29,7 @@ public class BaseFilterRequest {
     @Size(max = 100, message = "Keyword too long")
     String keyword;
 
+    String color;
+    String productSize;
+
 }
