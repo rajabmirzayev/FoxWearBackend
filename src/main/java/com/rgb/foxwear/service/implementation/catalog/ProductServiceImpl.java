@@ -26,7 +26,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
+@Slf4j  // add logs and comments where it needs it
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final WearCategoryRepository categoryRepository;
@@ -138,9 +138,13 @@ public class ProductServiceImpl implements ProductService {
         return mapper.map(savedSize, SizeCreateResponse.class);
     }
 
+    /**
+     * Retrieves a paginated list of products filtered by admin-defined criteria.
+     */
     @Override
     @Transactional
     public Page<@NonNull ProductGetAllResponse> getAllProductWithAdminFilter(ProductAdminFilterRequest filter) {
+        log.info("Fetching products with admin filter: {}", filter);
         Pageable pageable = PageRequest.of(
                 filter.getPage(),
                 filter.getSize(),
@@ -151,16 +155,10 @@ public class ProductServiceImpl implements ProductService {
 
         return products.map(product -> {
             ProductGetAllResponse productResponse = mapper.map(product, ProductGetAllResponse.class);
-            var colors = product.getColors().stream()
+            productResponse.setCategory(mapper.map(product.getCategory(), CategoryGetAllResponse.class));
+            productResponse.setColors(product.getColors().stream()
                     .map(this::getColorOptionGetAllResponse)
-                    .toList();
-
-            productResponse.setCategory(
-                    mapper.map(product.getCategory(), CategoryGetAllResponse.class)
-            );
-
-            productResponse.setColors(colors);
-
+                    .toList());
             return productResponse;
         });
     }
@@ -192,25 +190,27 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * Updates the activity of a product.
+     * Updates the activation status of an existing product.
      */
     @Override
     @Transactional
     public void updateProductActivity(Long id, boolean isActive) {
+        log.info("Updating activity status for product ID: {} to {}", id, isActive);
         Product product = findProductOrThrow(id);
 
         if (product.isActive() != isActive) {
             product.setActive(isActive);
-            log.info("Product ID: {} activity updated to: {}", id, isActive);
+            log.info("Product ID: {} activity updated successfully", id);
         }
     }
 
     /**
-     * Marks a product as deleted without removing it from the database.
+     * Marks a product as deleted (soft delete) to preserve referential integrity.
      */
     @Override
     @Transactional
     public void softDeleteProduct(Long id) {
+        log.info("Soft deleting product ID: {}", id);
         Product product = findProductOrThrow(id);
 
         if (!product.isDeleted()) {
@@ -220,11 +220,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * Permanently deletes a product from the database.
+     * Permanently removes a product and its associated options from the database.
      */
     @Override
     @Transactional
     public void deleteProduct(Long id) {
+        log.info("Hard deleting product ID: {}", id);
         Product product = findProductOrThrow(id);
 
         productRepository.delete(product);
@@ -232,11 +233,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * Marks a specific product item as deleted.
+     * Marks a specific product item (size/sku variant) as deleted.
      */
     @Override
     @Transactional
     public void softDeleteProductItem(Long id) {
+        log.info("Soft deleting product item ID: {}", id);
         ProductItem item = findProductItemOrThrow(id);
 
         if (!item.isDeleted()) {
@@ -246,11 +248,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * Permanently deletes a specific product item from the database.
+     * Permanently removes a specific product item variant from the database.
      */
     @Override
     @Transactional
     public void deleteProductItem(Long id) {
+        log.info("Hard deleting product item ID: {}", id);
         ProductItem item = findProductItemOrThrow(id);
 
         productItemRepository.delete(item);
@@ -542,6 +545,9 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    /**
+     * Constructs a dynamic JPA Specification based on the provided admin filter criteria.
+     */
     private Specification<@NonNull Product> buildSpecification(ProductAdminFilterRequest filter) {
         return Specification
                 .where(ProductSpecification.hasGender(filter.getGender()))
