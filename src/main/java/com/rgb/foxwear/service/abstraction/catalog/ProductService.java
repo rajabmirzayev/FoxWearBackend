@@ -19,6 +19,8 @@ public interface ProductService {
 
     ProductGetResponse getProductWithId(Long id);
 
+    CategoryResponse getCategoryById(Long id);
+
     ProductUpdateResponse updateProduct(ProductUpdateRequest request, Long id);
 
     void updateProductActivity(Long id, boolean isActive);

@@ -197,6 +197,18 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
+     * Retrieves a category by its unique identifier.
+     */
+    @Override
+    @Transactional
+    public CategoryResponse getCategoryById(Long id) {
+        log.info("Fetching category with ID: {}", id);
+        WearCategory category = findCategoryOrThrow(id);
+
+        return getCategoryResponse(category);
+    }
+
+    /**
      * Updates an existing product's details and its color options.
      */
     @Override
@@ -470,6 +482,18 @@ public class ProductServiceImpl implements ProductService {
         colorResponse.setItems(items);
 
         return colorResponse;
+    }
+
+    /**
+     * Transforms a {@link WearCategory} entity and its parent into a {@link CategoryResponse} DTO.
+     */
+    private CategoryResponse getCategoryResponse(WearCategory category) {
+        CategoryResponse categoryResponse = mapper.map(category, CategoryResponse.class);
+        categoryResponse.setParent(
+                category.getParent() != null ? mapper.map(category.getParent(), CategoryResponse.class) : null
+        );
+
+        return categoryResponse;
     }
 
     /**

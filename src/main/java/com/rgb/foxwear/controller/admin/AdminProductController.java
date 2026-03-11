@@ -66,6 +66,14 @@ public class AdminProductController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @GetMapping("/category/{id}")
+    public ResponseEntity<@NonNull ApiResponse<CategoryResponse>> getCategoryById(
+            @PathVariable Long id
+    ) {
+        var response = productService.getCategoryById(id);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<@NonNull ApiResponse<ProductUpdateResponse>> updateProduct(
             @Valid @RequestBody ProductUpdateRequest request,
