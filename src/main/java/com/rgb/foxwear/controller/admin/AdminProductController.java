@@ -38,7 +38,7 @@ public class AdminProductController {
 
     @PostMapping("/category")
     public ResponseEntity<@NonNull ApiResponse<CategoryCreateResponse>> createCategory(
-            @Valid @RequestBody CategoryCreateRequest request
+            @Valid @RequestBody CategoryRequest request
     ) {
         var response = productService.createCategory(request);
         return ResponseEntity.ok(ApiResponse.success(response));
@@ -88,6 +88,15 @@ public class AdminProductController {
             @PathVariable Long id
     ) {
         var response = productService.updateProduct(request, id);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PutMapping("/category/{id}")
+    public ResponseEntity<@NonNull ApiResponse<CategoryResponse>> updateCategory(
+            @Valid @RequestBody CategoryRequest request,
+            @PathVariable Long id
+    ) {
+        var response = productService.updateCategory(request, id);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

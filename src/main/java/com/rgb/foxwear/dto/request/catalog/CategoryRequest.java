@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CategoryCreateRequest {
+public class CategoryRequest {
 
     @NotBlank(message = "Category name is required")
     @Size(max = 30, message = "Category name must not exceed 30 characters")
@@ -23,7 +23,6 @@ public class CategoryCreateRequest {
     @Size(max = 255, message = "Category link must not exceed 255 characters")
     String link;
 
-    @NotBlank(message = "Category main image is required")
     @Size(max = 10000, message = "Category image URL is too long")
     String mainImage;
 

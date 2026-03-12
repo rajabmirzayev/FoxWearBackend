@@ -95,20 +95,16 @@ public class ProductServiceImpl implements ProductService {
      */
     @Override
     @Transactional
-    public CategoryCreateResponse createCategory(CategoryCreateRequest request) {
+    public CategoryCreateResponse createCategory(CategoryRequest request) {
         log.info("Creating new category with name: {}", request.getName());
-        checkCategory(request);
+        checkCategoryUniquenessForCreate(request);
 
         WearCategory category = mapper.map(request, WearCategory.class);
         category.setId(null);
         category.setName(StringHelper.capitalize(request.getName()));
 
         if (request.getParentId() != null) {
-            WearCategory parent = categoryRepository.findById(request.getParentId())
-                    .orElseThrow(() -> {
-                        log.error("Parent category not found with ID: {}", request.getParentId());
-                        return new WearCategoryNotFoundException("Parent category not found");
-                    });
+            WearCategory parent = findCategoryOrThrow(request.getParentId());
             category.setParent(parent);
         }
 
@@ -126,7 +122,7 @@ public class ProductServiceImpl implements ProductService {
     public SizeCreateResponse createSize(SizeCreateRequest request) {
         log.info("Creating new size with value: {}", request.getSizeValue());
 
-        if (productSizeRepository.findBySizeValue(request.getSizeValue()).isPresent()) {
+        if (productSizeRepository.existsBySizeValue(request.getSizeValue())) {
             log.warn("Size with value {} already exists", request.getSizeValue());
             throw new SizeAlreadyExistsException("Size already exists");
         }
@@ -246,6 +242,38 @@ public class ProductServiceImpl implements ProductService {
         log.info("Product updated successfully with ID: {}", product.getId());
 
         return getProductUpdateResponse(product);
+    }
+
+    /**
+     * Updates an existing product category's details, including its parent association.
+     */
+    @Override
+    @Transactional
+    public CategoryResponse updateCategory(CategoryRequest request, Long id) {
+        log.info("Updating category ID: {} with name: {}", id, request.getName());
+        WearCategory category = findCategoryOrThrow(id);
+
+        checkCategoryUniquenessForUpdate(request, id);
+
+        category.setName(StringHelper.capitalize(request.getName()));
+        category.setSubtitle(request.getSubtitle());
+        category.setLink(request.getLink());
+        category.setMainImage(request.getMainImage());
+
+        if (request.getParentId() != null) {
+            if (request.getParentId().equals(id)) {
+                throw new InvalidArgumentException("A category cannot be its own parent");
+            }
+            WearCategory parent = findCategoryOrThrow(request.getParentId());
+            category.setParent(parent);
+        } else {
+            category.setParent(null);
+        }
+
+        WearCategory savedCategory = categoryRepository.save(category);
+        log.info("Category updated successfully with ID: {}", savedCategory.getId());
+
+        return getCategoryResponse(savedCategory);
     }
 
     /**
@@ -602,16 +630,31 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * Validates that the category name and link are unique before creation.
+     * Validates that the category name and link are unique before updating.
      */
-    private void checkCategory(CategoryCreateRequest request) {
-        if (categoryRepository.findByName(request.getName()).isPresent()) {
+    private void checkCategoryUniquenessForUpdate(CategoryRequest request, Long id) {
+        if (categoryRepository.existsByNameAndIdNot(request.getName(), id)) {
             log.warn("Category with name {} already exists", request.getName());
             throw new WearCategoryAlreadyExistsException("Category already exists with this name");
         }
 
-        if (categoryRepository.findByLink(request.getLink()).isPresent()) {
+        if (request.getLink() != null && categoryRepository.existsByLinkAndIdNot(request.getLink(), id)) {
             log.warn("Category with link {} already exists", request.getLink());
+            throw new WearCategoryAlreadyExistsException("Category already exists with this link");
+        }
+    }
+
+    /**
+     * Validates that the category name and link are unique before creation.
+     */
+    private void checkCategoryUniquenessForCreate(CategoryRequest request) {
+        if (categoryRepository.existsByName(request.getName())) {
+            log.warn("Category with name: {} already exists", request.getName());
+            throw new WearCategoryAlreadyExistsException("Category already exists with this name");
+        }
+
+        if (request.getLink() != null && categoryRepository.existsByLink(request.getLink())) {
+            log.warn("Category with link: {} already exists", request.getLink());
             throw new WearCategoryAlreadyExistsException("Category already exists with this link");
         }
     }

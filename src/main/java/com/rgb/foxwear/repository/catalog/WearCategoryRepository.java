@@ -12,4 +12,12 @@ public interface WearCategoryRepository extends JpaRepository<@NonNull WearCateg
     Optional<WearCategory> findByName(String name);
 
     Optional<WearCategory> findByLink(String link);
+
+    boolean existsByName(String name);
+
+    boolean existsByLink(String link);
+
+    boolean existsByNameAndIdNot(String name, Long id);
+
+    boolean existsByLinkAndIdNot(String link, Long id);
 }

@@ -2,6 +2,7 @@ package com.rgb.foxwear.service.abstraction.catalog;
 
 import com.rgb.foxwear.dto.request.catalog.*;
 import com.rgb.foxwear.dto.response.catalog.*;
+import jakarta.validation.Valid;
 import lombok.NonNull;
 import org.springframework.data.domain.Page;
 
@@ -13,7 +14,7 @@ public interface ProductService {
 
     ColorOptionCreateResponse addColorToProduct(Long productId, ColorOptionCreateRequest request);
 
-    CategoryCreateResponse createCategory(CategoryCreateRequest request);
+    CategoryCreateResponse createCategory(CategoryRequest request);
 
     SizeCreateResponse createSize(SizeCreateRequest request);
 
@@ -26,6 +27,8 @@ public interface ProductService {
     CategoryResponse getCategoryById(Long id);
 
     ProductUpdateResponse updateProduct(ProductUpdateRequest request, Long id);
+
+    CategoryResponse updateCategory(CategoryRequest request, Long id);
 
     void updateProductActivity(Long id, boolean isActive);
 
