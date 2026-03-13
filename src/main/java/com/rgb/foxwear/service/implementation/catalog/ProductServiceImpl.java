@@ -119,7 +119,7 @@ public class ProductServiceImpl implements ProductService {
      */
     @Override
     @Transactional
-    public SizeCreateResponse createSize(SizeCreateRequest request) {
+    public SizeResponse createSize(SizeRequest request) {
         log.info("Creating new size with value: {}", request.getSizeValue());
 
         if (productSizeRepository.existsBySizeValue(request.getSizeValue())) {
@@ -133,7 +133,7 @@ public class ProductServiceImpl implements ProductService {
         var savedSize = productSizeRepository.save(size);
         log.info("Size created successfully with ID: {}", savedSize.getId());
 
-        return mapper.map(savedSize, SizeCreateResponse.class);
+        return mapper.map(savedSize, SizeResponse.class);
     }
 
     /**
@@ -216,6 +216,30 @@ public class ProductServiceImpl implements ProductService {
         WearCategory category = findCategoryOrThrow(id);
 
         return getCategoryResponse(category);
+    }
+
+    /**
+     * Retrieves all available product size definitions.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<SizeResponse> getAllSizes() {
+        log.info("Fetching all sizes");
+        return productSizeRepository.findAll().stream()
+                .map(s -> mapper.map(s, SizeResponse.class))
+                .toList();
+    }
+
+    /**
+     * Retrieves a specific product size definition by its ID.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public SizeResponse getSizeById(Long id) {
+        log.info("Fetching size with ID: {}", id);
+        ProductSize size = findProductSizeOrThrow(id);
+
+        return mapper.map(size, SizeResponse.class);
     }
 
     /**
@@ -408,6 +432,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
+     * Helper method to find a {@link ProductSize} by ID or throw a {@link ProductSizeNotFoundException}.
+     */
+    private ProductSize findProductSizeOrThrow(Long id) {
+        return productSizeRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Product size not found with ID: {}", id);
+                    return new ProductSizeNotFoundException("Product size not found");
+                });
+    }
+
+    /**
      * Maps a {@link ColorOptionCreateRequest} to a {@link ColorOption} entity, including nested images and items.
      */
     private ColorOption mapToColorOption(ColorOptionDTO colorOptionDTO, Product product) {
@@ -451,11 +486,7 @@ public class ProductServiceImpl implements ProductService {
     private List<ProductItem> mapItems(ColorOptionDTO color, ColorOption colorOption) {
         return color.getItems().stream()
                 .map(item -> {
-                    ProductSize productSize = productSizeRepository.findById(item.getSizeId())
-                            .orElseThrow(() -> {
-                                log.error("Product size not found with ID: {}", item.getSizeId());
-                                return new ProductSizeNotFoundException("Product size not found");
-                            });
+                    ProductSize productSize = findProductSizeOrThrow(item.getSizeId());
 
                     return ProductItem.builder()
                             .colorOption(colorOption)

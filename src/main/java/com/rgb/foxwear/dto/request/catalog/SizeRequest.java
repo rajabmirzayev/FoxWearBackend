@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SizeCreateRequest {
+public class SizeRequest {
 
     @NotBlank(message = "Size value is required")
     @Size(max = 10, message = "Size value must not exceed 10 characters")

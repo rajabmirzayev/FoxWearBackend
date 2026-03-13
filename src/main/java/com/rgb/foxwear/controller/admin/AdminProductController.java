@@ -53,8 +53,8 @@ public class AdminProductController {
 
     @Operation(summary = "Create a product size", description = "Defines a new size value available for products.")
     @PostMapping("/size")
-    public ResponseEntity<@NonNull ApiResponse<SizeCreateResponse>> createSize(
-            @Valid @RequestBody SizeCreateRequest request
+    public ResponseEntity<@NonNull ApiResponse<SizeResponse>> createSize(
+            @Valid @RequestBody SizeRequest request
     ) {
         var response = productService.createSize(request);
         return ResponseEntity.ok(ApiResponse.success(response));
@@ -91,6 +91,22 @@ public class AdminProductController {
             @Parameter(description = "ID of the category") @PathVariable Long id
     ) {
         var response = productService.getCategoryById(id);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @Operation(summary = "Get all sizes", description = "Retrieves a list of all defined product sizes.")
+    @GetMapping("/size")
+    public ResponseEntity<@NonNull ApiResponse<List<SizeResponse>>> getAllSizes() {
+        var response = productService.getAllSizes();
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @Operation(summary = "Get size by ID", description = "Retrieves a specific size definition by its ID.")
+    @GetMapping("/size/{id}")
+    public ResponseEntity<@NonNull ApiResponse<SizeResponse>> getSizeById(
+            @Parameter(description = "ID of the size") @PathVariable Long id
+    ) {
+        var response = productService.getSizeById(id);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
