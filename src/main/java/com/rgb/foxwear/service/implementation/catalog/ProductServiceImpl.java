@@ -225,7 +225,9 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public List<SizeResponse> getAllSizes() {
         log.info("Fetching all sizes");
-        return productSizeRepository.findAll().stream()
+        return productSizeRepository.findAll(
+                        Sort.by(Sort.Direction.ASC, "id")
+                ).stream()
                 .map(s -> mapper.map(s, SizeResponse.class))
                 .toList();
     }
@@ -298,6 +300,25 @@ public class ProductServiceImpl implements ProductService {
         log.info("Category updated successfully with ID: {}", savedCategory.getId());
 
         return getCategoryResponse(savedCategory);
+    }
+
+    /**
+     * Updates an existing product size definition.
+     */
+    @Override
+    @Transactional
+    public SizeResponse updateSize(SizeRequest request, Long id) {
+        log.info("Updating size ID: {} with value: {}", id, request.getSizeValue());
+        if (productSizeRepository.existsBySizeValueAndIdNot(request.getSizeValue(), id)) {
+            log.warn("Product size already exists with name {}", request.getSizeValue());
+            throw new ProductSizeAlreadyExistException("Product size already exists with name " + request.getSizeValue());
+        }
+
+        ProductSize size = findProductSizeOrThrow(id);
+        size.setSizeValue(request.getSizeValue());
+
+        log.info("Size updated successfully with ID: {}", size.getId());
+        return mapper.map(size, SizeResponse.class);
     }
 
     /**

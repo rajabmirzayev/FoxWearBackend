@@ -80,7 +80,7 @@ public class AdminProductController {
 
     @Operation(summary = "Get all categories", description = "Retrieves a list of all product categories.")
     @GetMapping("/category")
-    public ResponseEntity<@NonNull ApiResponse<List<CategoryResponse>>> getAllCategories(){
+    public ResponseEntity<@NonNull ApiResponse<List<CategoryResponse>>> getAllCategories() {
         var response = productService.getAllCategories();
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -117,6 +117,16 @@ public class AdminProductController {
             @Parameter(description = "ID of the product") @PathVariable Long id
     ) {
         var response = productService.updateProduct(request, id);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @Operation(summary = "Update size", description = "Updates an existing size definition.")
+    @PutMapping("/size/{id}")
+    public ResponseEntity<@NonNull ApiResponse<SizeResponse>> updateSize(
+            @Parameter(description = "ID of the size") @PathVariable Long id,
+            @Valid @RequestBody SizeRequest request
+    ) {
+        var response = productService.updateSize(request, id);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

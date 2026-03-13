@@ -9,7 +9,8 @@ import java.util.Optional;
 
 @Repository
 public interface ProductSizeRepository extends JpaRepository<@NonNull ProductSize, @NonNull Long> {
-    Optional<ProductSize> findBySizeValue(String sizeValue);
+
+    boolean existsBySizeValueAndIdNot(String sizeValue, Long id);
 
     boolean existsBySizeValue(String sizeValue);
 }

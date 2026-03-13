@@ -2,6 +2,7 @@ package com.rgb.foxwear.service.abstraction.catalog;
 
 import com.rgb.foxwear.dto.request.catalog.*;
 import com.rgb.foxwear.dto.response.catalog.*;
+import jakarta.validation.Valid;
 import lombok.NonNull;
 import org.springframework.data.domain.Page;
 
@@ -32,6 +33,8 @@ public interface ProductService {
     ProductUpdateResponse updateProduct(ProductUpdateRequest request, Long id);
 
     CategoryResponse updateCategory(CategoryRequest request, Long id);
+
+    SizeResponse updateSize(SizeRequest request, Long id);
 
     void updateProductActivity(Long id, boolean isActive);
 
