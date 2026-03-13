@@ -393,6 +393,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
+     * Permanently removes a product size definition from the database.
+     */
+    @Override
+    @Transactional
+    public void deleteSize(Long id) {
+        log.info("Deleting product size ID: {}", id);
+        ProductSize size = findProductSizeOrThrow(id);
+        
+        productSizeRepository.delete(size);
+        log.info("Product size deleted successfully with ID: {}", id);
+    }
+
+    /**
      * Updates the stock quantity for a specific product item.
      */
     @Override

@@ -2,7 +2,6 @@ package com.rgb.foxwear.service.abstraction.catalog;
 
 import com.rgb.foxwear.dto.request.catalog.*;
 import com.rgb.foxwear.dto.response.catalog.*;
-import jakarta.validation.Valid;
 import lombok.NonNull;
 import org.springframework.data.domain.Page;
 
@@ -36,6 +35,8 @@ public interface ProductService {
 
     SizeResponse updateSize(SizeRequest request, Long id);
 
+    ItemUpdateResponse updateStock(Long itemId, Integer count);
+
     void updateProductActivity(Long id, boolean isActive);
 
     void softDeleteProduct(Long id);
@@ -46,6 +47,6 @@ public interface ProductService {
 
     void deleteProductItem(Long id);
 
-    ItemUpdateResponse updateStock(Long itemId, Integer count);
+    void deleteSize(Long id);
 
 }

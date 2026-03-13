@@ -195,4 +195,13 @@ public class AdminProductController {
         productService.deleteProductItem(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
+
+    @Operation(summary = "Delete size", description = "Permanently removes a size definition from the database.")
+    @DeleteMapping("/size/{id}")
+    public ResponseEntity<@NonNull ApiResponse<Void>> deleteSize(
+            @Parameter(description = "ID of the size") @PathVariable Long id
+    ) {
+        productService.deleteSize(id);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
 }
