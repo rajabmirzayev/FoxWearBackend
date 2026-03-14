@@ -95,7 +95,7 @@ public class ProductServiceImpl implements ProductService {
      */
     @Override
     @Transactional
-    public CategoryCreateResponse createCategory(CategoryRequest request) {
+    public CategoryResponse createCategory(CategoryRequest request) {
         log.info("Creating new category with name: {}", request.getName());
         checkCategoryUniquenessForCreate(request);
 
@@ -111,7 +111,7 @@ public class ProductServiceImpl implements ProductService {
         WearCategory savedCategory = categoryRepository.save(category);
         log.info("Category created successfully with ID: {}", savedCategory.getId());
 
-        return mapper.map(savedCategory, CategoryCreateResponse.class);
+        return getCategoryResponse(savedCategory);
     }
 
     /**
@@ -157,7 +157,7 @@ public class ProductServiceImpl implements ProductService {
 
         return products.map(product -> {
             ProductGetAllResponse productResponse = mapper.map(product, ProductGetAllResponse.class);
-            productResponse.setCategory(mapper.map(product.getCategory(), CategoryGetAllResponse.class));
+            productResponse.setCategoryName(product.getCategory().getName());
             productResponse.setColors(product.getColors().stream()
                     .map(this::getColorOptionGetAllResponse)
                     .collect(Collectors.toCollection(ArrayList::new)));
@@ -187,9 +187,40 @@ public class ProductServiceImpl implements ProductService {
         Product product = findProductOrThrow(id);
 
         ProductGetResponse productResponse = mapper.map(product, ProductGetResponse.class);
-        productResponse.setCategory(mapper.map(product.getCategory(), CategoryGetAllResponse.class));
+        productResponse.setCategory(
+                mapper.map(product.getCategory(), CategoryResponse.class)
+        );
+        productResponse.setColors(product.getColors().stream()
+                .map(this::getColorGetResponse)
+                .toList());
 
         return productResponse;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ColorOptionAllValuesResponse> getAllColorOptionsValues() {
+        var colors = colorOptionRepository.findAll();
+
+        return colors.stream()
+                .map(color -> mapper.map(color, ColorOptionAllValuesResponse.class))
+                .toList();
+    }
+
+
+    /**
+     * Retrieves a specific product item variant by its ID.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public ItemGetResponse getItemById(Long id) {
+        log.info("Fetching item information for ID: {}", id);
+        ProductItem item = findProductItemOrThrow(id);
+
+        ItemGetResponse response = mapper.map(item, ItemGetResponse.class);
+        response.setProductSize(mapper.map(item.getProductSize(), SizeResponse.class));
+
+        return response;
     }
 
     /**
@@ -199,7 +230,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public List<CategoryResponse> getAllCategories() {
         log.info("Fetching all categories");
-        List<WearCategory> categories = categoryRepository.findAll();
+        List<WearCategory> categories = categoryRepository.findAllByParentIsNotNull();
 
         return categories.stream()
                 .map(this::getCategoryResponse)
@@ -326,14 +357,11 @@ public class ProductServiceImpl implements ProductService {
      */
     @Override
     @Transactional
-    public void updateProductActivity(Long id, boolean isActive) {
-        log.info("Updating activity status for product ID: {} to {}", id, isActive);
+    public void updateProductActivity(Long id) {
         Product product = findProductOrThrow(id);
+        log.info("Updating activity status for product ID: {} to {}", id, !product.isActive());
 
-        if (product.isActive() != isActive) {
-            product.setActive(isActive);
-            log.info("Product ID: {} activity updated successfully", id);
-        }
+        product.setActive(!product.isActive());
     }
 
     /**
@@ -400,7 +428,7 @@ public class ProductServiceImpl implements ProductService {
     public void deleteSize(Long id) {
         log.info("Deleting product size ID: {}", id);
         ProductSize size = findProductSizeOrThrow(id);
-        
+
         productSizeRepository.delete(size);
         log.info("Product size deleted successfully with ID: {}", id);
     }
@@ -592,18 +620,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * Transforms a {@link WearCategory} entity and its parent into a {@link CategoryResponse} DTO.
-     */
-    private CategoryResponse getCategoryResponse(WearCategory category) {
-        CategoryResponse categoryResponse = mapper.map(category, CategoryResponse.class);
-        categoryResponse.setParent(
-                category.getParent() != null ? mapper.map(category.getParent(), CategoryResponse.class) : null
-        );
-
-        return categoryResponse;
-    }
-
-    /**
      * Transforms a {@link ColorOption} entity and its nested images and items into a {@link ColorOptionUpdateResponse} DTO.
      */
     private ColorOptionUpdateResponse getColorUpdateResponse(ColorOption color) {
@@ -628,10 +644,13 @@ public class ProductServiceImpl implements ProductService {
         return colorResponse;
     }
 
+    /**
+     * Transforms a {@link ColorOption} entity into a {@link ColorOptionGetAllResponse} DTO for list views.
+     */
     private ColorOptionGetAllResponse getColorOptionGetAllResponse(ColorOption color) {
         ColorOptionGetAllResponse colorResponse = mapper.map(color, ColorOptionGetAllResponse.class);
         var images = colorResponse.getImages().stream()
-                .map(image -> mapper.map(image, ColorOptionImageGetAllResponse.class))
+                .map(image -> mapper.map(image, ImageGetAllResponse.class))
                 .toList();
 
         var items = colorResponse.getItems().stream()
@@ -642,6 +661,37 @@ public class ProductServiceImpl implements ProductService {
         colorResponse.setItems(items);
 
         return colorResponse;
+    }
+
+    /**
+     * Transforms a {@link ColorOption} entity into a detailed {@link ColorOptionGetResponse} DTO.
+     */
+    private ColorOptionGetResponse getColorGetResponse(ColorOption color) {
+        ColorOptionGetResponse colorResponse = mapper.map(color, ColorOptionGetResponse.class);
+        var images = colorResponse.getImages().stream()
+                .map(image -> mapper.map(image, ImageGetResponse.class))
+                .toList();
+
+        var items = colorResponse.getItems().stream()
+                .map(item -> mapper.map(item, ItemGetResponse.class))
+                .toList();
+
+        colorResponse.setImages(images);
+        colorResponse.setItems(items);
+
+        return colorResponse;
+    }
+
+    /**
+     * Transforms a {@link WearCategory} entity and its parent into a {@link CategoryResponse} DTO.
+     */
+    private CategoryResponse getCategoryResponse(WearCategory category) {
+        CategoryResponse categoryResponse = mapper.map(category, CategoryResponse.class);
+        categoryResponse.setParent(
+                category.getParent() != null ? mapper.map(category.getParent(), CategoryResponse.class) : null
+        );
+
+        return categoryResponse;
     }
 
     /**
@@ -735,7 +785,8 @@ public class ProductServiceImpl implements ProductService {
                 .and(ProductSpecification.isDeleted(filter.getIsDeleted()))
                 .and(ProductSpecification.hasColor(filter.getColor()))
                 .and(ProductSpecification.hasSize(filter.getProductSize()))
-                .and(ProductSpecification.searchByTitleOrSkuOrDescription(filter.getKeyword()));
+                .and(ProductSpecification.searchByTitleOrSkuOrDescription(filter.getKeyword()))
+                .and(ProductSpecification.hasPriceBetween(filter.getMinPrice(), filter.getMaxPrice()));
     }
 
     /**

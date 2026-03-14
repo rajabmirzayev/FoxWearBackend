@@ -10,6 +10,8 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Sort;
 
+import java.math.BigInteger;
+
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -31,5 +33,8 @@ public class BaseFilterRequest {
 
     String color;
     String productSize;
+
+    BigInteger minPrice;
+    BigInteger maxPrice;
 
 }

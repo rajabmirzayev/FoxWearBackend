@@ -44,7 +44,7 @@ public class AdminProductController {
 
     @Operation(summary = "Create a category", description = "Creates a new product category.")
     @PostMapping("/category")
-    public ResponseEntity<@NonNull ApiResponse<CategoryCreateResponse>> createCategory(
+    public ResponseEntity<@NonNull ApiResponse<CategoryResponse>> createCategory(
             @Valid @RequestBody CategoryRequest request
     ) {
         var response = productService.createCategory(request);
@@ -77,6 +77,21 @@ public class AdminProductController {
         var response = productService.getProductWithId(id);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
+
+    @GetMapping("/colors")
+    public ResponseEntity<@NonNull ApiResponse<List<ColorOptionAllValuesResponse>>> getAllColorOptionsValues() {
+        var response = productService.getAllColorOptionsValues();
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/item/{id}")
+    public ResponseEntity<@NonNull ApiResponse<ItemGetResponse>> getProductItem(
+            @PathVariable Long id
+    ) {
+        var response = productService.getItemById(id);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
 
     @Operation(summary = "Get all categories", description = "Retrieves a list of all product categories.")
     @GetMapping("/category")
@@ -143,20 +158,19 @@ public class AdminProductController {
     @Operation(summary = "Update product activity status", description = "Activates or deactivates a product.")
     @PatchMapping("/{id}/activate")
     public ResponseEntity<@NonNull ApiResponse<Void>> updateProductStatus(
-            @Parameter(description = "ID of the product") @PathVariable Long id,
-            @Parameter(description = "New active status") @RequestParam boolean isActive
+            @Parameter(description = "ID of the product") @PathVariable Long id
     ) {
-        productService.updateProductActivity(id, isActive);
+        productService.updateProductActivity(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @Operation(summary = "Update item stock", description = "Updates the stock count for a specific product item (size variant).")
-    @PatchMapping("/item/{itemId}/stock")
+    @PatchMapping("/item/{id}/stock")
     public ResponseEntity<@NonNull ApiResponse<ItemUpdateResponse>> updateStock(
-            @Parameter(description = "ID of the product item") @PathVariable Long itemId,
+            @Parameter(description = "ID of the product item") @PathVariable Long id,
             @Parameter(description = "New stock count") @RequestParam Integer count
     ) {
-        var response = productService.updateStock(itemId, count);
+        var response = productService.updateStock(id, count);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

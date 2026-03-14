@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -25,7 +26,9 @@ public class ProductGetResponse {
     String description;
     boolean isActive;
     boolean isDeleted;
-    CategoryGetAllResponse category;
+    CategoryResponse category;
     List<ColorOptionGetResponse> colors;
+    LocalDateTime createdAt;
+    LocalDateTime updatedAt;
 
 }

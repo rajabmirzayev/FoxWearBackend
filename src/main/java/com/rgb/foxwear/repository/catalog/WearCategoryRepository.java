@@ -5,6 +5,7 @@ import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -20,4 +21,6 @@ public interface WearCategoryRepository extends JpaRepository<@NonNull WearCateg
     boolean existsByNameAndIdNot(String name, Long id);
 
     boolean existsByLinkAndIdNot(String link, Long id);
+
+    List<WearCategory> findAllByParentIsNotNull();
 }

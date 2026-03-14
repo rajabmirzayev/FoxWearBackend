@@ -15,7 +15,7 @@ public class ColorOptionGetAllResponse {
     Long id;
     String colorName;
     String colorCode;
-    List<ColorOptionImageGetAllResponse> images;
+    List<ImageGetAllResponse> images;
     List<ItemGetAllResponse> items;
 
 }

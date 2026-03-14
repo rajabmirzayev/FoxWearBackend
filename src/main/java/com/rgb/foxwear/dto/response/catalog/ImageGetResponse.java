@@ -8,10 +8,10 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ColorOptionImageGetAllResponse {
+public class ImageGetResponse {
 
     Long id;
     String image;
-    boolean isMain = false;
+    boolean isMain;
 
 }

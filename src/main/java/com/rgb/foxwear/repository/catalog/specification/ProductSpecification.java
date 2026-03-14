@@ -76,4 +76,21 @@ public class ProductSpecification {
             return cb.or(titlePredicate, descriptionPredicate, skuPredicate);
         };
     }
+
+    public static Specification<@NonNull Product> hasPriceBetween(java.math.BigInteger minPrice, java.math.BigInteger maxPrice) {
+        return (root, query, cb) -> {
+            Predicate predicate = cb.conjunction();
+
+            if (minPrice != null) {
+                predicate = cb.and(predicate, cb.greaterThanOrEqualTo(root.get("discountPrice"), minPrice));
+            }
+
+            if (maxPrice != null) {
+                predicate = cb.and(predicate, cb.lessThanOrEqualTo(root.get("discountPrice"), maxPrice));
+            }
+
+            return predicate;
+        };
+    }
+
 }

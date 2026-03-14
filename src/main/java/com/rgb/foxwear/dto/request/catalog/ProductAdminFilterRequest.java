@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductAdminFilterRequest extends BaseFilterRequest {
 
-    @Pattern(regexp = "id|title|originalPrice|createdAt", message = "Invalid sort field")
+    @Pattern(regexp = "id|title|discountPrice|createdAt|updatedAt", message = "Invalid sort field")
     String sortBy = "createdAt";
 
     Boolean isActive;

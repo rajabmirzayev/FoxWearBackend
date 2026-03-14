@@ -5,13 +5,13 @@ import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ColorOptionImageGetResponse {
+public class ColorOptionAllValuesResponse {
 
     Long id;
-    String image;
-    boolean isMain;
+    String colorName;
+    String colorCode;
 
 }

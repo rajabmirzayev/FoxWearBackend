@@ -1,6 +1,5 @@
 package com.rgb.foxwear.dto.response.catalog;
 
-import com.rgb.foxwear.entity.catalog.ProductSize;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -12,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 public class ItemGetResponse {
 
     Long id;
-    ProductSize productSize;
+    SizeResponse productSize;
     String sku;
     Integer stockQuantity;
     Integer stockRemaining;

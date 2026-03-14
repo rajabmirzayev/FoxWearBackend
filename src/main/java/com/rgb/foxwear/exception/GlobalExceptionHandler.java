@@ -2,6 +2,7 @@ package com.rgb.foxwear.exception;
 
 import com.rgb.foxwear.dto.ApiResponse;
 import com.rgb.foxwear.enums.ErrorCode;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,31 +67,37 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidTokenException.class)
-    public ResponseEntity<@NonNull ApiResponse<Void>> handleInvalidToken(InvalidTokenException ex) {
+    public ResponseEntity<@NonNull ApiResponse<?>> handleInvalidToken(InvalidTokenException ex) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.INVALID_TOKEN));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<@NonNull ApiResponse<Void>> handleBadCredentials(BadCredentialsException ex) {
+    public ResponseEntity<@NonNull ApiResponse<?>> handleBadCredentials(BadCredentialsException ex) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.UNAUTHORIZED));
     }
 
     @ExceptionHandler(DisabledException.class)
-    public ResponseEntity<@NonNull ApiResponse<Void>> handleDisabled(DisabledException ex) {
+    public ResponseEntity<@NonNull ApiResponse<?>> handleDisabled(DisabledException ex) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.EMAIL_NOT_VERIFIED));
     }
 
     @ExceptionHandler(LockedException.class)
-    public ResponseEntity<@NonNull ApiResponse<Void>> handleLocked(LockedException ex) {
+    public ResponseEntity<@NonNull ApiResponse<?>> handleLocked(LockedException ex) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.FORBIDDEN));
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<@NonNull ApiResponse<?>> handleExpiredJwtException(ExpiredJwtException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error("Token has expired", ErrorCode.TOKEN_EXPIRED));
     }
 
     // Product error handlers

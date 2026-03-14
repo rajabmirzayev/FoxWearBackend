@@ -1,6 +1,5 @@
 package com.rgb.foxwear.dto.response.catalog;
 
-import com.rgb.foxwear.entity.catalog.WearCategory;
 import com.rgb.foxwear.enums.Gender;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -23,7 +22,8 @@ public class ProductGetAllResponse {
     boolean hasDiscount = false;
     String slug;
     Gender gender;
-    CategoryGetAllResponse category;
+    String categoryName;
+    boolean isActive;
     List<ColorOptionGetAllResponse> colors;
 
 }

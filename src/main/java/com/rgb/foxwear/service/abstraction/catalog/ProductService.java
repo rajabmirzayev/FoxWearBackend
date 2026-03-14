@@ -13,13 +13,17 @@ public interface ProductService {
 
     ColorOptionCreateResponse addColorToProduct(Long productId, ColorOptionCreateRequest request);
 
-    CategoryCreateResponse createCategory(CategoryRequest request);
+    CategoryResponse createCategory(CategoryRequest request);
 
     SizeResponse createSize(SizeRequest request);
 
     Page<@NonNull ProductGetAllResponse> getAllProductWithAdminFilter(ProductAdminFilterRequest filter);
 
     ProductGetResponse getProductWithId(Long id);
+
+    List<ColorOptionAllValuesResponse> getAllColorOptionsValues();
+
+    ItemGetResponse getItemById(Long id);
 
     List<CategoryResponse> getAllCategories();
 
@@ -37,7 +41,7 @@ public interface ProductService {
 
     ItemUpdateResponse updateStock(Long itemId, Integer count);
 
-    void updateProductActivity(Long id, boolean isActive);
+    void updateProductActivity(Long id);
 
     void softDeleteProduct(Long id);
 
