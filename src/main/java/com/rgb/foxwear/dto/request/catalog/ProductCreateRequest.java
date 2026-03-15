@@ -1,6 +1,7 @@
 package com.rgb.foxwear.dto.request.catalog;
 
 import com.rgb.foxwear.enums.Gender;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -33,6 +34,6 @@ public class ProductCreateRequest {
     @NotNull(message = "Category is required")
     Long categoryId;
     
-    List<ColorOptionCreateRequest> colors;
+    List<@Valid ColorOptionCreateRequest> colors;
 
 }

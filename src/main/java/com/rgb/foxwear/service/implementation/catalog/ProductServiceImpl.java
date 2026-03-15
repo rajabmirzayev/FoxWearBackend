@@ -200,7 +200,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public List<ColorOptionAllValuesResponse> getAllColorOptionsValues() {
-        var colors = colorOptionRepository.findAll();
+        var colors = colorOptionRepository.findAllUniqueColorNames();
 
         return colors.stream()
                 .map(color -> mapper.map(color, ColorOptionAllValuesResponse.class))

@@ -1,5 +1,6 @@
 package com.rgb.foxwear.dto.request.catalog;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -22,8 +23,8 @@ public class ColorOptionCreateRequest implements ColorOptionDTO {
     @Size(max = 30, message = "Color code must not exceed 30 characters")
     String colorCode;
 
-    List<ImageCreateRequest> images;
+    List<@Valid ImageCreateRequest> images;
 
-    List<ItemCreateRequest> items;
+    List<@Valid ItemCreateRequest> items;
 
 }
