@@ -3,7 +3,7 @@ package com.rgb.foxwear.controller.admin;
 import com.rgb.foxwear.dto.ApiResponse;
 import com.rgb.foxwear.dto.request.catalog.*;
 import com.rgb.foxwear.dto.response.catalog.*;
-import com.rgb.foxwear.service.abstraction.catalog.ProductService;
+import com.rgb.foxwear.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

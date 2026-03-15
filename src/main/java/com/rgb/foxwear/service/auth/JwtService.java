@@ -1,4 +1,4 @@
-package com.rgb.foxwear.service.implementation.auth;
+package com.rgb.foxwear.service.auth;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

@@ -1,4 +1,4 @@
-package com.rgb.foxwear.service.implementation.auth;
+package com.rgb.foxwear.service.auth;
 
 import com.rgb.foxwear.entity.auth.UserEntity;
 import com.rgb.foxwear.enums.UserStatus;

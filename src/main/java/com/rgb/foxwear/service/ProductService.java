@@ -1,4 +1,4 @@
-package com.rgb.foxwear.service.implementation.catalog;
+package com.rgb.foxwear.service;
 
 import com.rgb.foxwear.dto.request.catalog.*;
 import com.rgb.foxwear.dto.response.catalog.*;
@@ -6,7 +6,6 @@ import com.rgb.foxwear.entity.catalog.*;
 import com.rgb.foxwear.exception.*;
 import com.rgb.foxwear.repository.catalog.*;
 import com.rgb.foxwear.repository.catalog.specification.ProductSpecification;
-import com.rgb.foxwear.service.abstraction.catalog.ProductService;
 import com.rgb.foxwear.util.CodeGenerator;
 import com.rgb.foxwear.util.StringHelper;
 import lombok.NonNull;
@@ -29,7 +28,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ProductServiceImpl implements ProductService {
+public class ProductService {
     private final ProductRepository productRepository;
     private final WearCategoryRepository categoryRepository;
     private final ProductSizeRepository productSizeRepository;
@@ -40,7 +39,6 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Creates a new product including its category association and color options.
      */
-    @Override
     @Transactional
     public ProductCreateResponse createProduct(ProductCreateRequest request) {
         log.info("Creating new product with title: {}", request.getTitle());
@@ -73,7 +71,6 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Creates a new product category, optionally associating it with a parent category.
      */
-    @Override
     @Transactional
     public CategoryResponse createCategory(CategoryRequest request) {
         log.info("Creating new category with name: {}", request.getName());
@@ -97,7 +94,6 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Creates a new product size definition.
      */
-    @Override
     @Transactional
     public SizeResponse createSize(SizeRequest request) {
         log.info("Creating new size with value: {}", request.getSizeValue());
@@ -119,7 +115,6 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Retrieves a paginated list of products filtered by admin-defined criteria.
      */
-    @Override
     @Transactional(readOnly = true)
     public Page<@NonNull ProductGetAllResponse> getAllProductWithAdminFilter(ProductAdminFilterRequest filter) {
         log.info("Fetching products with admin filter: {}", filter);
@@ -160,7 +155,6 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Retrieves a detailed view of a single product by its ID.
      */
-    @Override
     @Transactional(readOnly = true)
     public ProductGetResponse getProductWithSlug(String slug) {
         log.info("Fetching detailed product information for slug: {}", slug);
@@ -177,7 +171,6 @@ public class ProductServiceImpl implements ProductService {
         return productResponse;
     }
 
-    @Override
     @Transactional(readOnly = true)
     public List<ColorOptionAllValuesResponse> getAllColorOptionsValues() {
         var colors = colorOptionRepository.findAllUniqueColorNames();
@@ -190,7 +183,6 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Retrieves a list of all available product categories.
      */
-    @Override
     @Transactional(readOnly = true)
     public List<CategoryResponse> getAllCategories() {
         log.info("Fetching all categories");
@@ -204,7 +196,6 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Retrieves a category by its unique identifier.
      */
-    @Override
     @Transactional(readOnly = true)
     public CategoryResponse getCategoryById(Long id) {
         log.info("Fetching category with ID: {}", id);
@@ -216,7 +207,6 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Retrieves all available product size definitions.
      */
-    @Override
     @Transactional(readOnly = true)
     public List<SizeResponse> getAllSizes() {
         log.info("Fetching all sizes");
@@ -230,7 +220,6 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Retrieves a specific product size definition by its ID.
      */
-    @Override
     @Transactional(readOnly = true)
     public SizeResponse getSizeById(Long id) {
         log.info("Fetching size with ID: {}", id);
@@ -242,7 +231,6 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Updates an existing product's details and its color options.
      */
-    @Override
     @Transactional
     public ProductUpdateResponse updateProduct(ProductUpdateRequest request, Long id) {
         log.info("Updating product ID: {} with title: {}", id, request.getTitle());
@@ -268,7 +256,6 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Updates an existing product category's details, including its parent association.
      */
-    @Override
     @Transactional
     public CategoryResponse updateCategory(CategoryRequest request, Long id) {
         log.info("Updating category ID: {} with name: {}", id, request.getName());
@@ -300,7 +287,6 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Updates an existing product size definition.
      */
-    @Override
     @Transactional
     public SizeResponse updateSize(SizeRequest request, Long id) {
         log.info("Updating size ID: {} with value: {}", id, request.getSizeValue());
@@ -319,7 +305,6 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Updates the activation status of an existing product.
      */
-    @Override
     @Transactional
     public void updateProductActivity(Long id) {
         Product product = findProductOrThrow(id);
@@ -331,7 +316,6 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Marks a product as deleted (soft delete) to preserve referential integrity.
      */
-    @Override
     @Transactional
     public void softDeleteProduct(Long id) {
         log.info("Soft deleting product ID: {}", id);
@@ -346,7 +330,6 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Permanently removes a product and its associated options from the database.
      */
-    @Override
     @Transactional
     public void deleteProduct(Long id) {
         log.info("Hard deleting product ID: {}", id);
@@ -359,7 +342,6 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Permanently removes a product size definition from the database.
      */
-    @Override
     @Transactional
     public void deleteSize(Long id) {
         log.info("Deleting product size ID: {}", id);
@@ -369,7 +351,6 @@ public class ProductServiceImpl implements ProductService {
         log.info("Product size deleted successfully with ID: {}", id);
     }
 
-    @Override
     @Transactional
     public void deleteCategory(Long id) {
         log.info("Deleting category ID: {}", id);
@@ -382,7 +363,6 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Updates the stock quantity for a specific product item.
      */
-    @Override
     @Transactional
     public ItemUpdateResponse updateStock(Long itemId, Integer count) {
         log.info("Updating stock for item ID: {} to count: {}", itemId, count);

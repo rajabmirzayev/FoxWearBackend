@@ -1,7 +1,7 @@
 package com.rgb.foxwear.filter;
 
-import com.rgb.foxwear.service.implementation.auth.CustomUserDetailsService;
-import com.rgb.foxwear.service.implementation.auth.JwtService;
+import com.rgb.foxwear.service.auth.CustomUserDetailsService;
+import com.rgb.foxwear.service.auth.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

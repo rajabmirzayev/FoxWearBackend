@@ -3,7 +3,7 @@ package com.rgb.foxwear.config;
 import com.rgb.foxwear.exception.AuthEntryPoint;
 import com.rgb.foxwear.exception.CustomAccessDeniedHandler;
 import com.rgb.foxwear.filter.JwtAuthFilter;
-import com.rgb.foxwear.service.implementation.auth.CustomUserDetailsService;
+import com.rgb.foxwear.service.auth.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -3,7 +3,7 @@ package com.rgb.foxwear.controller;
 import com.rgb.foxwear.dto.ApiResponse;
 import com.rgb.foxwear.dto.request.auth.CreateAddressRequest;
 import com.rgb.foxwear.dto.response.auth.CreateAddressResponse;
-import com.rgb.foxwear.service.abstraction.auth.AddressService;
+import com.rgb.foxwear.service.AddressService;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

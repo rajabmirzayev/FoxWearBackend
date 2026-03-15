@@ -1,4 +1,4 @@
-package com.rgb.foxwear.service.implementation.auth;
+package com.rgb.foxwear.service.auth;
 
 import com.rgb.foxwear.dto.request.auth.LoginRequest;
 import com.rgb.foxwear.dto.request.auth.RegisterRequest;
@@ -11,7 +11,6 @@ import com.rgb.foxwear.exception.UnderageUserException;
 import com.rgb.foxwear.exception.UserAlreadyExistsException;
 import com.rgb.foxwear.exception.UserNotFoundException;
 import com.rgb.foxwear.repository.auth.UserRepository;
-import com.rgb.foxwear.service.abstraction.auth.AuthService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -26,7 +25,7 @@ import java.time.Period;
 
 @Service
 @RequiredArgsConstructor
-public class AuthServiceImpl implements AuthService {
+public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final JwtService jwtService;
@@ -34,7 +33,6 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper mapper;
 
-    @Override
     @Transactional
     public void register(RegisterRequest request) {
         checkUserExists(request);
@@ -52,7 +50,6 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
-    @Override
     @Transactional
     public AuthResponse login(LoginRequest loginRequest) {
         try {
@@ -81,7 +78,6 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    @Override
     @Transactional
     public AuthResponse refresh(String refreshToken) {
         RefreshToken verified = refreshTokenService.verifyRefreshToken(refreshToken);
