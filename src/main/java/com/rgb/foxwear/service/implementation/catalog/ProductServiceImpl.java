@@ -71,26 +71,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * Adds a new color option to an existing product.
-     */
-    @Override
-    @Transactional
-    public ColorOptionCreateResponse addColorToProduct(Long productId, ColorOptionCreateRequest request) {
-        log.info("Adding color {} to product ID: {}", request.getColorName(), productId);
-        Product product = findProductOrThrow(productId);
-
-        ColorOption colorOption = mapToColorOption(request, product);
-
-        // If the product is used within this method (for future)
-        product.getColors().add(colorOption);
-
-        var savedColor = colorOptionRepository.save(colorOption);
-        log.info("Color option added successfully with ID: {}", savedColor.getId());
-
-        return getColorCreateResponse(savedColor);
-    }
-
-    /**
      * Creates a new product category, optionally associating it with a parent category.
      */
     @Override
@@ -159,12 +139,12 @@ public class ProductServiceImpl implements ProductService {
             ProductGetAllResponse productResponse = mapper.map(product, ProductGetAllResponse.class);
             productResponse.setCategoryName(product.getCategory().getName());
             productResponse.setColors(product.getColors().stream()
-                    .map(this::getColorOptionGetAllResponse)
+                    .map(this::getColorGetAllResponse)
                     .collect(Collectors.toCollection(ArrayList::new)));
 
             if (productResponse.getColors() != null) {
                 var matchingColor = productResponse.getColors().stream()
-                        .filter(c -> isMatch(c, searchKeyword, filterColor, filterSize))
+                        .filter(c -> isMatchColors(c, searchKeyword, filterColor, filterSize))
                         .findFirst();
 
                 matchingColor.ifPresent(color -> {
@@ -205,22 +185,6 @@ public class ProductServiceImpl implements ProductService {
         return colors.stream()
                 .map(color -> mapper.map(color, ColorOptionAllValuesResponse.class))
                 .toList();
-    }
-
-
-    /**
-     * Retrieves a specific product item variant by its ID.
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public ItemGetResponse getItemById(Long id) {
-        log.info("Fetching item information for ID: {}", id);
-        ProductItem item = findProductItemOrThrow(id);
-
-        ItemGetResponse response = mapper.map(item, ItemGetResponse.class);
-        response.setProductSize(mapper.map(item.getProductSize(), SizeResponse.class));
-
-        return response;
     }
 
     /**
@@ -393,34 +357,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     /**
-     * Marks a specific product item (size/sku variant) as deleted.
-     */
-    @Override
-    @Transactional
-    public void softDeleteProductItem(Long id) {
-        log.info("Soft deleting product item ID: {}", id);
-        ProductItem item = findProductItemOrThrow(id);
-
-        if (!item.isDeleted()) {
-            item.setDeleted(true);
-            log.info("Product item soft deleted successfully with ID: {}", id);
-        }
-    }
-
-    /**
-     * Permanently removes a specific product item variant from the database.
-     */
-    @Override
-    @Transactional
-    public void deleteProductItem(Long id) {
-        log.info("Hard deleting product item ID: {}", id);
-        ProductItem item = findProductItemOrThrow(id);
-
-        productItemRepository.delete(item);
-        log.info("Product item hard deleted successfully with ID: {}", id);
-    }
-
-    /**
      * Permanently removes a product size definition from the database.
      */
     @Override
@@ -471,6 +407,9 @@ public class ProductServiceImpl implements ProductService {
                 });
     }
 
+    /**
+     * Helper method to find a {@link Product} by slug or throw a {@link ProductNotFoundException}.
+     */
     private Product findProductOrThrow(String slug) {
         return productRepository.findBySlug(slug)
                 .orElseThrow(() -> {
@@ -524,8 +463,8 @@ public class ProductServiceImpl implements ProductService {
         colorOption.setColorCode(colorOption.getColorCode().trim());
 
         // Map nested images and items using helper methods
-        List<ColorOptionImage> images = mapImages(colorOptionDTO, colorOption);
-        List<ProductItem> items = mapItems(colorOptionDTO, colorOption);
+        List<ColorOptionImage> images = mapImagesToEntityList(colorOptionDTO, colorOption);
+        List<ProductItem> items = mapItemsToEntityList(colorOptionDTO, colorOption);
 
         colorOption.setImages(images);
         colorOption.setItems(items);
@@ -536,7 +475,7 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Maps image requests to {@link ColorOptionImage} entities and associates them with a {@link ColorOption}.
      */
-    private List<ColorOptionImage> mapImages(ColorOptionDTO color, ColorOption colorOption) {
+    private List<ColorOptionImage> mapImagesToEntityList(ColorOptionDTO color, ColorOption colorOption) {
         return color.getImages().stream()
                 .map(image -> {
                     ColorOptionImage colorOptionImage = mapper.map(image, ColorOptionImage.class);
@@ -553,7 +492,7 @@ public class ProductServiceImpl implements ProductService {
      * Maps item requests to {@link ProductItem} entities, looks up the corresponding {@link ProductSize},
      * and generates unique SKUs.
      */
-    private List<ProductItem> mapItems(ColorOptionDTO color, ColorOption colorOption) {
+    private List<ProductItem> mapItemsToEntityList(ColorOptionDTO color, ColorOption colorOption) {
         return color.getItems().stream()
                 .map(item -> {
                     ProductSize productSize = findProductSizeOrThrow(item.getSizeId());
@@ -655,7 +594,7 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Transforms a {@link ColorOption} entity into a {@link ColorOptionGetAllResponse} DTO for list views.
      */
-    private ColorOptionGetAllResponse getColorOptionGetAllResponse(ColorOption color) {
+    private ColorOptionGetAllResponse getColorGetAllResponse(ColorOption color) {
         ColorOptionGetAllResponse colorResponse = mapper.map(color, ColorOptionGetAllResponse.class);
         var images = colorResponse.getImages().stream()
                 .map(image -> mapper.map(image, ImageGetAllResponse.class))
@@ -800,7 +739,7 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Checks if a color option matches search criteria (keyword, specific color, or specific size).
      */
-    private boolean isMatch(ColorOptionGetAllResponse color, String keyword, String filterColor, String filterSize) {
+    private boolean isMatchColors(ColorOptionGetAllResponse color, String keyword, String filterColor, String filterSize) {
         // 1. Check specific color filter
         if (filterColor != null && !filterColor.isBlank()) {
             if (color.getColorName().toLowerCase().contains(filterColor)) return true;

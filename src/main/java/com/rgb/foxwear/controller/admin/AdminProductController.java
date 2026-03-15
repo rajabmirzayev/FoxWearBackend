@@ -32,16 +32,6 @@ public class AdminProductController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @Operation(summary = "Add a color option to a product", description = "Adds a new color variant to an existing product.")
-    @PostMapping("/{productId}/colors")
-    public ResponseEntity<@NonNull ApiResponse<ColorOptionCreateResponse>> createColorOption(
-            @Parameter(description = "ID of the product") @PathVariable Long productId,
-            @Valid @RequestBody ColorOptionCreateRequest request
-    ) {
-        var response = productService.addColorToProduct(productId, request);
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
     @Operation(summary = "Create a category", description = "Creates a new product category.")
     @PostMapping("/category")
     public ResponseEntity<@NonNull ApiResponse<CategoryResponse>> createCategory(
@@ -78,20 +68,12 @@ public class AdminProductController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @Operation(summary = "Get all color option values", description = "Retrieves a list of all unique color names and codes used across products.")
     @GetMapping("/colors")
     public ResponseEntity<@NonNull ApiResponse<List<ColorOptionAllValuesResponse>>> getAllColorOptionsValues() {
         var response = productService.getAllColorOptionsValues();
         return ResponseEntity.ok(ApiResponse.success(response));
     }
-
-    @GetMapping("/item/{id}")
-    public ResponseEntity<@NonNull ApiResponse<ItemGetResponse>> getProductItem(
-            @PathVariable Long id
-    ) {
-        var response = productService.getItemById(id);
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
 
     @Operation(summary = "Get all categories", description = "Retrieves a list of all product categories.")
     @GetMapping("/category")
@@ -189,24 +171,6 @@ public class AdminProductController {
             @Parameter(description = "ID of the product") @PathVariable Long id
     ) {
         productService.deleteProduct(id);
-        return ResponseEntity.ok(ApiResponse.success(null));
-    }
-
-    @Operation(summary = "Soft delete product item", description = "Marks a product item as deleted.")
-    @DeleteMapping("/item/{id}/soft")
-    public ResponseEntity<@NonNull ApiResponse<Void>> softDeleteItem(
-            @Parameter(description = "ID of the product item") @PathVariable Long id
-    ) {
-        productService.softDeleteProductItem(id);
-        return ResponseEntity.ok(ApiResponse.success(null));
-    }
-
-    @Operation(summary = "Hard delete product item", description = "Permanently removes a product item from the database.")
-    @DeleteMapping("/item/{id}")
-    public ResponseEntity<@NonNull ApiResponse<Void>> deleteItem(
-            @Parameter(description = "ID of the product item") @PathVariable Long id
-    ) {
-        productService.deleteProductItem(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 

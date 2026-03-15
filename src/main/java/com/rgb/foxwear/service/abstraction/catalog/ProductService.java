@@ -11,8 +11,6 @@ public interface ProductService {
 
     ProductCreateResponse createProduct(ProductCreateRequest request);
 
-    ColorOptionCreateResponse addColorToProduct(Long productId, ColorOptionCreateRequest request);
-
     CategoryResponse createCategory(CategoryRequest request);
 
     SizeResponse createSize(SizeRequest request);
@@ -22,8 +20,6 @@ public interface ProductService {
     ProductGetResponse getProductWithSlug(String slug);
 
     List<ColorOptionAllValuesResponse> getAllColorOptionsValues();
-
-    ItemGetResponse getItemById(Long id);
 
     List<CategoryResponse> getAllCategories();
 
@@ -46,10 +42,6 @@ public interface ProductService {
     void softDeleteProduct(Long id);
 
     void deleteProduct(Long id);
-
-    void softDeleteProductItem(Long id);
-
-    void deleteProductItem(Long id);
 
     void deleteSize(Long id);
 
