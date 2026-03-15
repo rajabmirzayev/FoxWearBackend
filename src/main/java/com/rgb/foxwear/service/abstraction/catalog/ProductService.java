@@ -19,7 +19,7 @@ public interface ProductService {
 
     Page<@NonNull ProductGetAllResponse> getAllProductWithAdminFilter(ProductAdminFilterRequest filter);
 
-    ProductGetResponse getProductWithId(Long id);
+    ProductGetResponse getProductWithSlug(String slug);
 
     List<ColorOptionAllValuesResponse> getAllColorOptionsValues();
 

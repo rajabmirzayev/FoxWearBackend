@@ -182,9 +182,9 @@ public class ProductServiceImpl implements ProductService {
      */
     @Override
     @Transactional(readOnly = true)
-    public ProductGetResponse getProductWithId(Long id) {
-        log.info("Fetching detailed product information for ID: {}", id);
-        Product product = findProductOrThrow(id);
+    public ProductGetResponse getProductWithSlug(String slug) {
+        log.info("Fetching detailed product information for slug: {}", slug);
+        Product product = findProductOrThrow(slug);
 
         ProductGetResponse productResponse = mapper.map(product, ProductGetResponse.class);
         productResponse.setCategory(
@@ -467,6 +467,14 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Product not found with ID: {}", id);
+                    return new ProductNotFoundException("Product not found!");
+                });
+    }
+
+    private Product findProductOrThrow(String slug) {
+        return productRepository.findBySlug(slug)
+                .orElseThrow(() -> {
+                    log.error("Product not found with slug: {}", slug);
                     return new ProductNotFoundException("Product not found!");
                 });
     }

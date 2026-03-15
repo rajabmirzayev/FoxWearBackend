@@ -24,4 +24,8 @@ public interface ProductRepository extends JpaRepository<@NonNull Product, @NonN
     @EntityGraph(attributePaths = {"category"})
     Optional<Product> findById(Long id);
 
+    @NullMarked
+    @EntityGraph(attributePaths = {"category"})
+    Optional<Product> findBySlug(String slug);
+
 }

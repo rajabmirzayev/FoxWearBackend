@@ -69,12 +69,12 @@ public class AdminProductController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @Operation(summary = "Get product by ID", description = "Retrieves detailed information for a specific product.")
-    @GetMapping("/{id}")
+    @Operation(summary = "Get product by slug", description = "Retrieves detailed information for a specific product.")
+    @GetMapping("/{slug}")
     public ResponseEntity<@NonNull ApiResponse<ProductGetResponse>> getProduct(
-            @Parameter(description = "ID of the product") @PathVariable Long id
+            @Parameter(description = "Slug of the product") @PathVariable String slug
     ) {
-        var response = productService.getProductWithId(id);
+        var response = productService.getProductWithSlug(slug);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
