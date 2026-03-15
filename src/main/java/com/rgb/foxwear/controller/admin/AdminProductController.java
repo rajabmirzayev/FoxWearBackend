@@ -182,4 +182,13 @@ public class AdminProductController {
         productService.deleteSize(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
+
+    @Operation(summary = "Delete category", description = "Permanently deletes a category and its products from the database.")
+    @DeleteMapping("/category/{id}")
+    public ResponseEntity<@NonNull ApiResponse<Void>> deleteCategory(
+            @Parameter(description = "ID of the category") @PathVariable Long id
+    ) {
+        productService.deleteCategory(id);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
 }

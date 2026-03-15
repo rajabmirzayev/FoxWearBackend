@@ -369,6 +369,16 @@ public class ProductServiceImpl implements ProductService {
         log.info("Product size deleted successfully with ID: {}", id);
     }
 
+    @Override
+    @Transactional
+    public void deleteCategory(Long id) {
+        log.info("Deleting category ID: {}", id);
+        WearCategory category = findCategoryOrThrow(id);
+
+        categoryRepository.delete(category);
+        log.info("Category deleted successfully with ID: {}", id);
+    }
+
     /**
      * Updates the stock quantity for a specific product item.
      */

@@ -45,4 +45,5 @@ public interface ProductService {
 
     void deleteSize(Long id);
 
+    void deleteCategory(Long id);
 }
