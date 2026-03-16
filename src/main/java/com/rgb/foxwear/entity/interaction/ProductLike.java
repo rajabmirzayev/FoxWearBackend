@@ -3,6 +3,7 @@ package com.rgb.foxwear.entity.interaction;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.rgb.foxwear.entity.auth.UserEntity;
 import com.rgb.foxwear.entity.catalog.ColorOption;
+import com.rgb.foxwear.entity.catalog.Product;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
         name = "product_likes",
         schema = "interaction",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"user_id", "product_color_id"})
+                @UniqueConstraint(columnNames = {"user_id", "product_id"})
         }
 )
 @Getter
@@ -32,8 +33,8 @@ public class ProductLike {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_color_id", nullable = false)
-    ColorOption colorOption;
+    @JoinColumn(name = "product_id", nullable = false)
+    Product product;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)

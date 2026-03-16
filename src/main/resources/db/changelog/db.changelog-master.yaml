@@ -53,3 +53,5 @@ databaseChangeLog:
       file: classpath:/db/changelog/v-04/add-not-null-constraint-to-placement-column-in-banner-table.yaml
   - include:
       file: classpath:/db/changelog/v-04/add-unique-constraint-to-placement-column-in-banner-table.yaml
+  - include:
+      file: classpath:/db/changelog/v-04/change-relation-with-product-id.yaml

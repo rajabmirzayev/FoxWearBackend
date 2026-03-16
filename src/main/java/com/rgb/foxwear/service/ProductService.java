@@ -6,6 +6,7 @@ import com.rgb.foxwear.entity.catalog.*;
 import com.rgb.foxwear.exception.*;
 import com.rgb.foxwear.repository.catalog.*;
 import com.rgb.foxwear.repository.catalog.specification.ProductSpecification;
+import com.rgb.foxwear.repository.interaction.ProductLikeRepository;
 import com.rgb.foxwear.util.CodeGenerator;
 import com.rgb.foxwear.util.StringHelper;
 import lombok.NonNull;
@@ -34,6 +35,7 @@ public class ProductService {
     private final ProductSizeRepository productSizeRepository;
     private final ColorOptionRepository colorOptionRepository;
     private final ProductItemRepository productItemRepository;
+    private final ProductLikeRepository productLikeRepository;
     private final ModelMapper mapper;
 
     /**
@@ -226,6 +228,23 @@ public class ProductService {
         ProductSize size = findProductSizeOrThrow(id);
 
         return mapper.map(size, SizeResponse.class);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductGetAllResponse> getMostLiked() {
+        var products = productLikeRepository.findTopMostLikedProducts();
+
+        return products.stream()
+                .map(product -> {
+                    ProductGetAllResponse productResponse = mapper.map(product, ProductGetAllResponse.class);
+                    productResponse.setCategoryName(product.getCategory().getName());
+                    productResponse.setColors(product.getColors().stream()
+                            .map(this::getColorGetAllResponse)
+                            .collect(Collectors.toCollection(ArrayList::new)));
+
+                    return productResponse;
+                })
+                .toList();
     }
 
     /**
