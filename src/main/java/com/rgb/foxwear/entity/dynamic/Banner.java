@@ -46,7 +46,7 @@ public class Banner {
 
     @NotBlank
     @Size(max = 50)
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, unique = true, length = 50)
     String placement;
 
     @Column(name = "is_active", nullable = false)

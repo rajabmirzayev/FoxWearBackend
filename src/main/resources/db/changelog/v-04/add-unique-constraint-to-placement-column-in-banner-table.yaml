@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 16032026-04
+      author: rajabmirzayev
+      changes:
+        - addUniqueConstraint:
+            schemaName: dynamic
+            tableName: banners
+            columnNames: placement
+            constraintName: uk_banners_placement
