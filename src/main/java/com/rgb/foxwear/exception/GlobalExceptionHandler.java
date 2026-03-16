@@ -142,4 +142,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ApiResponse.error(ex.getMessage(), ErrorCode.WEAR_CATEGORY_ALREADY_EXISTS));
     }
+    
+    // Dynamic process exceptions handlers
+    @ExceptionHandler(BannerNotFoundException.class)
+    public ResponseEntity<@NonNull ApiResponse<?>> handleBannerNotFoundException(BannerNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.DYNAMIC_DATA_NOT_FOUND));
+    }
+
+    @ExceptionHandler(BannerAlreadyExistsException.class)
+    public ResponseEntity<@NonNull ApiResponse<?>> handleBannerAlreadyExistsException(BannerAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.DYNAMIC_DATA_ALREADY_EXISTS));
+    }
+
+    @ExceptionHandler(BannerIsNotActiveException.class)
+    public ResponseEntity<@NonNull ApiResponse<?>> handleBannerNotActiveException(BannerIsNotActiveException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.DYNAMIC_DATA_IS_NOT_ACTIVE));
+    }
+
 }
