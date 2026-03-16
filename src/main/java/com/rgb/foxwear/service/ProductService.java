@@ -232,7 +232,7 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public List<ProductGetAllResponse> getMostLiked() {
-        var products = productLikeRepository.findTopMostLikedProducts();
+        var products = productLikeRepository.findTopMostLikedProducts(PageRequest.of(0, 10));
 
         return products.stream()
                 .map(product -> {
