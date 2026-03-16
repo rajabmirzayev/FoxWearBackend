@@ -45,3 +45,5 @@ databaseChangeLog:
       file: classpath:/db/changelog/v-03/add-is-deleted-column-to-product-table.yaml
   - include:
       file: classpath:/db/changelog/v-03/change-check-constraint-to-product-table.yaml
+  - include:
+      file: classpath:/db/changelog/v-04/create-banner-table.yaml
