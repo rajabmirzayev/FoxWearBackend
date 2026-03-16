@@ -18,6 +18,7 @@ public class BannerResponse {
     String buttonText;
     String buttonLink;
     Integer sortOrder = 0;
+    String placement;
     boolean active = true;
 
 }

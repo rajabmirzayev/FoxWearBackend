@@ -47,3 +47,7 @@ databaseChangeLog:
       file: classpath:/db/changelog/v-03/change-check-constraint-to-product-table.yaml
   - include:
       file: classpath:/db/changelog/v-04/create-banner-table.yaml
+  - include:
+      file: classpath:/db/changelog/v-04/add-placement-column-to-banner-table.yaml
+  - include:
+      file: classpath:/db/changelog/v-04/add-not-null-constraint-to-placement-column-in-banner-table.yaml

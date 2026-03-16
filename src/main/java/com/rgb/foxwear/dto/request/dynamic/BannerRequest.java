@@ -1,5 +1,6 @@
 package com.rgb.foxwear.dto.request.dynamic;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -28,6 +29,10 @@ public class BannerRequest {
 
     @NotNull(message = "Sort order is required")
     Integer sortOrder = 0;
+
+    @NotBlank(message = "Placement is required")
+    @Size(max = 50, message = "Placement must not exceed 50 characters")
+    String placement;
 
     boolean active = true;
 

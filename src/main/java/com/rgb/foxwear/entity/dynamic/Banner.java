@@ -1,6 +1,7 @@
 package com.rgb.foxwear.entity.dynamic;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -42,6 +43,11 @@ public class Banner {
     @NotNull
     @Column(name = "sort_order", nullable = false)
     Integer sortOrder = 0;
+
+    @NotBlank
+    @Size(max = 50)
+    @Column(nullable = false, length = 50)
+    String placement;
 
     @Column(name = "is_active", nullable = false)
     boolean active = true;

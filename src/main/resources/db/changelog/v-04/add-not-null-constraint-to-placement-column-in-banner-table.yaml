@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 16032026-03
+      author: rajabmirzayev
+      changes:
+        - addNotNullConstraint:
+            schemaName: dynamic
+            tableName: banners
+            columnName: placement
+            columnDataType: VARCHAR(50)
