@@ -28,6 +28,11 @@ public class DynamicService {
      */
     @Transactional
     public BannerResponse createBanner(BannerRequest request) {
+        if (bannerRepository.existsByPlacement(request.getPlacement())) {
+            log.error("Banner with placement {} already exists", request.getPlacement());
+            throw new BannerAlreadyExistsException("Banner with placement " + request.getPlacement() + " already exists");
+        }
+
         log.info("Creating new banner with title: {}", request.getTitle());
         Banner banner = mapper.map(request, Banner.class);
         banner = bannerRepository.save(banner);
@@ -39,10 +44,6 @@ public class DynamicService {
     @Transactional(readOnly = true)
     public BannerResponse getBanner(String placement) {
         log.info("Fetching banner with placement: {}", placement);
-        if (bannerRepository.existsByPlacement(placement)) {
-            log.error("Banner with placement {} already exists", placement);
-            throw new BannerAlreadyExistsException("Banner with placement " + placement + " already exists");
-        }
 
         Banner banner = bannerRepository.findByPlacementAndActive(placement, true)
                 .orElseThrow(() -> new BannerNotFoundException("Banner with placement " + placement + " not found"));
