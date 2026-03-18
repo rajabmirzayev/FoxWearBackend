@@ -126,36 +126,30 @@ public class ProductService {
                 Sort.by(filter.getDirection(), filter.getSortBy())
         );
 
-        var products = productRepository.findAll(buildSpecification(filter), pageable);
+        var products = productRepository.findAll(buildAdminRequestSpecification(filter), pageable);
 
-        String searchKeyword = filter.getKeyword() == null ? null : filter.getKeyword().toLowerCase();
-        String filterColor = filter.getColor() == null ? null : filter.getColor().toLowerCase();
-        String filterSize = filter.getProductSize() == null ? null : filter.getProductSize().toLowerCase();
-
-        return products.map(product -> {
-            ProductGetAllResponse productResponse = mapper.map(product, ProductGetAllResponse.class);
-            productResponse.setCategoryName(product.getCategory().getName());
-            productResponse.setColors(product.getColors().stream()
-                    .map(this::getColorGetAllResponse)
-                    .collect(Collectors.toCollection(ArrayList::new)));
-
-            if (productResponse.getColors() != null) {
-                var matchingColor = productResponse.getColors().stream()
-                        .filter(c -> isMatchColors(c, searchKeyword, filterColor, filterSize))
-                        .findFirst();
-
-                matchingColor.ifPresent(color -> {
-                    productResponse.getColors().remove(color);
-                    productResponse.getColors().addFirst(color);
-                });
-            }
-
-            return productResponse;
-        });
+        return getFilterResponse(products, filter.getKeyword(), filter.getColor(), filter.getProductSize());
     }
 
     /**
-     * Retrieves a detailed view of a single product by its ID.
+     * Retrieves a paginated list of products filtered by user-defined criteria.
+     */
+    @Transactional(readOnly = true)
+    public Page<@NonNull ProductGetAllResponse> getAllProductWithUserFilter(ProductUserFilterRequest filter) {
+        log.info("Fetching products with user filter: {}", filter);
+        Pageable pageable = PageRequest.of(
+                filter.getPage(),
+                filter.getSize(),
+                Sort.by(filter.getDirection(), filter.getSortBy())
+        );
+
+        var products = productRepository.findAll(buildUserRequestSpecification(filter), pageable);
+
+        return getFilterResponse(products, filter.getKeyword(), filter.getColor(), filter.getProductSize());
+    }
+
+    /**
+     * Retrieves a detailed view of a single product by its slug.
      */
     @Transactional(readOnly = true)
     public ProductGetResponse getProductWithSlug(String slug) {
@@ -172,9 +166,12 @@ public class ProductService {
 
         return productResponse;
     }
-
+    /**
+     * Retrieves all unique color options used in the catalog.
+     */
     @Transactional(readOnly = true)
     public List<ColorOptionAllValuesResponse> getAllColorOptionsValues() {
+        log.info("Fetching all unique color option values");
         var colors = colorOptionRepository.findAllUniqueColorNames();
 
         return colors.stream()
@@ -230,8 +227,12 @@ public class ProductService {
         return mapper.map(size, SizeResponse.class);
     }
 
+    /**
+     * Retrieves the top 10 products with the highest number of likes.
+     */
     @Transactional(readOnly = true)
     public List<ProductGetAllResponse> getMostLiked() {
+        log.info("Fetching top 10 most liked products");
         var products = productLikeRepository.findTopMostLikedProducts(PageRequest.of(0, 10));
 
         return products.stream()
@@ -551,6 +552,45 @@ public class ProductService {
     }
 
     /**
+     * Transforms a {@link Product} entity into a {@link ProductGetAllResponse} DTO.
+     * If a specific color or size filter is applied, the matching color option is moved to the
+     * front of the list to ensure the relevant variant is displayed first.
+     */
+    private ProductGetAllResponse getProductGetAllResponse(Product product, String searchKeyword, List<String> filterColors, List<String> filterSizes) {
+        ProductGetAllResponse productResponse = mapper.map(product, ProductGetAllResponse.class);
+        productResponse.setCategoryName(product.getCategory().getName());
+        productResponse.setColors(product.getColors().stream()
+                .map(this::getColorGetAllResponse)
+                .collect(Collectors.toCollection(ArrayList::new)));
+
+        if (productResponse.getColors() != null) {
+            var matchingColor = productResponse.getColors().stream()
+                    .filter(c -> isMatchColors(c, searchKeyword, filterColors, filterSizes))
+                    .findFirst();
+
+            matchingColor.ifPresent(color -> {
+                productResponse.getColors().remove(color);
+                productResponse.getColors().addFirst(color);
+            });
+        }
+
+        return productResponse;
+    }
+
+    /**
+     * Processes a page of products to convert them into DTOs, ensuring that matching variants
+     * are prioritized in the response based on the search criteria.
+     */
+    private Page<@NonNull ProductGetAllResponse> getFilterResponse(Page<@NonNull Product> products, String keyword, List<String> colors, List<String> productSizes) {
+        String searchKeyword = keyword == null ? null : keyword.toLowerCase();
+        List<String> filterColors = colors == null ? null : colors.stream().map(String::toLowerCase).toList();
+        List<String> filterSizes = productSizes == null ? null : productSizes.stream().map(String::toLowerCase).toList();
+
+        return products.map(p ->
+                getProductGetAllResponse(p, searchKeyword, filterColors, filterSizes));
+    }
+
+    /**
      * Transforms a {@link ColorOption} entity and its nested images and items into a {@link ColorOptionCreateResponse} DTO.
      */
     private ColorOptionCreateResponse getColorCreateResponse(ColorOption color) {
@@ -733,12 +773,29 @@ public class ProductService {
     /**
      * Constructs a dynamic JPA Specification based on the provided admin filter criteria.
      */
-    private Specification<@NonNull Product> buildSpecification(ProductAdminFilterRequest filter) {
+    private Specification<@NonNull Product> buildAdminRequestSpecification(ProductAdminFilterRequest filter) {
+        return buildBasicSpecification(filter)
+                .and(ProductSpecification.isActive(filter.getIsActive()))
+                .and(ProductSpecification.isDeleted(filter.getIsDeleted()));
+    }
+
+    /**
+     * Constructs a dynamic JPA Specification for user-facing product requests.
+     */
+    private Specification<@NonNull Product> buildUserRequestSpecification(ProductUserFilterRequest filter) {
+        return buildBasicSpecification(filter)
+                .and(ProductSpecification.isActive(true))
+                .and(ProductSpecification.isDeleted(false));
+    }
+
+    /**
+     * Constructs the base JPA Specification shared between admin and user filters,
+     * covering common criteria like gender, category, color, size, keyword search, and price range.
+     */
+    private Specification<@NonNull Product> buildBasicSpecification(FilterDTO filter) {
         return Specification
                 .where(ProductSpecification.hasGender(filter.getGender()))
                 .and(ProductSpecification.hasCategory(filter.getCategoryId()))
-                .and(ProductSpecification.isActive(filter.getIsActive()))
-                .and(ProductSpecification.isDeleted(filter.getIsDeleted()))
                 .and(ProductSpecification.hasColor(filter.getColor()))
                 .and(ProductSpecification.hasSize(filter.getProductSize()))
                 .and(ProductSpecification.searchByTitleOrSkuOrDescription(filter.getKeyword()))
@@ -746,19 +803,20 @@ public class ProductService {
     }
 
     /**
-     * Checks if a color option matches search criteria (keyword, specific color, or specific size).
+     * Determines if a specific color option matches the provided filtering or search criteria.
+     * This logic is used to prioritize which product variant is displayed first in search results.
      */
-    private boolean isMatchColors(ColorOptionGetAllResponse color, String keyword, String filterColor, String filterSize) {
+    private boolean isMatchColors(ColorOptionGetAllResponse color, String keyword, List<String> filterColors, List<String> filterSizes) {
         // 1. Check specific color filter
-        if (filterColor != null && !filterColor.isBlank()) {
-            if (color.getColorName().toLowerCase().contains(filterColor)) return true;
+        if (filterColors != null && !filterColors.isEmpty()) {
+            if (filterColors.contains(color.getColorName().toLowerCase())) return true;
         }
 
         // 2. Check specific size filter
-        if (filterSize != null && !filterSize.isBlank()) {
+        if (filterSizes != null && !filterSizes.isEmpty()) {
             boolean sizeMatch = color.getItems().stream().anyMatch(item ->
                     item.getProductSize() != null &&
-                            item.getProductSize().getSizeValue().toLowerCase().contains(filterSize));
+                            filterSizes.contains(item.getProductSize().getSizeValue().toLowerCase()));
             if (sizeMatch) return true;
         }
 

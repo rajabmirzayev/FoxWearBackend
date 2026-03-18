@@ -7,19 +7,20 @@ import com.rgb.foxwear.enums.Gender;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import java.util.List;
 import lombok.NonNull;
 import org.springframework.data.jpa.domain.Specification;
 
 public class ProductSpecification {
 
-    public static Specification<@NonNull Product> hasGender(Gender gender) {
+    public static Specification<@NonNull Product> hasGender(List<Gender> genders) {
         return (root, query, criteriaBuilder) ->
-                gender == null ? null : criteriaBuilder.equal(root.get("gender"), gender);
+                (genders == null || genders.isEmpty()) ? null : root.get("gender").in(genders);
     }
 
-    public static Specification<@NonNull Product> hasCategory(Long categoryId) {
+    public static Specification<@NonNull Product> hasCategory(List<Long> categoryIds) {
         return (root, query, criteriaBuilder) ->
-                categoryId == null ? null : criteriaBuilder.equal(root.get("category").get("id"), categoryId);
+                (categoryIds == null || categoryIds.isEmpty()) ? null : root.get("category").get("id").in(categoryIds);
     }
 
     public static Specification<@NonNull Product> isActive(Boolean isActive) {
@@ -32,28 +33,26 @@ public class ProductSpecification {
                 isDeleted == null ? null : criteriaBuilder.equal(root.get("isDeleted"), isDeleted);
     }
 
-    public static Specification<@NonNull Product> hasColor(String color) {
+    public static Specification<@NonNull Product> hasColor(List<String> colors) {
         return (root, query, criteriaBuilder) -> {
-            if (color == null || color.isBlank()) return null;
+            if (colors == null || colors.isEmpty()) return null;
 
-            String searchedColor = "%" + color.toLowerCase() + "%";
+            Join<Product, ColorOption> colorJoin = root.join("colors");
+            query.distinct(true);
 
-            Join<Product, ColorOption> colors = root.join("colors", JoinType.LEFT);
-
-            return criteriaBuilder.like(criteriaBuilder.lower(colors.get("colorName")), searchedColor);
+            return colorJoin.get("colorName").in(colors);
         };
     }
 
-    public static Specification<@NonNull Product> hasSize(String size) {
+    public static Specification<@NonNull Product> hasSize(List<String> sizes) {
         return (root, query, criteriaBuilder) -> {
-            if (size == null || size.isBlank()) return null;
+            if (sizes == null || sizes.isEmpty()) return null;
 
-            String searchedSize = "%" + size.toLowerCase() + "%";
+            Join<Product, ColorOption> colors = root.join("colors");
+            Join<ColorOption, ProductItem> items = colors.join("items");
+            query.distinct(true);
 
-            Join<Product, ColorOption> colors = root.join("colors", JoinType.LEFT);
-            Join<ColorOption, ProductItem> items = colors.join("items", JoinType.LEFT);
-
-            return criteriaBuilder.like(criteriaBuilder.lower(items.get("productSize").get("sizeValue")), searchedSize);
+            return items.get("productSize").get("sizeValue").in(sizes);
         };
     }
 

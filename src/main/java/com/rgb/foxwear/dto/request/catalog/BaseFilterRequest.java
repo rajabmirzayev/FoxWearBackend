@@ -11,11 +11,12 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Sort;
 
 import java.math.BigInteger;
+import java.util.List;
 
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class BaseFilterRequest {
+public class BaseFilterRequest implements FilterDTO {
 
     @Min(value = 0, message = "Page must be non-negative")
     Integer page = 0;
@@ -25,14 +26,14 @@ public class BaseFilterRequest {
     Integer size = 10;
 
     Sort.Direction direction = Sort.Direction.DESC;
-    Gender gender;
-    Long categoryId;
+    List<Gender> gender;
+    List<Long> categoryId;
 
     @Size(max = 100, message = "Keyword too long")
     String keyword;
 
-    String color;
-    String productSize;
+    List<String> color;
+    List<String> productSize;
 
     BigInteger minPrice;
     BigInteger maxPrice;

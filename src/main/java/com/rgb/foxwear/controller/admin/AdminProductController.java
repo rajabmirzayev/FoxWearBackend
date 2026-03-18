@@ -14,8 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/admin/products")
 @RequiredArgsConstructor
@@ -68,33 +66,12 @@ public class AdminProductController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @Operation(summary = "Get all color option values", description = "Retrieves a list of all unique color names and codes used across products.")
-    @GetMapping("/colors")
-    public ResponseEntity<@NonNull ApiResponse<List<ColorOptionAllValuesResponse>>> getAllColorOptionsValues() {
-        var response = productService.getAllColorOptionsValues();
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
-    @Operation(summary = "Get all categories", description = "Retrieves a list of all product categories.")
-    @GetMapping("/category")
-    public ResponseEntity<@NonNull ApiResponse<List<CategoryResponse>>> getAllCategories() {
-        var response = productService.getAllCategories();
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
     @Operation(summary = "Get category by ID", description = "Retrieves a specific category by its ID.")
     @GetMapping("/category/{id}")
     public ResponseEntity<@NonNull ApiResponse<CategoryResponse>> getCategoryById(
             @Parameter(description = "ID of the category") @PathVariable Long id
     ) {
         var response = productService.getCategoryById(id);
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
-    @Operation(summary = "Get all sizes", description = "Retrieves a list of all defined product sizes.")
-    @GetMapping("/size")
-    public ResponseEntity<@NonNull ApiResponse<List<SizeResponse>>> getAllSizes() {
-        var response = productService.getAllSizes();
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
