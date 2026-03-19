@@ -28,6 +28,11 @@ public class DynamicService {
      */
     @Transactional
     public BannerResponse createBanner(BannerRequest request) {
+        if (bannerRepository.existsByPlacement(request.getPlacement())) {
+            log.error("Banner with placement {} already exists", request.getPlacement());
+            throw new BannerAlreadyExistsException("Banner with placement " + request.getPlacement() + " already exists");
+        }
+
         log.info("Creating new banner with title: {}", request.getTitle());
 
         if (bannerRepository.existsByPlacement(request.getPlacement())) {
