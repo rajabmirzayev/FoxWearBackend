@@ -24,6 +24,7 @@ public class ProductGetAllResponse {
     Gender gender;
     String categoryName;
     boolean isActive;
+    boolean isLiked;
     List<ColorOptionGetAllResponse> colors;
 
 }

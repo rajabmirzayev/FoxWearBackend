@@ -100,6 +100,12 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error("Token has expired", ErrorCode.TOKEN_EXPIRED));
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<@NonNull ApiResponse<Void>> handleUnauthorized(UnauthorizedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(ex.getMessage(), ErrorCode.UNAUTHORIZED));
+    }
+
     // Product error handlers
     @ExceptionHandler(WearCategoryNotFoundException.class)
     public ResponseEntity<@NonNull ApiResponse<?>> handleWearCategoryNotFound(WearCategoryNotFoundException ex) {

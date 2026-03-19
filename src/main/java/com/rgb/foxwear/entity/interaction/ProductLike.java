@@ -2,7 +2,6 @@ package com.rgb.foxwear.entity.interaction;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.rgb.foxwear.entity.auth.UserEntity;
-import com.rgb.foxwear.entity.catalog.ColorOption;
 import com.rgb.foxwear.entity.catalog.Product;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -24,6 +23,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductLike {
 

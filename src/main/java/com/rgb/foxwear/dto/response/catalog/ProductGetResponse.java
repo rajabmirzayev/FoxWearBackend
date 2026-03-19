@@ -26,6 +26,7 @@ public class ProductGetResponse {
     String description;
     boolean isActive;
     boolean isDeleted;
+    boolean isLiked;
     CategoryResponse category;
     List<ColorOptionGetResponse> colors;
     LocalDateTime createdAt;

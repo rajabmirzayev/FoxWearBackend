@@ -2,8 +2,11 @@ package com.rgb.foxwear.service;
 
 import com.rgb.foxwear.dto.request.catalog.*;
 import com.rgb.foxwear.dto.response.catalog.*;
+import com.rgb.foxwear.entity.auth.UserEntity;
 import com.rgb.foxwear.entity.catalog.*;
+import com.rgb.foxwear.entity.interaction.ProductLike;
 import com.rgb.foxwear.exception.*;
+import com.rgb.foxwear.repository.auth.UserRepository;
 import com.rgb.foxwear.repository.catalog.*;
 import com.rgb.foxwear.repository.catalog.specification.ProductSpecification;
 import com.rgb.foxwear.repository.interaction.ProductLikeRepository;
@@ -22,8 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +39,7 @@ public class ProductService {
     private final ColorOptionRepository colorOptionRepository;
     private final ProductItemRepository productItemRepository;
     private final ProductLikeRepository productLikeRepository;
+    private final UserRepository userRepository;
     private final ModelMapper mapper;
 
     /**
@@ -115,6 +119,36 @@ public class ProductService {
     }
 
     /**
+     * Increments the like count for a specific product or records a user like interaction.
+     */
+    @Transactional
+    public boolean likeProduct(Long id, String username) {
+        log.info("Processing like for product ID: {}", id);
+        if (username == null) {
+            throw new UnauthorizedException("Unauthorized access");
+        }
+
+        UserEntity user = findUserOrThrow(username);
+        Product product = findProductOrThrow(id);
+
+        var existingLike = productLikeRepository.findByUserAndProduct(user, product);
+
+        if (existingLike.isPresent()) {
+            productLikeRepository.delete(existingLike.get());
+            return false;
+        } else {
+            ProductLike like = ProductLike.builder()
+                    .user(user)
+                    .product(product)
+                    .likedAt(LocalDateTime.now())
+                    .build();
+
+            productLikeRepository.save(like);
+            return true;
+        }
+    }
+
+    /**
      * Retrieves a paginated list of products filtered by admin-defined criteria.
      */
     @Transactional(readOnly = true)
@@ -128,15 +162,23 @@ public class ProductService {
 
         var products = productRepository.findAll(buildAdminRequestSpecification(filter), pageable);
 
-        return getFilterResponse(products, filter.getKeyword(), filter.getColor(), filter.getProductSize());
+        return getFilterResponse(products, filter.getKeyword(), filter.getColor(), filter.getProductSize(), new HashSet<>());
     }
 
     /**
      * Retrieves a paginated list of products filtered by user-defined criteria.
      */
     @Transactional(readOnly = true)
-    public Page<@NonNull ProductGetAllResponse> getAllProductWithUserFilter(ProductUserFilterRequest filter) {
+    public Page<@NonNull ProductGetAllResponse> getAllProductWithUserFilter(ProductUserFilterRequest filter, String username) {
         log.info("Fetching products with user filter: {}", filter);
+        Set<Long> likedIds = new HashSet<>();
+
+        if (username != null) {
+            likedIds = productLikeRepository.findAllLikedProductIdsByUsername(username);
+        }
+
+        Set<Long> finalLikedIds = likedIds;
+
         Pageable pageable = PageRequest.of(
                 filter.getPage(),
                 filter.getSize(),
@@ -145,18 +187,27 @@ public class ProductService {
 
         var products = productRepository.findAll(buildUserRequestSpecification(filter), pageable);
 
-        return getFilterResponse(products, filter.getKeyword(), filter.getColor(), filter.getProductSize());
+        return getFilterResponse(products, filter.getKeyword(), filter.getColor(), filter.getProductSize(), finalLikedIds);
     }
 
     /**
      * Retrieves a detailed view of a single product by its slug.
      */
     @Transactional(readOnly = true)
-    public ProductGetResponse getProductWithSlug(String slug) {
+    public ProductGetResponse getProductWithSlug(String slug, String username) {
         log.info("Fetching detailed product information for slug: {}", slug);
         Product product = findProductOrThrow(slug);
 
         ProductGetResponse productResponse = mapper.map(product, ProductGetResponse.class);
+
+        if (username != null) {
+            productResponse.setLiked(
+                    productLikeRepository.existsByUserUsernameAndProduct(username, product)
+            );
+        } else {
+            productResponse.setLiked(false);
+        }
+
         productResponse.setCategory(
                 mapper.map(product.getCategory(), CategoryResponse.class)
         );
@@ -231,13 +282,18 @@ public class ProductService {
      * Retrieves the top 10 products with the highest number of likes.
      */
     @Transactional(readOnly = true)
-    public List<ProductGetAllResponse> getMostLiked() {
+    public List<ProductGetAllResponse> getMostLiked(String username) {
         log.info("Fetching top 10 most liked products");
         var products = productLikeRepository.findTopMostLikedProducts(PageRequest.of(0, 10));
+
+        Set<Long> likedIds = (username != null)
+                ? productLikeRepository.findAllLikedProductIdsByUsername(username)
+                : Collections.emptySet();
 
         return products.stream()
                 .map(product -> {
                     ProductGetAllResponse productResponse = mapper.map(product, ProductGetAllResponse.class);
+                    productResponse.setLiked(likedIds.contains(product.getId()));
                     productResponse.setCategoryName(product.getCategory().getName());
                     productResponse.setColors(product.getColors().stream()
                             .map(this::getColorGetAllResponse)
@@ -461,6 +517,14 @@ public class ProductService {
                 });
     }
 
+    private UserEntity findUserOrThrow(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> {
+                    log.error("User not found with username: {}", username);
+                    return new UserNotFoundException("User not found!");
+                });
+    }
+
     /**
      * Maps a {@link ColorOptionCreateRequest} to a {@link ColorOption} entity, including nested images and items.
      */
@@ -556,12 +620,14 @@ public class ProductService {
      * If a specific color or size filter is applied, the matching color option is moved to the
      * front of the list to ensure the relevant variant is displayed first.
      */
-    private ProductGetAllResponse getProductGetAllResponse(Product product, String searchKeyword, List<String> filterColors, List<String> filterSizes) {
+    private ProductGetAllResponse getProductGetAllResponse(Product product, String searchKeyword, List<String> filterColors, List<String> filterSizes, Set<Long> likedIds) {
         ProductGetAllResponse productResponse = mapper.map(product, ProductGetAllResponse.class);
         productResponse.setCategoryName(product.getCategory().getName());
+        productResponse.setLiked(likedIds.contains(product.getId()));
         productResponse.setColors(product.getColors().stream()
                 .map(this::getColorGetAllResponse)
                 .collect(Collectors.toCollection(ArrayList::new)));
+
 
         if (productResponse.getColors() != null) {
             var matchingColor = productResponse.getColors().stream()
@@ -581,13 +647,13 @@ public class ProductService {
      * Processes a page of products to convert them into DTOs, ensuring that matching variants
      * are prioritized in the response based on the search criteria.
      */
-    private Page<@NonNull ProductGetAllResponse> getFilterResponse(Page<@NonNull Product> products, String keyword, List<String> colors, List<String> productSizes) {
+    private Page<@NonNull ProductGetAllResponse> getFilterResponse(Page<@NonNull Product> products, String keyword, List<String> colors, List<String> productSizes, Set<Long> likedIds) {
         String searchKeyword = keyword == null ? null : keyword.toLowerCase();
         List<String> filterColors = colors == null ? null : colors.stream().map(String::toLowerCase).toList();
         List<String> filterSizes = productSizes == null ? null : productSizes.stream().map(String::toLowerCase).toList();
 
         return products.map(p ->
-                getProductGetAllResponse(p, searchKeyword, filterColors, filterSizes));
+                getProductGetAllResponse(p, searchKeyword, filterColors, filterSizes, likedIds));
     }
 
     /**

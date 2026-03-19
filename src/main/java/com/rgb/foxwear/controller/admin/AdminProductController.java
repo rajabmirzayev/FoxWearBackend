@@ -57,15 +57,6 @@ public class AdminProductController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @Operation(summary = "Get product by slug", description = "Retrieves detailed information for a specific product.")
-    @GetMapping("/{slug}")
-    public ResponseEntity<@NonNull ApiResponse<ProductGetResponse>> getProduct(
-            @Parameter(description = "Slug of the product") @PathVariable String slug
-    ) {
-        var response = productService.getProductWithSlug(slug);
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
     @Operation(summary = "Get category by ID", description = "Retrieves a specific category by its ID.")
     @GetMapping("/category/{id}")
     public ResponseEntity<@NonNull ApiResponse<CategoryResponse>> getCategoryById(
