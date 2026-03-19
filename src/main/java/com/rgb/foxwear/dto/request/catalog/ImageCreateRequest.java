@@ -11,13 +11,13 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ImageCreateRequest {
+public class ImageCreateRequest implements ImageDTO {
 
-    @NotBlank(message = "Image URL is required")
+    @NotBlank(message = "Image is required")
     @Size(max = 10000, message = "Image URL must not exceed 10000 characters")
     String image;
 
-    @NotNull(message = "isMain flag is required")
+    @NotNull(message = "Main flag is required")
     Boolean isMain = false;
 
 }

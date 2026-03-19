@@ -3,7 +3,7 @@ package com.rgb.foxwear.config;
 import com.rgb.foxwear.exception.AuthEntryPoint;
 import com.rgb.foxwear.exception.CustomAccessDeniedHandler;
 import com.rgb.foxwear.filter.JwtAuthFilter;
-import com.rgb.foxwear.service.implementation.auth.CustomUserDetailsService;
+import com.rgb.foxwear.service.auth.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +35,7 @@ public class SecurityConfig {
     private final CustomAccessDeniedHandler accessDeniedHandler;
 
     @Bean
+    @SuppressWarnings("all") // to prevent never used warning for 'throws Exception'
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -43,12 +44,18 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/v1/files/**").permitAll()
+                        .requestMatchers("/api/v1/dynamic/**").permitAll()
+                        .requestMatchers("/api/v1/products/**").permitAll()
+                        .requestMatchers("/api/v1/reviews/**").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/products/*/like").authenticated()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex

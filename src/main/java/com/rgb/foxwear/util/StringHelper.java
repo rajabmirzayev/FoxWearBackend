@@ -1,5 +1,6 @@
 package com.rgb.foxwear.util;
 
+@SuppressWarnings("unused")
 public class StringHelper {
 
     public static String capitalize(String text) {

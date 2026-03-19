@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    username: rgb
+    password: 1234
+    url: jdbc:postgresql://localhost:5432/foxwear_db
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+aws:
+  s3:
+    access-key: "AKIA5WNSNLX2RBUDXMM4"
+    secret-key: "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"
+    region: "eu-north-1"
+    bucket-name: "foxwear-images"

@@ -1,8 +1,6 @@
 package com.rgb.foxwear.dto.request.catalog;
 
-import com.rgb.foxwear.entity.catalog.ProductItem;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.OneToMany;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -15,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ColorOptionCreateRequest {
+public class ColorOptionCreateRequest implements ColorOptionDTO {
 
     @NotBlank(message = "Color name is required")
     @Size(max = 30, message = "Color name must not exceed 30 characters")
@@ -25,8 +23,8 @@ public class ColorOptionCreateRequest {
     @Size(max = 30, message = "Color code must not exceed 30 characters")
     String colorCode;
 
-    List<ImageCreateRequest> images;
+    List<@Valid ImageCreateRequest> images;
 
-    List<ItemCreateRequest> items;
+    List<@Valid ItemCreateRequest> items;
 
 }

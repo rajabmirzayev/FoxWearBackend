@@ -1,7 +1,8 @@
 package com.rgb.foxwear.filter;
 
-import com.rgb.foxwear.service.implementation.auth.CustomUserDetailsService;
-import com.rgb.foxwear.service.implementation.auth.JwtService;
+import com.rgb.foxwear.service.auth.CustomUserDetailsService;
+import com.rgb.foxwear.service.auth.JwtService;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,9 +31,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
+        String authHeader = "";
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        try {
+            authHeader = request.getHeader("Authorization");
+        } catch (ExpiredJwtException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"success\": false, \"message\": \"JWT expired\", \"errorCode\": \"TOKEN_EXPIRED\"}");
+        }
+
+        if (authHeader == null || authHeader.isBlank() || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }

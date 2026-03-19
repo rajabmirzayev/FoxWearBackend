@@ -12,6 +12,6 @@ public class ImageCreateResponse {
 
     Long id;
     String image;
-    Boolean isMain;
+    boolean isMain;
 
 }

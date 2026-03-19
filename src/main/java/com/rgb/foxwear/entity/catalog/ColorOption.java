@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,7 @@ public class ColorOption {
     String colorCode;
 
     @OneToMany(mappedBy = "colorOption", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
     List<ColorOptionImage> images = new ArrayList<>();
 
     @NotNull
@@ -42,6 +44,7 @@ public class ColorOption {
     Product product;
 
     @OneToMany(mappedBy = "colorOption", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
     List<ProductItem> items = new ArrayList<>();
 
 }

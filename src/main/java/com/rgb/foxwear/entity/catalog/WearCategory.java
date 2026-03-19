@@ -37,7 +37,6 @@ public class WearCategory extends BaseAuditEntity {
     @Column(unique = true)
     String link;
 
-    @NotBlank
     @Size(max = 10000)
     @Column(name = "main_image", length = 10000)
     String mainImage;

@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 16032026-02
+      author: rajabmirzayev
+      changes:
+        - addColumn:
+            schemaName: dynamic
+            tableName: banners
+            columns:
+              - column:
+                  name: placement
+                  type: VARCHAR(50)

@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.BatchSize;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -68,12 +69,16 @@ public class Product extends BaseAuditEntity {
     @Column(name = "is_active")
     boolean isActive = true;
 
+    @Column(name = "is_deleted", nullable = false)
+    boolean isDeleted = false;
+
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     WearCategory category;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
     List<ColorOption> colors = new ArrayList<>();
 
     @PrePersist

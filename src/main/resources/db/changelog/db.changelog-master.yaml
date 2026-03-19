@@ -41,4 +41,17 @@ databaseChangeLog:
       file: classpath://db/changelog/v-02/change-check-constraint-product-table.yaml
   - include:
       file: classpath://db/changelog/v-03/create-refresh-token-table.yaml
-
+  - include:
+      file: classpath:/db/changelog/v-03/add-is-deleted-column-to-product-table.yaml
+  - include:
+      file: classpath:/db/changelog/v-03/change-check-constraint-to-product-table.yaml
+  - include:
+      file: classpath:/db/changelog/v-04/create-banner-table.yaml
+  - include:
+      file: classpath:/db/changelog/v-04/add-placement-column-to-banner-table.yaml
+  - include:
+      file: classpath:/db/changelog/v-04/add-not-null-constraint-to-placement-column-in-banner-table.yaml
+  - include:
+      file: classpath:/db/changelog/v-04/add-unique-constraint-to-placement-column-in-banner-table.yaml
+  - include:
+      file: classpath:/db/changelog/v-04/change-relation-with-product-id.yaml
