@@ -10,7 +10,7 @@ import com.rgb.foxwear.exception.PasswordMismatchException;
 import com.rgb.foxwear.exception.UnderageUserException;
 import com.rgb.foxwear.exception.UserAlreadyExistsException;
 import com.rgb.foxwear.exception.UserNotFoundException;
-import com.rgb.foxwear.repository.auth.UserRepository;
+import com.rgb.foxwear.repository.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;

@@ -6,7 +6,7 @@ import com.rgb.foxwear.entity.auth.Address;
 import com.rgb.foxwear.entity.auth.UserEntity;
 import com.rgb.foxwear.exception.UserNotFoundException;
 import com.rgb.foxwear.repository.auth.AddressRepository;
-import com.rgb.foxwear.repository.auth.UserRepository;
+import com.rgb.foxwear.repository.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;

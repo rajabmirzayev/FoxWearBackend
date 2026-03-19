@@ -1,4 +1,4 @@
-package com.rgb.foxwear.repository.auth;
+package com.rgb.foxwear.repository.user;
 
 import com.rgb.foxwear.entity.auth.UserEntity;
 import lombok.NonNull;
