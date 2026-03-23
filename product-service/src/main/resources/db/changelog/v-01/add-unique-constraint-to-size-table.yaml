@@ -1,0 +1,11 @@
+ databaseChangeLog:
+  - changeSet:
+      id: 20032026-31
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: size_value
+            constraintName: uc_product_sizes_sizevalue
+            tableName: product_sizes
+

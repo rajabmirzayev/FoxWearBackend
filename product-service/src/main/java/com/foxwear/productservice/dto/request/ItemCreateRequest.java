@@ -1,0 +1,22 @@
+package com.foxwear.productservice.dto.request;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class ItemCreateRequest implements ItemDTO {
+
+    @NotNull(message = "Size ID is required")
+    Long sizeId;
+
+    @NotNull(message = "Stock quantity is required")
+    @Min(value = 0, message = "Stock quantity cannot be less than 0")
+    Integer stockQuantity;
+
+}

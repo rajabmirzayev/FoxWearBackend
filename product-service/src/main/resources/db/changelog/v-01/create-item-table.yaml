@@ -1,0 +1,56 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20032026-24
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_product_item
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_at
+                  type: DATETIME
+              - column:
+                  constraints:
+                    nullable: false
+                  name: updated_at
+                  type: DATETIME
+              - column:
+                  constraints:
+                    nullable: false
+                  name: color_option_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: product_size_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: sku
+                  type: VARCHAR(50)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: stock_quantity
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: stock_remaining
+                  type: INT
+              - column:
+                  name: is_deleted
+                  type: BOOLEAN
+            tableName: product_item
+

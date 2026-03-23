@@ -1,0 +1,67 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20032026-33
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: parent_id
+            baseTableName: categories
+            constraintName: FK_CATEGORIES_ON_PARENT
+            referencedColumnNames: id
+            referencedTableName: categories
+  - changeSet:
+      id: 20032026-34
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: color_option_id
+            baseTableName: color_option_images
+            constraintName: FK_COLOR_OPTION_IMAGES_ON_COLOR_OPTION
+            referencedColumnNames: id
+            referencedTableName: product_color_options
+  - changeSet:
+      id: 20032026-35
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: category_id
+            baseTableName: products
+            constraintName: FK_PRODUCTS_ON_CATEGORY
+            referencedColumnNames: id
+            referencedTableName: categories
+  - changeSet:
+      id: 20032026-36
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: product_id
+            baseTableName: product_color_options
+            constraintName: FK_PRODUCT_COLOR_OPTIONS_ON_PRODUCT
+            referencedColumnNames: id
+            referencedTableName: products
+  - changeSet:
+      id: 20032026-37
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: color_option_id
+            baseTableName: product_item
+            constraintName: FK_PRODUCT_ITEM_ON_COLOR_OPTION
+            referencedColumnNames: id
+            referencedTableName: product_color_options
+  - changeSet:
+      id: 20032026-38
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: product_size_id
+            baseTableName: product_item
+            constraintName: FK_PRODUCT_ITEM_ON_PRODUCT_SIZE
+            referencedColumnNames: id
+            referencedTableName: product_sizes

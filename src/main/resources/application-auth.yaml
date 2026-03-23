@@ -1,4 +1,0 @@
-jwt:
-  secret: Zm94LXdlYXItYXBwbGljYXRpb24tc2VjcmV0LWtleS0wOTEx
-  expiration: 6000 # 15 deq
-  refresh-expiration: 604800000 # 7 gun

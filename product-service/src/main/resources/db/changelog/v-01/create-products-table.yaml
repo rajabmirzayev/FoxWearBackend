@@ -1,0 +1,73 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20032026-26
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_products
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_at
+                  type: DATETIME
+              - column:
+                  constraints:
+                    nullable: false
+                  name: updated_at
+                  type: DATETIME
+              - column:
+                  constraints:
+                    nullable: false
+                  name: title
+                  type: VARCHAR(100)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: original_price
+                  type: DECIMAL(10, 2)
+              - column:
+                  name: discount_price
+                  type: DECIMAL(10, 2)
+              - column:
+                  name: discount_rate
+                  type: INT
+              - column:
+                  name: has_discount
+                  type: BOOLEAN
+              - column:
+                  constraints:
+                    nullable: false
+                  name: slug
+                  type: VARCHAR(100)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: gender
+                  type: VARCHAR(255)
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+              - column:
+                  constraints:
+                    nullable: false
+                  name: is_deleted
+                  type: BOOLEAN
+              - column:
+                  constraints:
+                    nullable: false
+                  name: category_id
+                  type: BIGINT
+            tableName: products
+

@@ -1,0 +1,3 @@
+databaseChangeLog:
+  - include:
+      file: classpath://db/changelog/v-01/create-banners-table.yaml

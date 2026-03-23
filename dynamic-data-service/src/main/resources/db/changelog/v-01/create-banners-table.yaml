@@ -1,0 +1,60 @@
+databaseChangeLog:
+  - changeSet:
+      id: 22032026-01
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_banners
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: image_url
+                  type: VARCHAR(255)
+              - column:
+                  name: mobile_image_url
+                  type: VARCHAR(255)
+              - column:
+                  name: title
+                  type: VARCHAR(100)
+              - column:
+                  name: subtitle
+                  type: VARCHAR(255)
+              - column:
+                  name: button_text
+                  type: VARCHAR(50)
+              - column:
+                  name: button_link
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: sort_order
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: placement
+                  type: VARCHAR(50)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: is_active
+                  type: BOOLEAN
+            tableName: banners
+  - changeSet:
+      id: 22032026-02
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: placement
+            constraintName: uc_banners_placement
+            tableName: banners
+

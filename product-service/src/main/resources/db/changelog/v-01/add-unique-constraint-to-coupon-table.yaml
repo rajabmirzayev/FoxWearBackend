@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20032026-29
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: code
+            constraintName: uc_coupons_code
+            tableName: coupons
+

@@ -1,0 +1,69 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20032026-22
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_coupons
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_at
+                  type: DATETIME
+              - column:
+                  constraints:
+                    nullable: false
+                  name: updated_at
+                  type: DATETIME
+              - column:
+                  constraints:
+                    nullable: false
+                  name: title
+                  type: VARCHAR(100)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: code
+                  type: VARCHAR(20)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: discount_type
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: value
+                  type: DECIMAL(10, 2)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: min_order_amount
+                  type: DECIMAL(10, 2)
+              - column:
+                  name: expiry_date
+                  type: DATE
+              - column:
+                  constraints:
+                    nullable: false
+                  name: usage_limit
+                  type: INT
+              - column:
+                  name: used_count
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: is_active
+                  type: BOOLEAN
+            tableName: coupons
+

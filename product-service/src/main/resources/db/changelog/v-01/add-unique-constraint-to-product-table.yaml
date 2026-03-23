@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20032026-32
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: slug
+            constraintName: uc_products_slug
+            tableName: products
+

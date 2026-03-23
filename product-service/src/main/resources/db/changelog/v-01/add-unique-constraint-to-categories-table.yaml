@@ -1,0 +1,19 @@
+ databaseChangeLog:
+  - changeSet:
+      id: 20032026-27
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: link
+            constraintName: uc_categories_link
+            tableName: categories
+  - changeSet:
+      id: 20032026-28
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: name
+            constraintName: uc_categories_name
+            tableName: categories

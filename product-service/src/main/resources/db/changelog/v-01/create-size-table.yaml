@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20032026-25
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_product_sizes
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: size_value
+                  type: VARCHAR(10)
+            tableName: product_sizes
+

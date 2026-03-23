@@ -1,1 +1,8 @@
 rootProject.name = 'FoxWear'
+include 'common'
+include 'eureka-server'
+include 'gateway-service'
+include 'auth-service'
+include 'product-service'
+include 'interaction-service'
+include 'dynamic-data-service'

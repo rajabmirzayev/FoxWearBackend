@@ -1,0 +1,47 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20032026-20
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_categories
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_at
+                  type: DATETIME
+              - column:
+                  constraints:
+                    nullable: false
+                  name: updated_at
+                  type: DATETIME
+              - column:
+                  constraints:
+                    nullable: false
+                  name: name
+                  type: VARCHAR(30)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: subtitle
+                  type: VARCHAR(200)
+              - column:
+                  name: link
+                  type: VARCHAR(255)
+              - column:
+                  name: main_image
+                  type: VARCHAR(10000)
+              - column:
+                  name: parent_id
+                  type: BIGINT
+            tableName: categories
+

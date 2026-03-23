@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20032026-21
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_color_option_images
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: image
+                  type: VARCHAR(10000)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: color_option_id
+                  type: BIGINT
+              - column:
+                  name: is_main
+                  type: BOOLEAN
+            tableName: color_option_images
+

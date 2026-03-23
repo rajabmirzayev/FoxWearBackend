@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: dynamic-data-service
+  profiles:
+    active: dev, auth
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+
+server:
+  port: 8083
