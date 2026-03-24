@@ -56,15 +56,6 @@ public class AdminProductController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @Operation(summary = "Get category by ID", description = "Retrieves a specific category by its ID.")
-    @GetMapping("/category/{id}")
-    public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryById(
-            @Parameter(description = "ID of the category") @PathVariable Long id
-    ) {
-        var response = productService.getCategoryById(id);
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
     @Operation(summary = "Get size by ID", description = "Retrieves a specific size definition by its ID.")
     @GetMapping("/size/{id}")
     public ResponseEntity<ApiResponse<SizeResponse>> getSizeById(

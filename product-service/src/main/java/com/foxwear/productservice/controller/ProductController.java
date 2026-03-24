@@ -60,8 +60,16 @@ public class ProductController {
 
     @Operation(summary = "Get all categories", description = "Retrieves a list of all product categories.")
     @GetMapping("/category")
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
+    public ResponseEntity<ApiResponse<List<CategoryGetAllResponse>>> getAllCategories() {
         var response = productService.getAllCategories();
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/category/{id}")
+    public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryById(
+            @Parameter(description = "ID of the category") @PathVariable Long id
+    ) {
+        var response = productService.getCategoryById(id);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

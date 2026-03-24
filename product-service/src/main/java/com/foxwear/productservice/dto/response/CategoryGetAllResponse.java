@@ -12,5 +12,6 @@ public class CategoryGetAllResponse {
 
     Long id;
     String name;
+    String parentName;
 
 }

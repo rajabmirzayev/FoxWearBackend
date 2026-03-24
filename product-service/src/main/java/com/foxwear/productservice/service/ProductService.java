@@ -203,12 +203,12 @@ public class ProductService {
      * Retrieves a list of all available product categories.
      */
     @Transactional(readOnly = true)
-    public List<CategoryResponse> getAllCategories() {
+    public List<CategoryGetAllResponse> getAllCategories() {
         log.info("Fetching all categories");
         List<WearCategory> categories = categoryRepository.findAllByParentIsNotNull();
 
         return categories.stream()
-                .map(this::getCategoryResponse)
+                .map(this::getAllCategoryResponse)
                 .toList();
     }
 
@@ -254,7 +254,6 @@ public class ProductService {
     public List<ProductGetAllResponse> getMostLiked(Long userId) {
         log.info("Fetching top 10 most liked products");
         var products = productRepository.findTop10MostLiked();
-        System.out.println("PRODUCTS: " + products.toString());
 
         ApiResponse<Set<Long>> response = interactionClient.getMyLikedIds(userId);
         Set<Long> likedIds = (response != null && response.getData() != null)
@@ -714,6 +713,15 @@ public class ProductService {
         CategoryResponse categoryResponse = categoryMapper.toResponse(category);
         categoryResponse.setParent(
                 category.getParent() != null ? categoryMapper.toResponse(category.getParent()) : null
+        );
+
+        return categoryResponse;
+    }
+
+    private CategoryGetAllResponse getAllCategoryResponse(WearCategory category) {
+        CategoryGetAllResponse categoryResponse = categoryMapper.toGetAllResponse(category);
+        categoryResponse.setParentName(
+                category.getParent() != null ? category.getParent().getName() : null
         );
 
         return categoryResponse;
