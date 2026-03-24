@@ -28,8 +28,10 @@ public class LikeController {
         return ResponseEntity.ok(ApiResponse.success(null, isLiked ? "Liked" : "Unliked"));
     }
 
+    @Operation(summary = "Get liked product IDs", description = "Retrieves a set of product IDs that the authenticated user has liked.")
     @GetMapping("/my-liked-ids")
     public ResponseEntity<ApiResponse<Set<Long>>> getMyLikedIds(
+            @Parameter(name = "X-User-Id", description = "ID of the authenticated user", hidden = true)
             @RequestHeader(value = "X-User-Id", required = false) Long id
     ) {
         Set<Long> likedIds = likeService.getMyLikedIds(id);

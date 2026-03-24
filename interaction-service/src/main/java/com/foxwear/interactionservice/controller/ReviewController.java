@@ -1,16 +1,20 @@
 package com.foxwear.interactionservice.controller;
 
 import com.foxwear.common.dto.ApiResponse;
-import com.foxwear.interactionservice.dto.response.ReviewGetAllResponse;
+import com.foxwear.interactionservice.dto.request.SiteReviewCreateRequest;
+import com.foxwear.interactionservice.dto.request.SiteReviewUpdateRequest;
+import com.foxwear.interactionservice.dto.response.SiteReviewGetAllResponse;
+import com.foxwear.interactionservice.dto.response.SiteReviewCreateResponse;
+import com.foxwear.interactionservice.dto.response.SiteReviewUpdateResponse;
 import com.foxwear.interactionservice.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,14 +25,87 @@ import java.util.List;
 public class ReviewController {
     private final ReviewService reviewService;
 
-    @GetMapping("/site/first-10")
+    @PostMapping("/site")
     @Operation(
-            summary = "Get first 10 site reviews",
-            description = "Retrieves the latest 10 active site reviews along with user information."
+            summary = "Create a site review",
+            description = "Allows a user to submit a new review for the site."
     )
-    public ResponseEntity<@NonNull ApiResponse<List<ReviewGetAllResponse>>> getFirst10Reviews() {
-        var response = reviewService.getFirst10Reviews();
-        return  ResponseEntity.ok(ApiResponse.success(response));
+    public ResponseEntity<ApiResponse<SiteReviewCreateResponse>> createSiteReview(
+            @RequestBody SiteReviewCreateRequest siteReviewCreateRequest,
+            @Parameter(description = "ID of the user creating the review", required = true) @RequestHeader(value = "X-User-Id") Long userId
+    ) {
+        var response = reviewService.createSiteReview(siteReviewCreateRequest, userId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/site")
+    @Operation(
+            summary = "Get all site reviews",
+            description = "Retrieves a paginated list of all site reviews."
+    )
+    public ResponseEntity<ApiResponse<Page<SiteReviewGetAllResponse>>> getAllSiteReviews(
+            @Parameter(description = "Page number (0-based)") @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @Parameter(description = "Number of records per page") @RequestParam(value = "size", defaultValue = "10") Integer size
+    ) {
+        var response = reviewService.getAllSiteReviews(page, size);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/site/my")
+    @Operation(
+            summary = "Get my site reviews",
+            description = "Retrieves a list of site reviews created by the authenticated user."
+    )
+    public ResponseEntity<ApiResponse<List<SiteReviewGetAllResponse>>> getMySiteReviews(
+            @RequestHeader(value = "X-User-Id") Long userId
+    ) {
+        var response = reviewService.getMySiteReviews(userId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/site/average-rate")
+    @Operation(
+            summary = "Get average site rating",
+            description = "Calculates and returns the average rating of all site reviews."
+    )
+    public ResponseEntity<ApiResponse<Double>> getAverageRate() {
+        var response = reviewService.getAverageRate();
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PutMapping("/site/{id}")
+    @Operation(
+            summary = "Update a site review",
+            description = "Updates an existing site review by its ID."
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully toggled review status"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Review not found")
+    })
+    public ResponseEntity<ApiResponse<SiteReviewUpdateResponse>> updateSiteReview(
+            @RequestBody SiteReviewUpdateRequest siteReviewUpdateRequest,
+            @Parameter(description = "ID of the review to be updated") @PathVariable Long id,
+            @RequestHeader(value = "X-User-Id") Long userId
+    ) {
+        var response = reviewService.updateSiteReview(siteReviewUpdateRequest, id, userId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @DeleteMapping("/site/{id}")
+    @Operation(
+            summary = "Delete a site review",
+            description = "Deletes a site review from the system by its ID."
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully toggled review status"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Review not found")
+    })
+    public ResponseEntity<ApiResponse<Void>> deleteMySiteReview(
+            @Parameter(description = "ID of the review to be deleted") @PathVariable Long id,
+            @RequestHeader(value = "X-User-Id") Long userId
+    ) {
+        reviewService.deleteSiteReview(id, userId);
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
 }

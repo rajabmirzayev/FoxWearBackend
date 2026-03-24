@@ -1,21 +1,19 @@
-package com.foxwear.interactionservice.entity;
+package com.foxwear.interactionservice.dto.request;
 
-import com.foxwear.common.entity.BaseAuditEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
-@MappedSuperclass
+@AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AbstractReview extends BaseAuditEntity {
+public class SiteReviewUpdateRequest {
 
     @NotNull
     @Min(1)
@@ -26,12 +24,5 @@ public class AbstractReview extends BaseAuditEntity {
     @NotBlank
     @Column(columnDefinition = "TEXT", nullable = false)
     String description;
-
-    @NotNull
-    @Column(name = "user_id", nullable = false)
-    Long userId;
-
-    @Column(name = "is_active", nullable = false)
-    boolean isActive = true;
 
 }
