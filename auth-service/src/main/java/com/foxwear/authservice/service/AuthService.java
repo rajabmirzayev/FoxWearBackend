@@ -128,7 +128,7 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthResponse confirm(String token) {
+    public String confirm(String token) {
         String email = (String) redisTemplate.opsForValue().get("CONFIRM:" + token);
 
         if (email == null) {
@@ -136,28 +136,26 @@ public class AuthService {
         }
 
         UserEntity user = userRepository.findByEmail(email)
-                        .orElseThrow(() -> {
-                            log.error("User not found with email: {}", email);
-                            return new UserNotFoundException("User not found!");
-                        });
+                .orElseThrow(() -> {
+                    log.error("User not found with email: {}", email);
+                    return new UserNotFoundException("User not found!");
+                });
 
         redisTemplate.delete("CONFIRM:" + token);
 
         var authorities = user.getAuthorities();
         List<String> roles = authorities.stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .toList();
+                .map(GrantedAuthority::getAuthority)
+                .toList();
 
         user.setStatus(UserStatus.ACTIVE);
         String jwtToken = jwtService.generateToken(email, user.getId(), roles);
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+        String refreshToken = refreshTokenService.createRefreshToken(user).getToken();
 
-        return AuthResponse.builder()
-                .accessToken(jwtToken)
-                .refreshToken(refreshToken.getToken())
-                .username(user.getUsername())
-                .role(user.getRole())
-                .build();
+        return String.format(
+                "http://localhost:3000/auth/callback?token=%s&refreshToken=%s",
+                jwtToken, refreshToken
+        );
     }
 
     private void checkPasswordsMatch(RegisterRequest request) {
