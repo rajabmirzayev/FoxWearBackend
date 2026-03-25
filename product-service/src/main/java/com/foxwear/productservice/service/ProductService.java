@@ -255,15 +255,23 @@ public class ProductService {
         log.info("Fetching top 10 most liked products");
         var products = productRepository.findTop10MostLiked();
 
-        ApiResponse<Set<Long>> response = interactionClient.getMyLikedIds(userId);
-        Set<Long> likedIds = (response != null && response.getData() != null)
-                ? response.getData()
-                : Collections.emptySet();
+        Set<Long> likedIds = Collections.emptySet();
+
+        try {
+            ApiResponse<Set<Long>> response = interactionClient.getMyLikedIds(userId);
+            likedIds = (response != null && response.getData() != null)
+                    ? response.getData()
+                    : Collections.emptySet();
+        } catch (Exception ex) {
+            log.error("Error fetching liked ids from interaction service: {}", ex.getMessage());
+        }
+
+        Set<Long> finalLikedIds = likedIds;
 
         return products.stream()
                 .map(product -> {
                     ProductGetAllResponse productResponse = productMapper.toGetAllResponse(product);
-                    productResponse.setLiked(likedIds.contains(product.getId()));
+                    productResponse.setLiked(finalLikedIds.contains(product.getId()));
                     productResponse.setCategoryName(product.getCategory().getName());
                     productResponse.setColors(product.getColors().stream()
                             .map(this::getColorGetAllResponse)
