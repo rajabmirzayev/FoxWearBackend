@@ -11,19 +11,23 @@ import com.foxwear.authservice.exception.UserAlreadyExistsException;
 import com.foxwear.authservice.exception.UserNotFoundException;
 import com.foxwear.authservice.mapper.UserMapper;
 import com.foxwear.authservice.repository.UserRepository;
-import com.foxwear.common.event.UserCreatedEvent;
+import com.foxwear.common.enums.UserStatus;
+import com.foxwear.common.exception.InvalidTokenException;
 import com.foxwear.common.service.JwtService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.List;
 
 /**
  * Service class for handling authentication operations such as registration, login, and token refreshing.
@@ -32,11 +36,12 @@ import java.time.Period;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+    private final VerificationService verificationService;
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
-//    private final KafkaTemplate<String, UserCreatedEvent> kafkaTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
@@ -58,8 +63,7 @@ public class AuthService {
         var savedUser = userRepository.save(user);
         log.info("User registered successfully with ID: {}", savedUser.getId());
 
-        UserCreatedEvent event = new UserCreatedEvent(savedUser.getId(), savedUser.getEmail());
-//        kafkaTemplate.send("user-created-topic", event);
+        verificationService.createAndSendVerification(user.getEmail());
     }
 
     /**
@@ -118,6 +122,39 @@ public class AuthService {
         return AuthResponse.builder()
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken.getToken())
+                .username(user.getUsername())
+                .role(user.getRole())
+                .build();
+    }
+
+    @Transactional
+    public AuthResponse confirm(String token) {
+        String email = (String) redisTemplate.opsForValue().get("CONFIRM:" + token);
+
+        if (email == null) {
+            throw new InvalidTokenException("Invalid or expired confirmation token");
+        }
+
+        UserEntity user = userRepository.findByEmail(email)
+                        .orElseThrow(() -> {
+                            log.error("User not found with email: {}", email);
+                            return new UserNotFoundException("User not found!");
+                        });
+
+        redisTemplate.delete("CONFIRM:" + token);
+
+        var authorities = user.getAuthorities();
+        List<String> roles = authorities.stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .toList();
+
+        user.setStatus(UserStatus.ACTIVE);
+        String jwtToken = jwtService.generateToken(email, user.getId(), roles);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+
+        return AuthResponse.builder()
+                .accessToken(jwtToken)
+                .refreshToken(refreshToken.getToken())
                 .username(user.getUsername())
                 .role(user.getRole())
                 .build();

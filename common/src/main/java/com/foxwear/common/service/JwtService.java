@@ -52,6 +52,19 @@ public class JwtService {
                 .compact();
     }
 
+    public String generateToken(String email, Long userId, List<String> roles) {
+        log.debug("Generating JWT token for user with email: {}", email);
+
+        return Jwts.builder()
+                .subject(email)
+                .claim("userId", userId)
+                .claim("roles", roles)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
     public List<String> extractRoles(String token) {
         return extractClaim(token, claims -> claims.get("roles", List.class));
     }

@@ -46,7 +46,6 @@ public class AuthController {
             @RequestParam String refreshToken
     ) {
         var response = authService.refresh(refreshToken);
-
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -55,5 +54,14 @@ public class AuthController {
     public ResponseEntity<ApiResponse<String>> logout(@RequestParam String refreshToken) {
         refreshTokenService.revokeRefreshToken(refreshToken);
         return ResponseEntity.ok(ApiResponse.success(null, "Successfully logged out"));
+    }
+
+    @GetMapping("/confirm")
+    @Operation(summary = "Confirm email", description = "Verifies the user's email address using the token sent during registration.")
+    public ResponseEntity<ApiResponse<AuthResponse>> confirm(
+            @RequestParam String token
+    ) {
+        var response = authService.confirm(token);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

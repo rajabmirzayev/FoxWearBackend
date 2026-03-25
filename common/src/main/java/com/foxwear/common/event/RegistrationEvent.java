@@ -9,9 +9,10 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LikeEvent {
+public class RegistrationEvent {
 
-    Long productId;
-    boolean isLiked;
+    String email;
+    String token;
+    String link;
 
 }
