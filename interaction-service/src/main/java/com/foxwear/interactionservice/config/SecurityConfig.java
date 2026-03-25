@@ -26,6 +26,7 @@ public class SecurityConfig {
                 .sessionManagement(config -> config
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((requests) -> requests
+<<<<<<< Updated upstream
                                 .requestMatchers("/api/v1/interaction/**").permitAll()
                                 .requestMatchers("/api/v1/reviews/**").permitAll()
                                 .requestMatchers(
@@ -35,6 +36,17 @@ public class SecurityConfig {
                                 ).permitAll()
                                 .requestMatchers("/api/admin/interaction/**").hasRole("ADMIN")
                                 .anyRequest().authenticated()
+=======
+                        .requestMatchers("/api/v1/reviews/**").permitAll()
+                        .requestMatchers("/api/v1/likes/my-liked-ids/**").permitAll()
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**"
+                        ).permitAll()
+                        .requestMatchers("/api/admin/reviews/**").hasRole("ADMIN")
+                        .anyRequest().authenticated()
+>>>>>>> Stashed changes
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authEntryPoint)
