@@ -1,4 +1,4 @@
-package com.foxwear.productservice.dto.response;
+package com.foxwear.interactionservice.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,10 +8,12 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CategoryGetAllResponse {
+public class SiteReviewCreateResponse {
 
     Long id;
-    String name;
-    String parentName;
+    Integer rate;
+    String description;
+    Long userId;
+    Boolean isActive;
 
 }

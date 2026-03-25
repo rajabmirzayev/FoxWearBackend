@@ -37,6 +37,10 @@ public enum ErrorCode {
     DYNAMIC_DATA_ALREADY_EXISTS("DYNAMIC_002"),
     DYNAMIC_DATA_IS_NOT_ACTIVE("DYNAMIC_003"),
 
+    // Review related errors
+    REVIEW_NOT_FOUND("RVW_001"),
+    REVIEW_IS_NOT_ACTIVE("RVW_002"),
+
     // Server errors
     INTERNAL_SERVER_ERROR("SERVER_001");
 
