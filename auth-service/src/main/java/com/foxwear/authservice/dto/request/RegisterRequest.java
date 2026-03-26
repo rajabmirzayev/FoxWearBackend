@@ -17,11 +17,11 @@ import java.time.LocalDate;
 public class RegisterRequest {
 
     @NotBlank(message = "First name is required")
-    @Size(min = 3, max = 30, message = "First name must be between 3 and 30 characters")
+    @Size(max = 30, message = "First name must be less than 30 characters")
     String firstName;
 
     @NotBlank(message = "Last name is required")
-    @Size(min = 3, max = 50, message = "Last name must be between 3 and 50 characters")
+    @Size(max = 50, message = "Last name must be less than 50 characters")
     String lastName;
 
     @NotBlank(message = "Username is required")

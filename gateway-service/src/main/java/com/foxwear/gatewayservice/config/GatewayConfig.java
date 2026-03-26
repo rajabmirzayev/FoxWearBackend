@@ -31,7 +31,7 @@ public class GatewayConfig {
                         .path(
                                 "/api/v1/auth/**",
                                 "/api/v1/users/**",
-                                "/login?**",
+                                "/login/**",
                                 "/oauth2/**"
                         )
                         .filters(f -> f.filter(commonFilter))

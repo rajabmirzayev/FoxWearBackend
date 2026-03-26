@@ -37,12 +37,12 @@ public class UserEntity extends BaseAuditEntity implements UserDetails {
     Long id;
 
     @NotBlank
-    @Size(min = 3, max = 30)
+    @Size(max = 30)
     @Column(name = "first_name", nullable = false, length = 30)
     String firstName;
 
     @NotBlank
-    @Size(min = 3, max = 50)
+    @Size(max = 50)
     @Column(name = "last_name", nullable = false, length = 50)
     String lastName;
 
