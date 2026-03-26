@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 26032026-01
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - dropNotNullConstraint:
+            columnDataType: varchar(17)
+            columnName: phone_number
+            tableName: users
+

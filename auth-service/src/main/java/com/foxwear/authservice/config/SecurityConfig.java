@@ -1,5 +1,6 @@
 package com.foxwear.authservice.config;
 
+import com.foxwear.authservice.security.OAuth2LoginSuccessHandler;
 import com.foxwear.authservice.service.CustomUserDetailsService;
 import com.foxwear.common.exception.AuthEntryPoint;
 import com.foxwear.common.exception.CustomAccessDeniedHandler;
@@ -28,6 +29,7 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final AuthEntryPoint authEntryPoint;
     private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Bean
     @SuppressWarnings("all")
@@ -39,6 +41,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/users/**").permitAll()
+                        .requestMatchers("/login/**").permitAll()
+                        .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
@@ -46,6 +50,9 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         ).permitAll()
                         .anyRequest().authenticated()
+                )
+                .oauth2Login(auth -> auth
+                        .successHandler(oAuth2LoginSuccessHandler)
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authEntryPoint)

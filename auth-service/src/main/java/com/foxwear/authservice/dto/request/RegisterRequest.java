@@ -32,7 +32,6 @@ public class RegisterRequest {
     @NotBlank(message = "Email is required")
     String email;
 
-    @NotBlank(message = "Phone number is required")
     @Pattern(regexp = "^\\+994\\s(50|51|55|70|77|99|10)\\s\\d{3}\\s\\d{2}\\s\\d{2}$", message = "Phone number must this format: +994 12 345 67 89)")
     String phoneNumber;
 

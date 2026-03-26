@@ -1,3 +1,7 @@
 databaseChangeLog:
   - include:
       file: classpath://db/changelog/v-01/create-auth-tables.yaml
+  - include:
+      file: classpath://db/changelog/v-01/drop-notnull-constraint-from-user-table.yaml
+  - include:
+      file: classpath://db/changelog/v-01/modify-length-of-column-username.yaml
