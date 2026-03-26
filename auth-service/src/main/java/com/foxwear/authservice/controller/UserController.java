@@ -1,11 +1,15 @@
 package com.foxwear.authservice.controller;
 
+import com.foxwear.authservice.dto.request.UserUpdateRequest;
+import com.foxwear.authservice.dto.response.UserGetPublicResponse;
 import com.foxwear.authservice.dto.response.UserGetResponse;
+import com.foxwear.authservice.dto.response.UserUpdateResponse;
 import com.foxwear.authservice.service.UserService;
 import com.foxwear.common.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,12 +22,30 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
 
+    @PutMapping
+    public ResponseEntity<ApiResponse<UserUpdateResponse>> updateUser(
+            @Valid @RequestBody UserUpdateRequest userUpdateRequest,
+            @RequestHeader(value = "X-User-Id") Long id
+    ) {
+        var response = userService.updateUser(userUpdateRequest, id);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
     @Operation(summary = "Get current user profile", description = "Retrieves the profile information of the currently authenticated user")
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserGetResponse>> getMe(
             @RequestHeader(value = "X-User-Id", required = false) Long id
     ) {
         var response = userService.getUserById(id);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<UserGetPublicResponse>> getUserById(
+            @Parameter(description = "Unique identifier of the user", example = "1")
+            @PathVariable Long id
+    ) {
+        var response = userService.getUserForPublicById(id);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -38,14 +60,4 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @Operation(summary = "Get user by ID", description = "Retrieves profile information for a specific user by their unique identifier")
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<UserGetResponse>> getUserById(
-            @Parameter(description = "Unique identifier of the user", example = "1")
-            @PathVariable Long id
-    ) {
-        var response = userService.getUserById(id);
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
 }

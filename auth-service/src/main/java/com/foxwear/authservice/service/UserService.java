@@ -1,14 +1,16 @@
 package com.foxwear.authservice.service;
 
+import com.foxwear.authservice.dto.request.UserUpdateRequest;
+import com.foxwear.authservice.dto.response.UserGetPublicResponse;
 import com.foxwear.authservice.dto.response.UserGetResponse;
+import com.foxwear.authservice.dto.response.UserUpdateResponse;
 import com.foxwear.authservice.entity.UserEntity;
 import com.foxwear.authservice.exception.UserNotFoundException;
 import com.foxwear.authservice.mapper.UserMapper;
 import com.foxwear.authservice.repository.UserRepository;
-import com.foxwear.common.event.UserCreatedEvent;
+import com.foxwear.common.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,24 +20,38 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
-//     private final KafkaTemplate<String, UserCreatedEvent> kafkaTemplate;
 
     @Transactional
-    public void registerUser(UserEntity user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+    public UserUpdateResponse updateUser(UserUpdateRequest request, Long id) {
+        if (id == null) {
+            throw new UnauthorizedException("Unauthorized user!");
+        }
 
-        UserEntity savedUser = userRepository.save(user);
+        UserEntity user = findUserOrThrow(id);
 
-        UserCreatedEvent event = new UserCreatedEvent(savedUser.getId(), savedUser.getEmail());
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setGender(request.getGender());
+        user.setBirthDate(request.getBirthDate());
+        user.setProfilePicture(request.getProfilePicture());
 
-        // kafkaTemplate.send("user-created-topic", event);
+        return userMapper.toUpdateResponse(user);
+    }
+
+    @Transactional(readOnly = true)
+    public UserGetPublicResponse getUserForPublicById(Long id) {
+        UserEntity user = findUserOrThrow(id);
+
+        return userMapper.toGetPublicResponse(user);
     }
 
     @Transactional(readOnly = true)
     public UserGetResponse getUserById(Long id) {
-        log.info("Getting user by username {}", id);
+        log.info("Getting user by id {}", id);
         UserEntity user = findUserOrThrow(id);
 
         return userMapper.toGetResponse(user);
