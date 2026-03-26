@@ -1,6 +1,7 @@
 package com.foxwear.authservice.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.foxwear.authservice.annotation.Adult;
 import com.foxwear.common.enums.Gender;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -39,10 +40,9 @@ public class UserUpdateRequest {
     String phoneNumber;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
     Gender gender;
 
-    @Column(name = "birth_date")
+    @Adult(message = "User must be at least 18 years old")
     @JsonFormat(pattern = "dd-MM-yyyy")
     LocalDate birthDate;
 

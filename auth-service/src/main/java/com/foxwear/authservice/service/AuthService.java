@@ -6,7 +6,6 @@ import com.foxwear.authservice.dto.response.AuthResponse;
 import com.foxwear.authservice.entity.RefreshToken;
 import com.foxwear.authservice.entity.UserEntity;
 import com.foxwear.authservice.exception.PasswordMismatchException;
-import com.foxwear.authservice.exception.UnderageUserException;
 import com.foxwear.authservice.exception.UserAlreadyExistsException;
 import com.foxwear.authservice.exception.UserNotFoundException;
 import com.foxwear.authservice.mapper.UserMapper;
@@ -25,8 +24,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.List;
 
 /**
@@ -55,7 +52,6 @@ public class AuthService {
         log.info("Attempting to register user with username: {}", request.getUsername());
         checkUserExists(request);
         checkPasswordsMatch(request);
-        checkUnderage(request.getBirthDate());
 
         UserEntity user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -176,12 +172,6 @@ public class AuthService {
 
         if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
             throw new UserAlreadyExistsException("Phone number already exists");
-        }
-    }
-
-    private void checkUnderage(LocalDate date) {
-        if (Period.between(date, LocalDate.now()).getYears() < 18) {
-            throw new UnderageUserException("The user must be over 18 years old");
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.foxwear.authservice.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.foxwear.authservice.annotation.Adult;
 import com.foxwear.common.enums.Gender;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -50,7 +51,7 @@ public class RegisterRequest {
     @NotNull(message = "Gender must be specified")
     Gender gender;
 
-    @Past(message = "Birth date must be in the past")
+    @Adult(message = "User must be at least 18 years old")
     @JsonFormat(pattern = "dd-MM-yyyy")
     LocalDate birthDate;
 

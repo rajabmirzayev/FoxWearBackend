@@ -6,7 +6,6 @@ import com.foxwear.authservice.repository.UserRepository;
 import com.foxwear.common.enums.UserStatus;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
