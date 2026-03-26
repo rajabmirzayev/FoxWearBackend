@@ -22,9 +22,11 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
 
+    @Operation(summary = "Update user profile", description = "Updates the profile information for the authenticated user")
     @PutMapping
     public ResponseEntity<ApiResponse<UserUpdateResponse>> updateUser(
             @Valid @RequestBody UserUpdateRequest userUpdateRequest,
+            @Parameter(description = "ID of the authenticated user", hidden = true)
             @RequestHeader(value = "X-User-Id") Long id
     ) {
         var response = userService.updateUser(userUpdateRequest, id);
@@ -34,12 +36,14 @@ public class UserController {
     @Operation(summary = "Get current user profile", description = "Retrieves the profile information of the currently authenticated user")
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserGetResponse>> getMe(
+            @Parameter(description = "ID of the authenticated user", hidden = true)
             @RequestHeader(value = "X-User-Id", required = false) Long id
     ) {
         var response = userService.getUserById(id);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @Operation(summary = "Get public user profile", description = "Retrieves public profile information of a user by their ID")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<UserGetPublicResponse>> getUserById(
             @Parameter(description = "Unique identifier of the user", example = "1")

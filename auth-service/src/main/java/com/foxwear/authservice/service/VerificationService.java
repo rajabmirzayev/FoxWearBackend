@@ -1,5 +1,6 @@
 package com.foxwear.authservice.service;
 
+import com.foxwear.common.event.PasswordResetEvent;
 import com.foxwear.common.event.RegistrationEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -27,5 +28,19 @@ public class VerificationService {
                 .build();
 
         kafkaTemplate.send("registration-topic", emailData);
+    }
+
+    public void resetPassword(String email) {
+        String token = UUID.randomUUID().toString();
+
+        redisTemplate.opsForValue().set("PWD_RESET:" + token, email, Duration.ofMinutes(15));
+
+        PasswordResetEvent passwordData = PasswordResetEvent.builder()
+                .email(email)
+                .token(token)
+                .link("http://localhost:3000/reset-password?token=" + token)
+                .build();
+
+        kafkaTemplate.send("password-reset-topic", passwordData);
     }
 }

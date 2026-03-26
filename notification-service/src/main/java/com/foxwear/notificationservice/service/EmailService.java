@@ -1,5 +1,6 @@
 package com.foxwear.notificationservice.service;
 
+import com.foxwear.common.event.PasswordResetEvent;
 import com.foxwear.common.event.RegistrationEvent;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -21,7 +22,11 @@ public class EmailService {
             helper.setTo(event.getEmail());
             helper.setSubject("Welcome to FoxWear - Verify Your Account");
 
-            String htmlContent = buildHtmlEmail(event.getLink());
+            String header = "Confirm Your Email Address";
+            String text = "Welcome to the FoxWear community! We're excited to have you on board. To get started, please verify your account by clicking the button below.";
+            String buttonText = "Verify Your Email";
+
+            String htmlContent = buildHtmlEmail(header, text, event.getLink(), buttonText);
             helper.setText(htmlContent, true);
 
             mailSender.send(message);
@@ -30,7 +35,28 @@ public class EmailService {
         }
     }
 
-    private String buildHtmlEmail(String link) {
+    public void sendPasswordResetEmail(PasswordResetEvent event) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(event.getEmail());
+            helper.setSubject("FoxWear - Password Reset Request");
+
+            String header = "Reset Your Password";
+            String text = "Welcome back to the FoxWear community! Use the link below to reset your password. If you did not send this, please ignore it.";
+            String buttonText = "Reset Password";
+
+            String htmlContent = buildHtmlEmail(header, text, event.getLink(), buttonText);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send email", e);
+        }
+    }
+
+    private String buildHtmlEmail(String header, String text , String link, String buttonText) {
         return "<!DOCTYPE html>" +
                 "<html>" +
                 "<head>" +
@@ -48,9 +74,9 @@ public class EmailService {
                 "      <h1>FoxWear</h1>" +
                 "    </div>" +
                 "    <div class='content'>" +
-                "      <h2>Confirm Your Email Address</h2>" +
-                "      <p>Welcome to the FoxWear community! We're excited to have you on board. To get started, please verify your account by clicking the button below.</p>" +
-                "      <a href='" + link + "' class='button'>Verify Your Email</a>" +
+                "      <h2>" + header + "</h2>" +
+                "      <p>" + text + "</p>" +
+                "      <a href='" + link + "' class='button'>" + buttonText + "</a>" +
                 "      <p style='margin-top: 25px;'>If the button doesn't work, you can copy and paste the following link into your browser:</p>" +
                 "      <p style='font-size: 11px; color: #888;'>" + link + "</p>" +
                 "    </div>" +
