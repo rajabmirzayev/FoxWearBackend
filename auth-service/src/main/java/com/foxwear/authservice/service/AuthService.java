@@ -75,20 +75,21 @@ public class AuthService {
     @Transactional
     public AuthResponse login(LoginRequest loginRequest) {
         log.info("Login attempt for username: {}", loginRequest.getUsername());
+
+        UserEntity user = userRepository.findByIdentifier(loginRequest.getUsername())
+                .orElseThrow(() -> new UserNotFoundException("Identifier or password is invalid"));
+
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            loginRequest.getUsername(),
+                            user.getUsername(),
                             loginRequest.getPassword()
                     )
             );
         } catch (BadCredentialsException e) {
             log.warn("Authentication failed for user: {}", loginRequest.getUsername());
-            throw new BadCredentialsException("Username or password is invalid");
+            throw new BadCredentialsException("Identifier or password is invalid");
         }
-
-        UserEntity user = userRepository.findByUsername(loginRequest.getUsername())
-                .orElseThrow(() -> new UserNotFoundException("Username or password is invalid"));
 
         String token = jwtService.generateToken(user, user.getId());
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
