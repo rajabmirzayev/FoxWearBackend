@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Set;
 
 @Service
@@ -39,7 +40,7 @@ public class LikeService {
         }
 
         if (productLikeRepository.existsByProductIdAndUserId(productId, userId)) {
-            log.info("User {} already liked product {}. Removing like.", userId, productId);
+            log.info("User {} unliked product {}.", userId, productId);
             productLikeRepository.deleteByProductIdAndUserId(productId, userId);
             isLiked = false;
         } else {
@@ -75,6 +76,11 @@ public class LikeService {
     @Transactional(readOnly = true)
     public Set<Long> getMyLikedIds(Long userId) {
         log.info("Fetching liked product IDs for user ID: {}", userId);
+
+        if (userId == null) {
+            return Collections.emptySet();
+        }
+
         return productLikeRepository.findAllProductIdsByUserId(userId);
     }
 }

@@ -10,8 +10,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -46,7 +49,6 @@ public class AuthController {
             @RequestParam String refreshToken
     ) {
         var response = authService.refresh(refreshToken);
-
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -55,5 +57,17 @@ public class AuthController {
     public ResponseEntity<ApiResponse<String>> logout(@RequestParam String refreshToken) {
         refreshTokenService.revokeRefreshToken(refreshToken);
         return ResponseEntity.ok(ApiResponse.success(null, "Successfully logged out"));
+    }
+
+    @GetMapping("/confirm")
+    @Operation(summary = "Confirm email", description = "Verifies the user's email address using the token sent during registration.")
+    public ResponseEntity<?> confirm(
+            @RequestParam String token
+    ) {
+        var response = authService.confirm(token);
+
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(response))
+                .build();
     }
 }

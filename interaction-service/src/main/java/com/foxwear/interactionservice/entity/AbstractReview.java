@@ -28,7 +28,7 @@ public class AbstractReview extends BaseAuditEntity {
     String description;
 
     @NotNull
-    @JoinColumn(name = "user_id", nullable = false)
+    @Column(name = "user_id", nullable = false)
     Long userId;
 
     @Column(name = "is_active", nullable = false)

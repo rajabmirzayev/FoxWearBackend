@@ -30,7 +30,9 @@ public class GatewayConfig {
                 .route("auth-service-route", r -> r
                         .path(
                                 "/api/v1/auth/**",
-                                "/api/v1/users/**"
+                                "/api/v1/users/**",
+                                "/login/**",
+                                "/oauth2/**"
                         )
                         .filters(f -> f.filter(commonFilter))
                         .uri("lb://AUTH-SERVICE")
@@ -50,7 +52,7 @@ public class GatewayConfig {
                         .path(
                                 "/api/v1/likes/**",
                                 "/api/v1/reviews/**",
-                                "/api/admin/interaction/**"
+                                "/api/admin/reviews/**"
                         )
                         .filters(f -> f.filter(commonFilter))
                         .uri("lb://INTERACTION-SERVICE")

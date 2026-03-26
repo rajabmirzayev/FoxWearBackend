@@ -1,14 +1,17 @@
 package com.foxwear.common.event;
 
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserCreatedEvent {
 
-    private Long userId;
-    private String email;
+    Long userId;
+    String email;
 
 }

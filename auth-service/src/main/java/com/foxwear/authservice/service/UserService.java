@@ -41,6 +41,11 @@ public class UserService {
         return userMapper.toGetResponse(user);
     }
 
+    @Transactional(readOnly = true)
+    public Boolean existsUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
     private UserEntity findUserOrThrow(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> {

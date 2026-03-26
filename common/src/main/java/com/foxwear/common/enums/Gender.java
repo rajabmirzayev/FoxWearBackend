@@ -5,6 +5,7 @@ public enum Gender {
     MALE,
     FEMALE,
     UNISEX,
-    KIDS
+    KIDS,
+    UNKNOWN
 
 }

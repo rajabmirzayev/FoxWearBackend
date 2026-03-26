@@ -26,6 +26,7 @@ import java.util.List;
 @Table(name = "users")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -36,18 +37,18 @@ public class UserEntity extends BaseAuditEntity implements UserDetails {
     Long id;
 
     @NotBlank
-    @Size(min = 3, max = 30)
+    @Size(max = 30)
     @Column(name = "first_name", nullable = false, length = 30)
     String firstName;
 
     @NotBlank
-    @Size(min = 3, max = 50)
+    @Size(max = 50)
     @Column(name = "last_name", nullable = false, length = 50)
     String lastName;
 
     @NotBlank
-    @Size(min = 3, max = 50)
-    @Column(unique = true, nullable = false, length = 50)
+    @Size(min = 3, max = 255)
+    @Column(unique = true, nullable = false)
     String username;
 
     @Email
@@ -55,9 +56,8 @@ public class UserEntity extends BaseAuditEntity implements UserDetails {
     @Column(unique = true, nullable = false)
     String email;
 
-    @NotBlank
     @Size(min = 12, max = 17)
-    @Column(name = "phone_number", unique = true, nullable = false, length = 17)
+    @Column(name = "phone_number", unique = true, length = 17)
     String phoneNumber;
 
     @NotBlank

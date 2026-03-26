@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 26032026-02
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - modifyDataType:
+            columnName: username
+            newDataType: VARCHAR(255)
+            tableName: users
+

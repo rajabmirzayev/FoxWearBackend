@@ -7,6 +7,7 @@ import com.foxwear.common.exception.InvalidTokenException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -26,6 +27,7 @@ public class RefreshTokenService {
      * @param user The user entity for whom the token is created
      * @return The saved RefreshToken entity
      */
+    @Transactional
     public RefreshToken createRefreshToken(UserEntity user) {
         refreshTokenRepository.deleteByUser(user);
 
@@ -55,6 +57,7 @@ public class RefreshTokenService {
         return refreshToken;
     }
 
+    @Transactional
     public void revokeRefreshToken(String token) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
                 .orElseThrow(() -> new InvalidTokenException("Refresh token not found!"));
