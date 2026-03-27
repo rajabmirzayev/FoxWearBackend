@@ -1,9 +1,6 @@
 package com.foxwear.authservice.controller;
 
-import com.foxwear.authservice.dto.request.ForgotPasswordRequest;
-import com.foxwear.authservice.dto.request.LoginRequest;
-import com.foxwear.authservice.dto.request.PasswordResetRequest;
-import com.foxwear.authservice.dto.request.RegisterRequest;
+import com.foxwear.authservice.dto.request.*;
 import com.foxwear.authservice.dto.response.AuthResponse;
 import com.foxwear.authservice.service.AuthService;
 import com.foxwear.authservice.service.RefreshTokenService;
@@ -92,6 +89,15 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(response))
                 .build();
+    }
+
+    @PatchMapping("/change-password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @Valid @RequestBody PasswordChangeRequest passwordChangeRequest,
+            @RequestHeader(value = "X-User-Id") Long id
+    ) {
+        authService.changePassword(passwordChangeRequest, id);
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
 }

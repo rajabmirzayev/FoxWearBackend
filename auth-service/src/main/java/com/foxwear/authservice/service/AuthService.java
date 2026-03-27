@@ -1,6 +1,7 @@
 package com.foxwear.authservice.service;
 
 import com.foxwear.authservice.dto.request.LoginRequest;
+import com.foxwear.authservice.dto.request.PasswordChangeRequest;
 import com.foxwear.authservice.dto.request.PasswordResetRequest;
 import com.foxwear.authservice.dto.request.RegisterRequest;
 import com.foxwear.authservice.dto.response.AuthResponse;
@@ -14,6 +15,7 @@ import com.foxwear.authservice.repository.UserRepository;
 import com.foxwear.common.enums.UserStatus;
 import com.foxwear.common.exception.InvalidArgumentException;
 import com.foxwear.common.exception.InvalidTokenException;
+import com.foxwear.common.exception.UnauthorizedException;
 import com.foxwear.common.service.JwtService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -187,6 +189,31 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         log.info("Password successfully reset for user: {}", email);
         kafkaTemplate.send("password-reset-success", email);
+    }
+
+    /**
+     * Changes the password for an authenticated user after verifying the old password.
+     *
+     * @param passwordChangeRequest the old and new password details
+     * @param id the user ID
+     */
+    @Transactional
+    public void changePassword(PasswordChangeRequest passwordChangeRequest, Long id) {
+        if (id == null) {
+            throw new UnauthorizedException("Unauthorized user!");
+        }
+
+        checkPasswordsMatch(passwordChangeRequest.getNewPassword(), passwordChangeRequest.getConfirmPassword());
+
+        UserEntity user = userService.findUserOrThrow(id);
+
+        if (!passwordEncoder.matches(passwordChangeRequest.getOldPassword(), user.getPassword())) {
+            throw new InvalidArgumentException("Invalid old password");
+        }
+
+        user.setPassword(passwordEncoder.encode(passwordChangeRequest.getNewPassword()));
+        log.info("Password successfully changed for user: {}", user.getUsername());
+        kafkaTemplate.send("password-reset-success", user.getEmail());
     }
 
     /**
