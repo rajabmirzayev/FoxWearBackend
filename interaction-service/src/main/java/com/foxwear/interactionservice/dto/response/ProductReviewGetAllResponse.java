@@ -10,15 +10,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SiteReviewGetAllResponse {
+public class ProductReviewGetAllResponse {
 
     Long id;
+    Long productId;
     Integer rate;
     String description;
     Long userId;
     Boolean isActive;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
-
 
 }
