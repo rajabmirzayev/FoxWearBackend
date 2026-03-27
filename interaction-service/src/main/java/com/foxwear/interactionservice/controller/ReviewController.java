@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,7 @@ public class ReviewController {
             description = "Allows a user to submit a new review for the site."
     )
     public ResponseEntity<ApiResponse<SiteReviewCreateResponse>> createSiteReview(
-            @RequestBody SiteReviewCreateRequest siteReviewCreateRequest,
+            @Valid @RequestBody SiteReviewCreateRequest siteReviewCreateRequest,
             @Parameter(description = "ID of the user creating the review", required = true) @RequestHeader(value = "X-User-Id") Long userId
     ) {
         var response = reviewService.createSiteReview(siteReviewCreateRequest, userId);
@@ -83,7 +84,7 @@ public class ReviewController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Review not found")
     })
     public ResponseEntity<ApiResponse<SiteReviewUpdateResponse>> updateSiteReview(
-            @RequestBody SiteReviewUpdateRequest siteReviewUpdateRequest,
+            @Valid @RequestBody SiteReviewUpdateRequest siteReviewUpdateRequest,
             @Parameter(description = "ID of the review to be updated") @PathVariable Long id,
             @RequestHeader(value = "X-User-Id") Long userId
     ) {

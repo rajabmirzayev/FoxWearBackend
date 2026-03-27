@@ -19,6 +19,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -45,6 +46,7 @@ public class AuthService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     /**
      * Registers a new user after validating input data.
@@ -184,6 +186,7 @@ public class AuthService {
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         log.info("Password successfully reset for user: {}", email);
+        kafkaTemplate.send("password-reset-success", email);
     }
 
     /**

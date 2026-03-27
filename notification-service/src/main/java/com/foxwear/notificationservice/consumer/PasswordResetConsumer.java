@@ -16,4 +16,9 @@ public class PasswordResetConsumer {
         emailService.sendPasswordResetEmail(event);
     }
 
+    @KafkaListener(topics = "password-reset-success", groupId = "notification-group")
+    public void handleResetSuccess(String email) {
+        emailService.sendPasswordResetInfoEmail(email);
+    }
+
 }

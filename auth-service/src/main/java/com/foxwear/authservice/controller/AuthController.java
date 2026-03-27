@@ -66,10 +66,20 @@ public class AuthController {
     @PostMapping("/forgot-password")
     @Operation(summary = "Forgot password", description = "Sends a password reset link to the user's email address.")
     public ResponseEntity<ApiResponse<Void>> forgotPassword(
-            @RequestBody ForgotPasswordRequest forgotPasswordRequest
+            @Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest
     ) {
         verificationService.resetPassword(forgotPasswordRequest.getEmail());
         return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @PostMapping("/reset")
+    @Operation(summary = "Reset password", description = "Resets the user's password using the token provided in the reset link.")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @Valid @RequestBody PasswordResetRequest request,
+            @RequestParam String token
+    ) {
+        authService.resetPassword(request, token);
+        return ResponseEntity.ok(ApiResponse.success(null, "Successfully changed password"));
     }
 
     @GetMapping("/confirm")
@@ -84,13 +94,4 @@ public class AuthController {
                 .build();
     }
 
-    @PostMapping("/reset")
-    @Operation(summary = "Reset password", description = "Resets the user's password using the token provided in the reset link.")
-    public ResponseEntity<ApiResponse<Void>> resetPassword(
-            @Valid @RequestBody PasswordResetRequest request,
-            @RequestParam String token
-    ) {
-        authService.resetPassword(request, token);
-        return ResponseEntity.ok(ApiResponse.success(null, "Successfully changed password"));
-    }
 }

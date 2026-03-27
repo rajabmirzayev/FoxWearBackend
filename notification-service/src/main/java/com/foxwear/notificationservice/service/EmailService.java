@@ -26,7 +26,7 @@ public class EmailService {
             String text = "Welcome to the FoxWear community! We're excited to have you on board. To get started, please verify your account by clicking the button below.";
             String buttonText = "Verify Your Email";
 
-            String htmlContent = buildHtmlEmail(header, text, event.getLink(), buttonText);
+            String htmlContent = buildHtmlVerificationEmail(header, text, event.getLink(), buttonText);
             helper.setText(htmlContent, true);
 
             mailSender.send(message);
@@ -47,7 +47,7 @@ public class EmailService {
             String text = "Welcome back to the FoxWear community! Use the link below to reset your password. If you did not send this, please ignore it.";
             String buttonText = "Reset Password";
 
-            String htmlContent = buildHtmlEmail(header, text, event.getLink(), buttonText);
+            String htmlContent = buildHtmlVerificationEmail(header, text, event.getLink(), buttonText);
             helper.setText(htmlContent, true);
 
             mailSender.send(message);
@@ -56,7 +56,25 @@ public class EmailService {
         }
     }
 
-    private String buildHtmlEmail(String header, String text , String link, String buttonText) {
+    public void sendPasswordResetInfoEmail(String email) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(email);
+            helper.setSubject("Security Alert: Your FoxWear Password Has Been Changed");
+
+            String htmlContent = buildHtmlPasswordResetEmail();
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send email", e);
+        }
+    }
+
+    private String buildHtmlVerificationEmail(String header, String text, String link, String buttonText) {
         return "<!DOCTYPE html>" +
                 "<html>" +
                 "<head>" +
@@ -88,4 +106,28 @@ public class EmailService {
                 "</body>" +
                 "</html>";
     }
+
+    private String buildHtmlPasswordResetEmail() {
+        return "<div style=\"font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #f0f0f0; border-radius: 12px; background-color: #ffffff;\">" +
+                "<div style=\"text-align: center; margin-bottom: 25px;\">" +
+                "<h1 style=\"color: #1a73e8; margin: 0;\">FoxWear</h1>" +
+                "</div>" +
+                "<h2 style=\"color: #202124; font-size: 22px; text-align: center; margin-bottom: 20px;\">Password Changed Successfully</h2>" +
+                "<p style=\"color: #3c4043; font-size: 16px; line-height: 1.5;\">Hello,</p>" +
+                "<p style=\"color: #3c4043; font-size: 16px; line-height: 1.5;\">This is a confirmation that the password for your <strong>FoxWear</strong> account has been recently changed.</p>" +
+
+                "<div style=\"background-color: #fce8e6; padding: 20px; border-radius: 8px; border-left: 6px solid #d93025; margin: 25px 0;\">" +
+                "<p style=\"margin: 0; color: #a50e0e; font-weight: bold; font-size: 14px;\">If you did not make this change:</p>" +
+                "<p style=\"margin: 10px 0 0 0; color: #a50e0e; font-size: 14px;\">Please contact our support team immediately or reset your password again to secure your account. Your account security is our top priority.</p>" +
+                "</div>" +
+
+                "<p style=\"color: #70757a; font-size: 14px; text-align: center; margin-top: 30px;\">If this was you, you can safely disregard this email.</p>" +
+                "<hr style=\"border: 0; border-top: 1px solid #eeeeee; margin: 30px 0;\">" +
+                "<footer style=\"text-align: center; color: #9aa0a6; font-size: 12px;\">" +
+                "&copy; 2026 FoxWear Security Team<br>Azerbaijan, Baku" +
+                "</footer>" +
+                "</div>";
+    }
+
+
 }
