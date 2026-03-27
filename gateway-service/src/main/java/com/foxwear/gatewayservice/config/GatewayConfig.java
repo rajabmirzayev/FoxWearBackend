@@ -31,6 +31,7 @@ public class GatewayConfig {
                         .path(
                                 "/api/v1/auth/**",
                                 "/api/v1/users/**",
+                                "/api/v1/addresses/**",
                                 "/login/**",
                                 "/oauth2/**"
                         )

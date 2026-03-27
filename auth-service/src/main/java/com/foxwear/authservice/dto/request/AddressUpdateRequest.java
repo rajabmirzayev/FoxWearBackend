@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CreateAddressRequest {
+public class AddressUpdateRequest implements AddressDTO {
 
     @NotBlank(message = "Address title is required")
     @Size(max = 50, message = "Address title must be at most 50 characters long")
