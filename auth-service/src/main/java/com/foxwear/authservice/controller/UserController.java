@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -44,7 +43,7 @@ public class UserController {
     }
 
     @Operation(summary = "Get public user profile", description = "Retrieves public profile information of a user by their ID")
-    @GetMapping("/{id}")
+    @GetMapping("/public/{id}")
     public ResponseEntity<ApiResponse<UserGetPublicResponse>> getUserById(
             @Parameter(description = "Unique identifier of the user", example = "1")
             @PathVariable Long id
@@ -54,8 +53,7 @@ public class UserController {
     }
 
     @Operation(summary = "Check if username exists", description = "Checks if a specific username is already taken in the system")
-    @GetMapping("username-exists/{username}")
-    @PreAuthorize("permitAll()")
+    @GetMapping("/public/username-exists/{username}")
     public ResponseEntity<ApiResponse<Boolean>> existsUsername(
             @Parameter(description = "Username to check for availability", example = "john_doe")
             @PathVariable String username
