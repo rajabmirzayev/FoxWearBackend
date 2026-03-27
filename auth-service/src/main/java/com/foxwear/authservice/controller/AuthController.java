@@ -100,4 +100,12 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
+    @PatchMapping("/verify-email")
+    public ResponseEntity<ApiResponse<Void>> verifyEmail(
+            @RequestHeader(value = "X-User-Id") Long id
+    ) {
+        authService.verifyEmail(id);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
 }

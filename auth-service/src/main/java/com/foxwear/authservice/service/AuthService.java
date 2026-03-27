@@ -12,6 +12,7 @@ import com.foxwear.authservice.exception.UserAlreadyExistsException;
 import com.foxwear.authservice.exception.UserNotFoundException;
 import com.foxwear.authservice.mapper.UserMapper;
 import com.foxwear.authservice.repository.UserRepository;
+import com.foxwear.common.enums.Role;
 import com.foxwear.common.enums.UserStatus;
 import com.foxwear.common.exception.InvalidArgumentException;
 import com.foxwear.common.exception.InvalidTokenException;
@@ -63,6 +64,8 @@ public class AuthService {
 
         UserEntity user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(Role.USER);
+        user.setStatus(UserStatus.PENDING);
 
         var savedUser = userRepository.save(user);
         log.info("User registered successfully with ID: {}", savedUser.getId());
@@ -214,6 +217,26 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(passwordChangeRequest.getNewPassword()));
         log.info("Password successfully changed for user: {}", user.getUsername());
         kafkaTemplate.send("password-reset-success", user.getEmail());
+    }
+
+    /**
+     * Verifies the user's email and updates their status to ACTIVE.
+     *
+     * @param id the user ID to verify
+     */
+    @Transactional
+    public void verifyEmail(Long id) {
+        if (id == null) {
+            throw new UnauthorizedException("Unauthorized user!");
+        }
+
+        UserEntity user = userService.findUserOrThrow(id);
+        verificationService.createAndSendVerification(user.getEmail());
+
+        user.setStatus(UserStatus.ACTIVE);
+        user.setEmailVerified(true);
+        log.info("Email successfully verified for user: {}", user.getUsername());
+        kafkaTemplate.send("verify-email-success", user.getEmail());
     }
 
     /**

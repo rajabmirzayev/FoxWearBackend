@@ -15,4 +15,9 @@ public class RegistrationConsumer {
     public void handleRegistration(RegistrationEvent event) {
         emailService.sendRegistrationEmail(event);
     }
+
+    @KafkaListener(topics = "verify-email-success", groupId = "notification-group")
+    public void handleVerifyEmailSuccess(String email) {
+        emailService.sendAccountActivatedAlert(email);
+    }
 }

@@ -74,6 +74,40 @@ public class EmailService {
         }
     }
 
+    public void sendAccountActivatedAlert(String email) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(email);
+            helper.setSubject("Welcome to FoxWear - Your Account is Active!");
+
+            String htmlContent = buildAccountActivatedHtml();
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send account activation success email", e);
+        }
+    }
+
+    public void sendEmailChangedAlert(String email) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(email);
+            helper.setSubject("Security Update: Your FoxWear Email Has Been Changed");
+
+            String htmlContent = buildEmailChangedHtml();
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send email change notification", e);
+        }
+    }
+
     private String buildHtmlVerificationEmail(String header, String text, String link, String buttonText) {
         return "<!DOCTYPE html>" +
                 "<html>" +
@@ -129,5 +163,57 @@ public class EmailService {
                 "</div>";
     }
 
+    private String buildAccountActivatedHtml() {
+        return "<div style=\"font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #e8f5e9; border-radius: 12px; background-color: #ffffff;\">" +
+                "<div style=\"text-align: center; margin-bottom: 25px;\">" +
+                "<h1 style=\"color: #2e7d32; margin: 0;\">FoxWear</h1>" +
+                "</div>" +
+                "<h2 style=\"color: #202124; font-size: 22px; text-align: center; margin-bottom: 20px;\">Account Activated!</h2>" +
+                "<p style=\"color: #3c4043; font-size: 16px; line-height: 1.6;\">Hello,</p>" +
+                "<p style=\"color: #3c4043; font-size: 16px; line-height: 1.6;\">Great news! Your <strong>FoxWear</strong> account has been successfully verified and is now fully active.</p>" +
+
+                "<div style=\"text-align: center; margin: 30px 0;\">" +
+                "<a href=\"http://localhost:3000/login\" style=\"background-color: #2e7d32; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;\">Log In to Your Account</a>" +
+                "</div>" +
+
+                "<p style=\"color: #3c4043; font-size: 16px; line-height: 1.6;\">You can now explore our latest collections and start shopping.</p>" +
+
+                "<p style=\"color: #70757a; font-size: 14px; text-align: center; margin-top: 30px;\">If you have any questions, feel free to reply to this email.</p>" +
+                "<hr style=\"border: 0; border-top: 1px solid #eeeeee; margin: 30px 0;\">" +
+                "<footer style=\"text-align: center; color: #9aa0a6; font-size: 12px;\">" +
+                "&copy; 2026 FoxWear Team<br>Welcome to the Community" +
+                "</footer>" +
+                "</div>";
+    }
+
+    private String buildEmailChangedHtml() {
+        return "<div style=\"font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #eeeeee; border-radius: 12px; background-color: #ffffff;\">" +
+                "<div style=\"text-align: center; margin-bottom: 25px;\">" +
+                "<h1 style=\"color: #1a73e8; margin: 0;\">FoxWear</h1>" +
+                "</div>" +
+                "<h2 style=\"color: #202124; font-size: 20px; text-align: center; margin-bottom: 20px;\">Email Address Updated</h2>" +
+                "<p style=\"color: #3c4043; font-size: 16px; line-height: 1.6;\">Hello,</p>" +
+                "<p style=\"color: #3c4043; font-size: 16px; line-height: 1.6;\">The email address associated with your <strong>FoxWear</strong> account has been successfully changed.</p>" +
+
+                "<div style=\"background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #1a73e8; margin: 25px 0;\">" +
+                "<p style=\"margin: 0; color: #202124; font-size: 14px; line-height: 1.5;\">" +
+                "<strong>What does this mean?</strong><br>" +
+                "From now on, you should use this email address to log in to your account and receive all future notifications." +
+                "</p>" +
+                "</div>" +
+
+                "<div style=\"background-color: #fff4e5; padding: 15px; border-radius: 8px; border: 1px solid #ffe1b8; margin-bottom: 25px;\">" +
+                "<p style=\"margin: 0; color: #856404; font-size: 13px;\">" +
+                "<strong>Security Notice:</strong> If you did not authorize this change, please contact our support team immediately to secure your account." +
+                "</p>" +
+                "</div>" +
+
+                "<p style=\"color: #70757a; font-size: 14px; text-align: center;\">Thank you for being part of FoxWear.</p>" +
+                "<hr style=\"border: 0; border-top: 1px solid #eeeeee; margin: 30px 0;\">" +
+                "<footer style=\"text-align: center; color: #9aa0a6; font-size: 12px;\">" +
+                "&copy; 2026 FoxWear Team<br>Security Notifications" +
+                "</footer>" +
+                "</div>";
+    }
 
 }
