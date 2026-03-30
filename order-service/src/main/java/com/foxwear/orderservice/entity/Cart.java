@@ -37,7 +37,6 @@ public class Cart {
     BigDecimal totalPrice = BigDecimal.ZERO;
 
     public void updateTotalPrice() {
-        System.out.println(items);
         this.totalPrice = items.stream()
                 .filter(item -> item.getProductItemId() != null)
                 .map(item -> item.getSubTotal() != null ? item.getSubTotal() : BigDecimal.ZERO)

@@ -70,9 +70,7 @@ public class CartItem {
     @Column(name = "sub_total", nullable = false, precision = 12, scale = 2)
     BigDecimal subTotal;
 
-    @PrePersist
-    @PreUpdate
-    public void calculateSubTotal() {
+    public void updateSubtotal() {
         this.actualUnitPrice = (this.actualUnitPrice == null) ? BigDecimal.ZERO : this.actualUnitPrice;
 
         int qty = (this.quantity == null) ? 0 : this.quantity;

@@ -36,7 +36,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers("/api/carts/**").permitAll() // todo delete this
+                        .requestMatchers("/api/v1/carts/**").permitAll() // todo delete this
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
