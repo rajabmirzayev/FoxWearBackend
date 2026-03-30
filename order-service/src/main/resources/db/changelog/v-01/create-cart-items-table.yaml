@@ -1,0 +1,48 @@
+databaseChangeLog:
+  - changeSet:
+      id: 30032026-01
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_cart_items
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: cart_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: product_item_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: quantity
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: original_unit_price
+                  type: DECIMAL(12, 2)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: actual_unit_price
+                  type: DECIMAL(12, 2)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: sub_total
+                  type: DECIMAL(12, 2)
+            tableName: cart_items
+

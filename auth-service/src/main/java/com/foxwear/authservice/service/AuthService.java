@@ -14,6 +14,7 @@ import com.foxwear.authservice.mapper.UserMapper;
 import com.foxwear.authservice.repository.UserRepository;
 import com.foxwear.common.enums.Role;
 import com.foxwear.common.enums.UserStatus;
+import com.foxwear.common.event.UserCreatedEvent;
 import com.foxwear.common.exception.InvalidArgumentException;
 import com.foxwear.common.exception.InvalidTokenException;
 import com.foxwear.common.exception.UnauthorizedException;
@@ -71,6 +72,12 @@ public class AuthService {
         log.info("User registered successfully with ID: {}", savedUser.getId());
 
         verificationService.createAndSendVerification(user.getEmail());
+
+        UserCreatedEvent userCreatedEvent = UserCreatedEvent.builder()
+                .userId(savedUser.getId())
+                .email(savedUser.getEmail())
+                .build();
+        kafkaTemplate.send("user-created-topic", userCreatedEvent);
     }
 
     /**

@@ -1,0 +1,112 @@
+databaseChangeLog:
+  - changeSet:
+      id: 30032026-04
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_orders
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_at
+                  type: DATETIME
+              - column:
+                  constraints:
+                    nullable: false
+                  name: updated_at
+                  type: DATETIME
+              - column:
+                  constraints:
+                    nullable: false
+                  name: order_number
+                  type: VARCHAR(20)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: user_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: status
+                  type: VARCHAR(20)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: total_original_price
+                  type: DECIMAL(12, 2)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: total_discount_price
+                  type: DECIMAL(12, 2)
+              - column:
+                  name: coupon_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: shipping_fee
+                  type: DECIMAL(10, 2)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: payment_status
+                  type: VARCHAR(25)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: payment_method
+                  type: VARCHAR(25)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: address_snapshot
+                  type: VARCHAR(700)
+              - column:
+                  name: latitude_snapshot
+                  type: DOUBLE
+              - column:
+                  name: longitude_snapshot
+                  type: DOUBLE
+              - column:
+                  name: order_note
+                  type: VARCHAR(500)
+              - column:
+                  name: tracking_number
+                  type: VARCHAR(30)
+              - column:
+                  name: estimated_delivery_date
+                  type: DATETIME
+              - column:
+                  name: delivered_at
+                  type: DATETIME
+            tableName: orders
+  - changeSet:
+      id: 1774881459803-05
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: order_number
+            constraintName: uc_orders_order_number
+            tableName: orders
+  - changeSet:
+      id: 1774881459803-06
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: tracking_number
+            constraintName: uc_orders_tracking_number
+            tableName: orders
+

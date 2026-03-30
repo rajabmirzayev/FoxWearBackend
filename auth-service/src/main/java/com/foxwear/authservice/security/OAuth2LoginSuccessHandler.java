@@ -5,6 +5,7 @@ import com.foxwear.authservice.repository.UserRepository;
 import com.foxwear.common.enums.Gender;
 import com.foxwear.common.enums.UserStatus;
 import com.foxwear.common.enums.Role;
+import com.foxwear.common.event.UserCreatedEvent;
 import com.foxwear.common.service.JwtService;
 import com.foxwear.authservice.service.RefreshTokenService;
 import jakarta.servlet.ServletException;
@@ -12,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -28,6 +30,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -65,5 +68,11 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 .build().toUriString();
 
         getRedirectStrategy().sendRedirect(request,response,targetUrl);
+
+        UserCreatedEvent userCreatedEvent = UserCreatedEvent.builder()
+                .userId(user.getId())
+                .email(user.getEmail())
+                .build();
+        kafkaTemplate.send("user-created-topic", userCreatedEvent);
     }
 }

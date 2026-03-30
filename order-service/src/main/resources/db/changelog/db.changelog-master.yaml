@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - include:
+      file: classpath://db/changelog/v-01/create-cart-items-table.yaml
+  - include:
+      file: classpath://db/changelog/v-01/create-carts-table.yaml
+  - include:
+      file: classpath://db/changelog/v-01/create-order-items-table.yaml
+  - include:
+      file: classpath://db/changelog/v-01/create-orders-table.yaml
+  - include:
+      file: classpath://db/changelog/v-01/add-foreign-const-to-cart-items-table.yaml
+  - include:
+      file: classpath://db/changelog/v-01/add-foreign-const-to-order-items-table.yaml
+  - include:
+      file: classpath://db/changelog/v-01/create-courier-locations-table.yaml
