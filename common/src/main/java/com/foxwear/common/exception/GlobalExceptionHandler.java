@@ -3,12 +3,14 @@ package com.foxwear.common.exception;
 import com.foxwear.common.dto.ApiResponse;
 import com.foxwear.common.enums.ErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
+import lombok.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -26,12 +28,18 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(e -> errors.put(e.getField(), e.getDefaultMessage()));
+    public ResponseEntity<@NonNull ApiResponse<?>> handleMethodArgumentNotValidException(Errors errors) {
+        Map<String, String> errorMap = new HashMap<>();
+
+        errors.getFieldErrors().forEach(error -> errorMap.put(
+                error.getField(),
+                error.getDefaultMessage()
+        ));
+
+        var iterator = errorMap.entrySet().iterator();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error("Validation error", ErrorCode.VALIDATION, errors));
+                .body(ApiResponse.error(iterator.next().getValue(), ErrorCode.VALIDATION, errorMap));
     }
 
     @ExceptionHandler({

@@ -1,23 +1,28 @@
 package com.foxwear.authservice.service;
 
 import com.foxwear.authservice.dto.request.LoginRequest;
+import com.foxwear.authservice.dto.request.PasswordChangeRequest;
+import com.foxwear.authservice.dto.request.PasswordResetRequest;
 import com.foxwear.authservice.dto.request.RegisterRequest;
 import com.foxwear.authservice.dto.response.AuthResponse;
 import com.foxwear.authservice.entity.RefreshToken;
 import com.foxwear.authservice.entity.UserEntity;
 import com.foxwear.authservice.exception.PasswordMismatchException;
-import com.foxwear.authservice.exception.UnderageUserException;
 import com.foxwear.authservice.exception.UserAlreadyExistsException;
 import com.foxwear.authservice.exception.UserNotFoundException;
 import com.foxwear.authservice.mapper.UserMapper;
 import com.foxwear.authservice.repository.UserRepository;
+import com.foxwear.common.enums.Role;
 import com.foxwear.common.enums.UserStatus;
+import com.foxwear.common.exception.InvalidArgumentException;
 import com.foxwear.common.exception.InvalidTokenException;
+import com.foxwear.common.exception.UnauthorizedException;
 import com.foxwear.common.service.JwtService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,9 +30,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Service class for handling authentication operations such as registration, login, and token refreshing.
@@ -39,11 +43,13 @@ public class AuthService {
     private final VerificationService verificationService;
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
+    private final UserService userService;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     /**
      * Registers a new user after validating input data.
@@ -54,11 +60,12 @@ public class AuthService {
     public void register(RegisterRequest request) {
         log.info("Attempting to register user with username: {}", request.getUsername());
         checkUserExists(request);
-        checkPasswordsMatch(request);
-        checkUnderage(request.getBirthDate());
+        checkPasswordsMatch(request.getPassword(), request.getConfirmPassword());
 
         UserEntity user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(Role.USER);
+        user.setStatus(UserStatus.PENDING);
 
         var savedUser = userRepository.save(user);
         log.info("User registered successfully with ID: {}", savedUser.getId());
@@ -128,6 +135,12 @@ public class AuthService {
                 .build();
     }
 
+    /**
+     * Confirms user email using the verification token and activates the account.
+     *
+     * @param token the verification token from Redis
+     * @return redirect URL with generated tokens
+     */
     @Transactional
     public String confirm(String token) {
         String email = (String) redisTemplate.opsForValue().get("CONFIRM:" + token);
@@ -136,11 +149,7 @@ public class AuthService {
             throw new InvalidTokenException("Invalid or expired confirmation token");
         }
 
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> {
-                    log.error("User not found with email: {}", email);
-                    return new UserNotFoundException("User not found!");
-                });
+        UserEntity user = userService.findUserOrThrow(email);
 
         redisTemplate.delete("CONFIRM:" + token);
 
@@ -150,6 +159,7 @@ public class AuthService {
                 .toList();
 
         user.setStatus(UserStatus.ACTIVE);
+        log.info("User account activated for email: {}", email);
         String jwtToken = jwtService.generateToken(email, user.getId(), roles);
         String refreshToken = refreshTokenService.createRefreshToken(user).getToken();
 
@@ -159,12 +169,94 @@ public class AuthService {
         );
     }
 
-    private void checkPasswordsMatch(RegisterRequest request) {
-        if (!request.getPassword().equals(request.getConfirmPassword())) {
+    /**
+     * Resets the user's password using a valid reset token.
+     *
+     * @param request the new password details
+     * @param token the password reset token
+     */
+    @Transactional
+    public void resetPassword(PasswordResetRequest request, String token) {
+        String email = (String) redisTemplate.opsForValue().get("PWD_RESET:" + token);
+
+        if (email == null) {
+            throw new InvalidArgumentException("Invalid or expired token");
+        }
+
+        UserEntity user = userService.findUserOrThrow(email);
+
+        redisTemplate.delete("PWD_RESET:" + token);
+
+        checkPasswordsMatch(request.getPassword(), request.getConfirmPassword());
+
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        log.info("Password successfully reset for user: {}", email);
+        kafkaTemplate.send("password-reset-success", email);
+    }
+
+    /**
+     * Changes the password for an authenticated user after verifying the old password.
+     *
+     * @param passwordChangeRequest the old and new password details
+     * @param id the user ID
+     */
+    @Transactional
+    public void changePassword(PasswordChangeRequest passwordChangeRequest, Long id) {
+        if (id == null) {
+            throw new UnauthorizedException("Unauthorized user!");
+        }
+
+        checkPasswordsMatch(passwordChangeRequest.getNewPassword(), passwordChangeRequest.getConfirmPassword());
+
+        UserEntity user = userService.findUserOrThrow(id);
+
+        if (!passwordEncoder.matches(passwordChangeRequest.getOldPassword(), user.getPassword())) {
+            throw new InvalidArgumentException("Invalid old password");
+        }
+
+        user.setPassword(passwordEncoder.encode(passwordChangeRequest.getNewPassword()));
+        log.info("Password successfully changed for user: {}", user.getUsername());
+        kafkaTemplate.send("password-reset-success", user.getEmail());
+    }
+
+    /**
+     * Verifies the user's email and updates their status to ACTIVE.
+     *
+     * @param id the user ID to verify
+     */
+    @Transactional
+    public void verifyEmail(Long id) {
+        if (id == null) {
+            throw new UnauthorizedException("Unauthorized user!");
+        }
+
+        UserEntity user = userService.findUserOrThrow(id);
+        verificationService.createAndSendVerification(user.getEmail());
+
+        user.setStatus(UserStatus.ACTIVE);
+        user.setEmailVerified(true);
+        log.info("Email successfully verified for user: {}", user.getUsername());
+        kafkaTemplate.send("verify-email-success", user.getEmail());
+    }
+
+    /**
+     * Checks if the provided password and confirmation password match.
+     *
+     * @param password the new password
+     * @param confirmPassword the confirmation password
+     */
+    private void checkPasswordsMatch(String password, String confirmPassword) {
+        if (!Objects.equals(password, confirmPassword)) {
             throw new PasswordMismatchException("Passwords do not match");
         }
     }
 
+    /**
+     * Validates that the username, email, and phone number are unique
+     * before proceeding with registration.
+     *
+     * @param request the registration details
+     */
     private void checkUserExists(RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new UserAlreadyExistsException("Username already exists");
@@ -176,12 +268,6 @@ public class AuthService {
 
         if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
             throw new UserAlreadyExistsException("Phone number already exists");
-        }
-    }
-
-    private void checkUnderage(LocalDate date) {
-        if (Period.between(date, LocalDate.now()).getYears() < 18) {
-            throw new UnderageUserException("The user must be over 18 years old");
         }
     }
 }

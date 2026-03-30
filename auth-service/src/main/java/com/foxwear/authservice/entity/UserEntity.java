@@ -56,7 +56,7 @@ public class UserEntity extends BaseAuditEntity implements UserDetails {
     @Column(unique = true, nullable = false)
     String email;
 
-    @Size(min = 12, max = 17)
+    @Size(max = 17)
     @Column(name = "phone_number", unique = true, length = 17)
     String phoneNumber;
 

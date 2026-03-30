@@ -32,6 +32,9 @@ public enum ErrorCode {
     PASSWORD_MISMATCH("AUTH_008"),
     UNDERAGE("AUTH_009"),
 
+    // Address related errors
+    ADDRESS_NOT_FOUND("ADDRESS_001"),
+
     // Dynamic Data related errors
     DYNAMIC_DATA_NOT_FOUND("DYNAMIC_001"),
     DYNAMIC_DATA_ALREADY_EXISTS("DYNAMIC_002"),

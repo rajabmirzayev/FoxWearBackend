@@ -1,10 +1,10 @@
 package com.foxwear.authservice.controller;
 
-import com.foxwear.authservice.dto.request.LoginRequest;
-import com.foxwear.authservice.dto.request.RegisterRequest;
+import com.foxwear.authservice.dto.request.*;
 import com.foxwear.authservice.dto.response.AuthResponse;
 import com.foxwear.authservice.service.AuthService;
 import com.foxwear.authservice.service.RefreshTokenService;
+import com.foxwear.authservice.service.VerificationService;
 import com.foxwear.common.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,6 +24,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final RefreshTokenService refreshTokenService;
+    private final VerificationService verificationService;
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user", description = "Creates a new user account and sends a verification email.")
@@ -59,6 +60,25 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(null, "Successfully logged out"));
     }
 
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Forgot password", description = "Sends a password reset link to the user's email address.")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest
+    ) {
+        verificationService.resetPassword(forgotPasswordRequest.getEmail());
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @PostMapping("/reset")
+    @Operation(summary = "Reset password", description = "Resets the user's password using the token provided in the reset link.")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @Valid @RequestBody PasswordResetRequest request,
+            @RequestParam String token
+    ) {
+        authService.resetPassword(request, token);
+        return ResponseEntity.ok(ApiResponse.success(null, "Successfully changed password"));
+    }
+
     @GetMapping("/confirm")
     @Operation(summary = "Confirm email", description = "Verifies the user's email address using the token sent during registration.")
     public ResponseEntity<?> confirm(
@@ -70,4 +90,22 @@ public class AuthController {
                 .location(URI.create(response))
                 .build();
     }
+
+    @PatchMapping("/change-password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @Valid @RequestBody PasswordChangeRequest passwordChangeRequest,
+            @RequestHeader(value = "X-User-Id") Long id
+    ) {
+        authService.changePassword(passwordChangeRequest, id);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @PatchMapping("/verify-email")
+    public ResponseEntity<ApiResponse<Void>> verifyEmail(
+            @RequestHeader(value = "X-User-Id") Long id
+    ) {
+        authService.verifyEmail(id);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
 }

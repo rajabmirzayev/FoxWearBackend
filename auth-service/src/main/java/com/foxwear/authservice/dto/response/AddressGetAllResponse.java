@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CreateAddressResponse {
+public class AddressGetAllResponse {
 
     Long id;
     String title;
@@ -21,7 +21,5 @@ public class CreateAddressResponse {
     String doorCode;
     String fullAddressText;
     Boolean isDefault;
-    Double latitude;
-    Double longitude;
 
 }

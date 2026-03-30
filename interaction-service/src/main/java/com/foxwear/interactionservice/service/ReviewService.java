@@ -2,16 +2,18 @@ package com.foxwear.interactionservice.service;
 
 import com.foxwear.common.exception.InvalidArgumentException;
 import com.foxwear.common.exception.UnauthorizedException;
+import com.foxwear.interactionservice.dto.request.ProductReviewCreateRequest;
+import com.foxwear.interactionservice.dto.request.ProductReviewUpdateRequest;
 import com.foxwear.interactionservice.dto.request.SiteReviewCreateRequest;
 import com.foxwear.interactionservice.dto.request.SiteReviewUpdateRequest;
-import com.foxwear.interactionservice.dto.response.SiteReviewGetAllResponse;
-import com.foxwear.interactionservice.dto.response.SiteReviewCreateResponse;
-import com.foxwear.interactionservice.dto.response.SiteReviewUpdateResponse;
+import com.foxwear.interactionservice.dto.response.*;
 import com.foxwear.interactionservice.entity.AbstractReview;
+import com.foxwear.interactionservice.entity.ProductReview;
 import com.foxwear.interactionservice.entity.SiteReview;
 import com.foxwear.interactionservice.exception.ReviewIsNotActiveException;
 import com.foxwear.interactionservice.exception.ReviewNotFoundException;
 import com.foxwear.interactionservice.mapper.ReviewMapper;
+import com.foxwear.interactionservice.repository.ProductReviewRepository;
 import com.foxwear.interactionservice.repository.SiteReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.DoubleBuffer;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,6 +34,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReviewService {
     private final SiteReviewRepository siteReviewRepository;
+    private final ProductReviewRepository productReviewRepository;
     private final ReviewMapper reviewMapper;
 
     /**
@@ -49,7 +51,6 @@ public class ReviewService {
         checkUserIdIsNotNull(userId);
 
         var review = reviewMapper.toSiteReviewEntity(request);
-        review.setId(null);
         review.setUserId(userId);
 
         var savedReview = siteReviewRepository.save(review);
@@ -57,6 +58,23 @@ public class ReviewService {
         log.info("Successfully saved site review with ID: {} for user: {}", savedReview.getId(), userId);
 
         return reviewMapper.toSiteReviewCreateResponse(savedReview);
+    }
+
+    @Transactional
+    public ProductReviewCreateResponse createProductReview(ProductReviewCreateRequest request, Long productId, Long userId) {
+        log.info("Attempting to create product review for user: {}", userId);
+
+        checkUserIdIsNotNull(userId);
+
+        var review = reviewMapper.toProductReviewEntity(request);
+        review.setUserId(userId);
+        review.setProductId(productId);
+
+        var savedReview = productReviewRepository.save(review);
+
+        log.info("Successfully saved product review with ID: {} for user: {}", savedReview.getId(), userId);
+
+        return reviewMapper.toProductReviewCreateResponse(savedReview);
     }
 
     /**
@@ -76,6 +94,16 @@ public class ReviewService {
         return reviews.map(reviewMapper::toSiteReviewGetAllResponse);
     }
 
+    @Transactional(readOnly = true)
+    public Page<ProductReviewGetAllResponse> getAllProductReviews(Integer page, Integer size, Long productId) {
+        log.info("Fetching paginated product reviews. Page: {}, Size: {}", page, size);
+
+        Pageable pageable = PageRequest.of(page, size);
+        var reviews = productReviewRepository.findAllByIsActiveTrue(pageable, productId);
+
+        return reviews.map(reviewMapper::toProductReviewGetAllResponse);
+    }
+
     /**
      * Retrieves all reviews created by a specific user.
      *
@@ -86,15 +114,31 @@ public class ReviewService {
     public List<SiteReviewGetAllResponse> getMySiteReviews(Long userId) {
         log.info("Fetching all reviews for user ID: {}", userId);
         if (userId == null) {
-            log.warn("User ID is null, returning empty list of reviews");
+            log.warn("User ID is null, returning empty list of site reviews");
             return Collections.emptyList();
         }
 
         var reviews = siteReviewRepository.findAllByUserId(userId);
-        log.info("Found {} reviews for user ID: {}", reviews.size(), userId);
+        log.info("Found {} site reviews for user ID: {}", reviews.size(), userId);
 
         return reviews.stream()
                 .map(reviewMapper::toSiteReviewGetAllResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductReviewGetAllResponse> getMyProductReviews(Long userId) {
+        log.info("Fetching all product reviews for user ID: {}", userId);
+        if (userId == null) {
+            log.warn("User ID is null, returning empty list of product reviews");
+            return Collections.emptyList();
+        }
+
+        var reviews = productReviewRepository.findAllByUserId(userId);
+        log.info("Found {} product reviews for user ID: {}", reviews.size(), userId);
+
+        return reviews.stream()
+                .map(reviewMapper::toProductReviewGetAllResponse)
                 .toList();
     }
 
@@ -104,9 +148,16 @@ public class ReviewService {
      * @return the average rating as a Double
      */
     @Transactional(readOnly = true)
-    public Double getAverageRate() {
+    public Double getAverageSiteRate() {
         Double averageRate = siteReviewRepository.getAverageRate();
-        log.info("Calculated average rate: {}", averageRate);
+        log.info("Calculated average site rate: {}", averageRate);
+        return averageRate;
+    }
+
+    @Transactional(readOnly = true)
+    public Double getAverageProductRate(Long productId) {
+        Double averageRate = productReviewRepository.getAverageRate(productId);
+        log.info("Calculated average product rate: {}", averageRate);
         return averageRate;
     }
 
@@ -117,20 +168,37 @@ public class ReviewService {
      * @return true if the review is now active, false otherwise
      */
     @Transactional
-    public boolean activateReview(Long id) {
-        log.info("Attempting to toggle activation status for review ID: {}", id);
-        var review = findReviewOrThrow(id);
+    public boolean activateSiteReview(Long id) {
+        log.info("Attempting to toggle activation status for site review ID: {}", id);
+        var review = findSiteReviewOrThrow(id);
 
         if (review.isActive()) {
             review.setActive(false);
-            log.info("Review ID: {} has been deactivated", id);
+            log.info("Site Review ID: {} has been deactivated", id);
             return false;
         } else {
             review.setActive(true);
-            log.info("Review ID: {} has been activated", id);
+            log.info("Site Review ID: {} has been activated", id);
             return true;
         }
     }
+
+    @Transactional
+    public boolean activateProductReview(Long id) {
+        log.info("Attempting to toggle activation status for product review ID: {}", id);
+        var review = findProductReviewOrThrow(id);
+
+        if (review.isActive()) {
+            review.setActive(false);
+            log.info("Product Review ID: {} has been deactivated", id);
+            return false;
+        } else {
+            review.setActive(true);
+            log.info("Product Review ID: {} has been activated", id);
+            return true;
+        }
+    }
+
 
     /**
      * Updates an existing site review.
@@ -142,7 +210,7 @@ public class ReviewService {
     @Transactional
     public SiteReviewUpdateResponse updateSiteReview(SiteReviewUpdateRequest request, Long id, Long userId) {
         log.info("Attempting to update site review with ID: {}", id);
-        var review = findReviewOrThrow(id);
+        var review = findSiteReviewOrThrow(id);
 
         checkUserIdIsNotNull(userId);
         checkReviewIsActive(review, id);
@@ -155,6 +223,22 @@ public class ReviewService {
         return reviewMapper.toSiteReviewUpdateResponse(review);
     }
 
+    @Transactional
+    public ProductReviewUpdateResponse updateProductReview(ProductReviewUpdateRequest request, Long id, Long userId) {
+        log.info("Attempting to update product review with ID: {}", id);
+        var review = findProductReviewOrThrow(id);
+
+        checkUserIdIsNotNull(userId);
+        checkReviewIsActive(review, id);
+        checkOwnerReview(review, userId, id);
+
+        review.setRate(request.getRate());
+        review.setDescription(request.getDescription());
+
+        log.info("Successfully updated product review with ID: {}", id);
+        return reviewMapper.toProductReviewUpdateResponse(review);
+    }
+
     /**
      * Deletes a site review by its ID.
      *
@@ -163,7 +247,7 @@ public class ReviewService {
     @Transactional
     public void deleteSiteReview(Long id, Long userId) {
         log.info("Attempting to delete site review with ID: {}", id);
-        var review = findReviewOrThrow(id);
+        var review = findSiteReviewOrThrow(id);
 
         checkUserIdIsNotNull(userId);
         checkReviewIsActive(review, id);
@@ -173,6 +257,19 @@ public class ReviewService {
         log.info("Successfully deleted site review with ID: {}", id);
     }
 
+    @Transactional
+    public void deleteProductReview(Long id, Long userId) {
+        log.info("Attempting to delete product review with ID: {}", id);
+        var review = findProductReviewOrThrow(id);
+
+        checkUserIdIsNotNull(userId);
+        checkReviewIsActive(review, id);
+        checkOwnerReview(review, userId, id);
+
+        productReviewRepository.delete(review);
+        log.info("Successfully deleted product review with ID: {}", id);
+    }
+
     /**
      * Helper method to find a review by ID or throw an exception if not found.
      *
@@ -180,11 +277,19 @@ public class ReviewService {
      * @return the found SiteReview entity
      * @throws ReviewNotFoundException if the review does not exist
      */
-    private SiteReview findReviewOrThrow(Long id) {
+    private SiteReview findSiteReviewOrThrow(Long id) {
         return siteReviewRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Failed to find site review with ID: {}", id);
                     return new ReviewNotFoundException("Site review not found!");
+                });
+    }
+
+    private ProductReview findProductReviewOrThrow(Long id) {
+        return productReviewRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Failed to find product review with ID: {}", id);
+                    return new ReviewNotFoundException("Product review not found!");
                 });
     }
 

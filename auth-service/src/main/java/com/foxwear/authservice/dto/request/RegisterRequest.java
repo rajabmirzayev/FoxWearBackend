@@ -1,6 +1,7 @@
 package com.foxwear.authservice.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.foxwear.authservice.annotation.Adult;
 import com.foxwear.common.enums.Gender;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -32,7 +33,10 @@ public class RegisterRequest {
     @NotBlank(message = "Email is required")
     String email;
 
-    @Pattern(regexp = "^\\+994\\s(50|51|55|70|77|99|10)\\s\\d{3}\\s\\d{2}\\s\\d{2}$", message = "Phone number must this format: +994 12 345 67 89)")
+    @Pattern(
+            regexp = "^(\\+994\\s(50|51|55|70|77|99|10)\\s\\d{3}\\s\\d{2}\\s\\d{2})?$",
+            message = "Phone number must this format: +994 12 345 67 89)"
+    )
     String phoneNumber;
 
     @NotBlank(message = "Password is required")
@@ -47,7 +51,7 @@ public class RegisterRequest {
     @NotNull(message = "Gender must be specified")
     Gender gender;
 
-    @Past(message = "Birth date must be in the past")
+    @Adult(message = "User must be at least 18 years old")
     @JsonFormat(pattern = "dd-MM-yyyy")
     LocalDate birthDate;
 

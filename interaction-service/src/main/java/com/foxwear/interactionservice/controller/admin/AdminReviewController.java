@@ -29,8 +29,20 @@ public class AdminReviewController {
     public ResponseEntity<ApiResponse<Void>> patchString(
             @Parameter(description = "ID of the review to be toggled", required = true) @PathVariable Long id
     ) {
-        var response = reviewService.activateReview(id);
+        var response = reviewService.activateSiteReview(id);
         return ResponseEntity.ok(ApiResponse.success(null, response ? "Activated" : "Deactivated"));
     }
 
+    @Operation(summary = "Toggle product review activation status", description = "Activates or deactivates a product review by its ID")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully toggled product review status"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Product review not found")
+    })
+    @PatchMapping("/product/{id}/activate")
+    public ResponseEntity<ApiResponse<Void>> patchProduct(
+            @Parameter(description = "ID of the review to be toggled", required = true) @PathVariable Long id
+    ) {
+        var response = reviewService.activateProductReview(id);
+        return ResponseEntity.ok(ApiResponse.success(null, response ? "Activated" : "Deactivated"));
+    }
 }

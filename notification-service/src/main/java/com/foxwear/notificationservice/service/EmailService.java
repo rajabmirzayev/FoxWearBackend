@@ -1,5 +1,6 @@
 package com.foxwear.notificationservice.service;
 
+import com.foxwear.common.event.PasswordResetEvent;
 import com.foxwear.common.event.RegistrationEvent;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -21,7 +22,11 @@ public class EmailService {
             helper.setTo(event.getEmail());
             helper.setSubject("Welcome to FoxWear - Verify Your Account");
 
-            String htmlContent = buildHtmlEmail(event.getLink());
+            String header = "Confirm Your Email Address";
+            String text = "Welcome to the FoxWear community! We're excited to have you on board. To get started, please verify your account by clicking the button below.";
+            String buttonText = "Verify Your Email";
+
+            String htmlContent = buildHtmlVerificationEmail(header, text, event.getLink(), buttonText);
             helper.setText(htmlContent, true);
 
             mailSender.send(message);
@@ -30,7 +35,80 @@ public class EmailService {
         }
     }
 
-    private String buildHtmlEmail(String link) {
+    public void sendPasswordResetEmail(PasswordResetEvent event) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(event.getEmail());
+            helper.setSubject("FoxWear - Password Reset Request");
+
+            String header = "Reset Your Password";
+            String text = "Welcome back to the FoxWear community! Use the link below to reset your password. If you did not send this, please ignore it.";
+            String buttonText = "Reset Password";
+
+            String htmlContent = buildHtmlVerificationEmail(header, text, event.getLink(), buttonText);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send email", e);
+        }
+    }
+
+    public void sendPasswordResetInfoEmail(String email) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(email);
+            helper.setSubject("Security Alert: Your FoxWear Password Has Been Changed");
+
+            String htmlContent = buildHtmlPasswordResetEmail();
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send email", e);
+        }
+    }
+
+    public void sendAccountActivatedAlert(String email) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(email);
+            helper.setSubject("Welcome to FoxWear - Your Account is Active!");
+
+            String htmlContent = buildAccountActivatedHtml();
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send account activation success email", e);
+        }
+    }
+
+    public void sendEmailChangedAlert(String email) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(email);
+            helper.setSubject("Security Update: Your FoxWear Email Has Been Changed");
+
+            String htmlContent = buildEmailChangedHtml();
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send email change notification", e);
+        }
+    }
+
+    private String buildHtmlVerificationEmail(String header, String text, String link, String buttonText) {
         return "<!DOCTYPE html>" +
                 "<html>" +
                 "<head>" +
@@ -48,9 +126,9 @@ public class EmailService {
                 "      <h1>FoxWear</h1>" +
                 "    </div>" +
                 "    <div class='content'>" +
-                "      <h2>Confirm Your Email Address</h2>" +
-                "      <p>Welcome to the FoxWear community! We're excited to have you on board. To get started, please verify your account by clicking the button below.</p>" +
-                "      <a href='" + link + "' class='button'>Verify Your Email</a>" +
+                "      <h2>" + header + "</h2>" +
+                "      <p>" + text + "</p>" +
+                "      <a href='" + link + "' class='button'>" + buttonText + "</a>" +
                 "      <p style='margin-top: 25px;'>If the button doesn't work, you can copy and paste the following link into your browser:</p>" +
                 "      <p style='font-size: 11px; color: #888;'>" + link + "</p>" +
                 "    </div>" +
@@ -62,4 +140,80 @@ public class EmailService {
                 "</body>" +
                 "</html>";
     }
+
+    private String buildHtmlPasswordResetEmail() {
+        return "<div style=\"font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #f0f0f0; border-radius: 12px; background-color: #ffffff;\">" +
+                "<div style=\"text-align: center; margin-bottom: 25px;\">" +
+                "<h1 style=\"color: #1a73e8; margin: 0;\">FoxWear</h1>" +
+                "</div>" +
+                "<h2 style=\"color: #202124; font-size: 22px; text-align: center; margin-bottom: 20px;\">Password Changed Successfully</h2>" +
+                "<p style=\"color: #3c4043; font-size: 16px; line-height: 1.5;\">Hello,</p>" +
+                "<p style=\"color: #3c4043; font-size: 16px; line-height: 1.5;\">This is a confirmation that the password for your <strong>FoxWear</strong> account has been recently changed.</p>" +
+
+                "<div style=\"background-color: #fce8e6; padding: 20px; border-radius: 8px; border-left: 6px solid #d93025; margin: 25px 0;\">" +
+                "<p style=\"margin: 0; color: #a50e0e; font-weight: bold; font-size: 14px;\">If you did not make this change:</p>" +
+                "<p style=\"margin: 10px 0 0 0; color: #a50e0e; font-size: 14px;\">Please contact our support team immediately or reset your password again to secure your account. Your account security is our top priority.</p>" +
+                "</div>" +
+
+                "<p style=\"color: #70757a; font-size: 14px; text-align: center; margin-top: 30px;\">If this was you, you can safely disregard this email.</p>" +
+                "<hr style=\"border: 0; border-top: 1px solid #eeeeee; margin: 30px 0;\">" +
+                "<footer style=\"text-align: center; color: #9aa0a6; font-size: 12px;\">" +
+                "&copy; 2026 FoxWear Security Team<br>Azerbaijan, Baku" +
+                "</footer>" +
+                "</div>";
+    }
+
+    private String buildAccountActivatedHtml() {
+        return "<div style=\"font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #e8f5e9; border-radius: 12px; background-color: #ffffff;\">" +
+                "<div style=\"text-align: center; margin-bottom: 25px;\">" +
+                "<h1 style=\"color: #2e7d32; margin: 0;\">FoxWear</h1>" +
+                "</div>" +
+                "<h2 style=\"color: #202124; font-size: 22px; text-align: center; margin-bottom: 20px;\">Account Activated!</h2>" +
+                "<p style=\"color: #3c4043; font-size: 16px; line-height: 1.6;\">Hello,</p>" +
+                "<p style=\"color: #3c4043; font-size: 16px; line-height: 1.6;\">Great news! Your <strong>FoxWear</strong> account has been successfully verified and is now fully active.</p>" +
+
+                "<div style=\"text-align: center; margin: 30px 0;\">" +
+                "<a href=\"http://localhost:3000/login\" style=\"background-color: #2e7d32; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;\">Log In to Your Account</a>" +
+                "</div>" +
+
+                "<p style=\"color: #3c4043; font-size: 16px; line-height: 1.6;\">You can now explore our latest collections and start shopping.</p>" +
+
+                "<p style=\"color: #70757a; font-size: 14px; text-align: center; margin-top: 30px;\">If you have any questions, feel free to reply to this email.</p>" +
+                "<hr style=\"border: 0; border-top: 1px solid #eeeeee; margin: 30px 0;\">" +
+                "<footer style=\"text-align: center; color: #9aa0a6; font-size: 12px;\">" +
+                "&copy; 2026 FoxWear Team<br>Welcome to the Community" +
+                "</footer>" +
+                "</div>";
+    }
+
+    private String buildEmailChangedHtml() {
+        return "<div style=\"font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #eeeeee; border-radius: 12px; background-color: #ffffff;\">" +
+                "<div style=\"text-align: center; margin-bottom: 25px;\">" +
+                "<h1 style=\"color: #1a73e8; margin: 0;\">FoxWear</h1>" +
+                "</div>" +
+                "<h2 style=\"color: #202124; font-size: 20px; text-align: center; margin-bottom: 20px;\">Email Address Updated</h2>" +
+                "<p style=\"color: #3c4043; font-size: 16px; line-height: 1.6;\">Hello,</p>" +
+                "<p style=\"color: #3c4043; font-size: 16px; line-height: 1.6;\">The email address associated with your <strong>FoxWear</strong> account has been successfully changed.</p>" +
+
+                "<div style=\"background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #1a73e8; margin: 25px 0;\">" +
+                "<p style=\"margin: 0; color: #202124; font-size: 14px; line-height: 1.5;\">" +
+                "<strong>What does this mean?</strong><br>" +
+                "From now on, you should use this email address to log in to your account and receive all future notifications." +
+                "</p>" +
+                "</div>" +
+
+                "<div style=\"background-color: #fff4e5; padding: 15px; border-radius: 8px; border: 1px solid #ffe1b8; margin-bottom: 25px;\">" +
+                "<p style=\"margin: 0; color: #856404; font-size: 13px;\">" +
+                "<strong>Security Notice:</strong> If you did not authorize this change, please contact our support team immediately to secure your account." +
+                "</p>" +
+                "</div>" +
+
+                "<p style=\"color: #70757a; font-size: 14px; text-align: center;\">Thank you for being part of FoxWear.</p>" +
+                "<hr style=\"border: 0; border-top: 1px solid #eeeeee; margin: 30px 0;\">" +
+                "<footer style=\"text-align: center; color: #9aa0a6; font-size: 12px;\">" +
+                "&copy; 2026 FoxWear Team<br>Security Notifications" +
+                "</footer>" +
+                "</div>";
+    }
+
 }
