@@ -44,6 +44,9 @@ public enum ErrorCode {
     REVIEW_NOT_FOUND("RVW_001"),
     REVIEW_IS_NOT_ACTIVE("RVW_002"),
 
+    // Cart related errors
+    CART_NOT_FOUND("CART_001"),
+
     // Server errors
     INTERNAL_SERVER_ERROR("SERVER_001");
 

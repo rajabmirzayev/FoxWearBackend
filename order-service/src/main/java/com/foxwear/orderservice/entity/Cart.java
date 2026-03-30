@@ -36,8 +36,8 @@ public class Cart {
     @Column(name = "total_price", precision = 12, scale = 2, nullable = false)
     BigDecimal totalPrice = BigDecimal.ZERO;
 
-    @SuppressWarnings("unused") // TODO delete when use
     public void updateTotalPrice() {
+        System.out.println(items);
         this.totalPrice = items.stream()
                 .filter(item -> item.getProductItemId() != null)
                 .map(item -> item.getSubTotal() != null ? item.getSubTotal() : BigDecimal.ZERO)

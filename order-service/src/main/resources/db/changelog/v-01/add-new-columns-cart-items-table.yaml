@@ -1,0 +1,54 @@
+databaseChangeLog:
+  - changeSet:
+      id: 30032026-15
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: color_name
+                  type: VARCHAR(255)
+              - column:
+                  name: image_url
+                  type: VARCHAR(255)
+              - column:
+                  name: product_name
+                  type: VARCHAR(255)
+              - column:
+                  name: size_value
+                  type: VARCHAR(255)
+            tableName: cart_items
+  - changeSet:
+      id: 30032026-16
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: color_name
+            tableName: cart_items
+  - changeSet:
+      id: 30032026-17
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: image_url
+            tableName: cart_items
+  - changeSet:
+      id: 30032026-18
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: product_name
+            tableName: cart_items
+  - changeSet:
+      id: 30032026-19
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: size_value
+            tableName: cart_items
+
