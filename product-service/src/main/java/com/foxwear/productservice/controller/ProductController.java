@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -77,6 +78,14 @@ public class ProductController {
     @GetMapping("/size")
     public ResponseEntity<ApiResponse<List<SizeResponse>>> getAllSizes() {
         var response = productService.getAllSizes();
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/{id}/price")
+    public ResponseEntity<ApiResponse<BigDecimal>> getProductPrice(
+            @Parameter(description = "ID of the product item") @PathVariable Long id
+    ) {
+        var response = productService.getProductPrice(id);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

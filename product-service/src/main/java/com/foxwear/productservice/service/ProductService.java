@@ -282,6 +282,13 @@ public class ProductService {
                 .toList();
     }
 
+    public BigDecimal getProductPrice(Long itemId) {
+        ProductItem item = findProductItemOrThrow(itemId);
+        Product product = item.getColorOption().getProduct();
+
+        return product.getDiscountPrice() != null ? product.getDiscountPrice() : product.getOriginalPrice();
+    }
+
     /**
      * Updates an existing product's details and its color options.
      */
