@@ -174,6 +174,28 @@ public class CartService {
     }
 
     /**
+     * Removes a specific item from the user's cart.
+     *
+     * @param itemId The ID of the cart item to delete.
+     * @param userId The ID of the user owning the cart.
+     */
+    @Transactional
+    public void deleteItem(Long itemId, Long userId) {
+        log.info("Deleting item: {} from cart for user: {}", itemId, userId);
+        checkUserIdIsNotNull(userId);
+
+        Cart cart = findCartOrThrow(userId);
+        CartItem item = findCartItemOrThrow(itemId);
+        checkCartIdMatch(cart, item);
+
+        cart.getItems().remove(item);
+        cartItemRepository.delete(item);
+
+        cart.updateTotalPrice();
+        log.info("Item: {} successfully deleted and cart total updated", itemId);
+    }
+
+    /**
      * Finds a cart by user ID or throws an exception if not found.
      *
      * @param userId The ID of the user.

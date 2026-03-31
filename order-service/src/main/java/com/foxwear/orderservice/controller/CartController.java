@@ -9,6 +9,7 @@ import com.foxwear.orderservice.service.CartService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +24,7 @@ public class CartController {
     @Operation(summary = "Add item to cart", description = "Adds a new item or increases quantity if item already exists in the cart")
     @PostMapping
     public ResponseEntity<ApiResponse<CartItemCreateResponse>> createCart(
-            @RequestBody CartItemCreateRequest request,
+            @Valid @RequestBody CartItemCreateRequest request,
             @RequestHeader(value = "X-User-Id") Long userId
     ) {
         var response = cartService.addItemToCart(request, userId);
@@ -57,6 +58,16 @@ public class CartController {
     ) {
         var response = cartService.decreaseQuantity(itemId, userId);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @Operation(summary = "Remove item from cart", description = "Deletes a specific item from the user's shopping cart")
+    @DeleteMapping("{itemId}")
+    public ResponseEntity<ApiResponse<Void>> deleteItem(
+            @Parameter(description = "The ID of the cart item to delete") @PathVariable Long itemId,
+            @RequestHeader(value = "X-User-Id") Long userId
+    ) {
+        cartService.deleteItem(itemId, userId);
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
 }
