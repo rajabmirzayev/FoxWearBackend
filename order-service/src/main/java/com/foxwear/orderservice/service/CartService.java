@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -137,6 +138,23 @@ public class CartService {
     }
 
     /**
+     * Retrieves the total number of items in the user's cart.
+     *
+     * @param userId The ID of the user.
+     * @return The total quantity of all items in the cart.
+     */
+    @Transactional(readOnly = true)
+    public Integer getCartCount(Long userId) {
+        checkUserIdIsNotNull(userId);
+
+        return cartRepository.findByUserId(userId)
+                .map(cart -> cart.getItems().stream()
+                        .mapToInt(CartItem::getQuantity)
+                        .sum())
+                .orElse(0);
+    }
+
+    /**
      * Increases the quantity of a specific item in the cart by one.
      *
      * @param itemId The ID of the cart item.
@@ -212,6 +230,25 @@ public class CartService {
 
         cart.updateTotalPrice();
         log.info("Item: {} successfully deleted and cart total updated", itemId);
+    }
+
+    /**
+     * Removes all items from the user's cart and resets the total price.
+     *
+     * @param userId The ID of the user whose cart should be cleared.
+     */
+    @Transactional
+    public void clearCart(Long userId) {
+        checkUserIdIsNotNull(userId);
+        Cart cart = findCartOrThrow(userId);
+
+        cart.getItems().clear();
+
+        cart.setTotalPrice(BigDecimal.ZERO);
+
+        cartRepository.save(cart);
+
+        log.info("Cart cleared for user {}", userId);
     }
 
     /**

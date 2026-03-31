@@ -40,6 +40,15 @@ public class CartController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @Operation(summary = "Get cart items count", description = "Returns the total quantity of all items in the user's cart")
+    @GetMapping("/count")
+    public ResponseEntity<ApiResponse<Integer>> getCartCount(
+            @RequestHeader(value = "X-User-Id") Long userId
+    ) {
+        int count = cartService.getCartCount(userId);
+        return ResponseEntity.ok(ApiResponse.success(count));
+    }
+
     @Operation(summary = "Increase item quantity", description = "Increments the quantity of a specific item in the cart by 1")
     @PatchMapping("/increase/{itemId}")
     public ResponseEntity<ApiResponse<CartItemUpdateResponse>> increaseItemQuantity(
@@ -67,6 +76,15 @@ public class CartController {
             @RequestHeader(value = "X-User-Id") Long userId
     ) {
         cartService.deleteItem(itemId, userId);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @Operation(summary = "Clear all items", description = "Removes all items from the user's cart")
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<Void>> clearCart(
+            @RequestHeader(value = "X-User-Id") Long userId
+    ) {
+        cartService.clearCart(userId);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
