@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/v1/carts/**").permitAll() // todo delete this
+                        .requestMatchers("/api/v1/orders/**").permitAll() // todo delete this
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",

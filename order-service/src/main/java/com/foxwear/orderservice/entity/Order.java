@@ -24,6 +24,7 @@ import java.util.List;
 @Check(name = "check_total_prices", constraints = "total_original_price >= 0 AND total_discount_price >= 0")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -46,11 +47,6 @@ public class Order extends BaseAuditEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     OrderStatus status;
-
-    @NotNull
-    @DecimalMin(value = "0.0", inclusive = false)
-    @Column(name = "total_original_price", precision = 12, scale = 2, nullable = false)
-    BigDecimal totalOriginalPrice;
 
     @NotNull
     @DecimalMin("0.0")
@@ -97,6 +93,15 @@ public class Order extends BaseAuditEntity {
     @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
     @Column(name = "estimated_delivery_date")
     LocalDateTime estimatedDeliveryDate;
+
+    @Column(name = "courier_id")
+    Long courierId;
+
+    @Column(name = "picked_up_at")
+    LocalDateTime pickedUpAt;
+
+    @Column(name = "prepared_at")
+    LocalDateTime preparedAt;
 
     @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
     @Column(name = "delivered_at")

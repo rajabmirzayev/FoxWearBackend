@@ -17,3 +17,7 @@ databaseChangeLog:
       file: classpath://db/changelog/v-01/add-new-columns-cart-items-table.yaml
   - include:
       file: classpath://db/changelog/v-01/add-slug-column-to-cart-item-table.yaml
+  - include:
+      file: classpath://db/changelog/v-01/add-new-columns-and-delete-some-columns.yaml
+  - include:
+      file: classpath://db/changelog/v-01/delete-sku-column-in-order-items.yaml

@@ -12,6 +12,7 @@ import java.math.RoundingMode;
 @Table(name = "order_items")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -31,9 +32,24 @@ public class OrderItem {
     Long productItemId;
 
     @NotBlank
-    @Size(max = 100)
-    @Column(name = "product_title_snapshot", nullable = false, length = 100)
-    String productTitleSnapshot;
+    @Column(name = "product_name", nullable = false)
+    String productName;
+
+    @NotNull
+    @Column(name = "color_name", nullable = false)
+    String colorName;
+
+    @NotNull
+    @Column(name = "image_url", nullable = false)
+    String imageUrl;
+
+    @NotNull
+    @Column(name = "size_value", nullable = false)
+    String sizeValue;
+
+    @NotNull
+    @Column(nullable = false)
+    String slug;
 
     @NotNull
     @Min(1)
@@ -51,11 +67,6 @@ public class OrderItem {
     @NotNull
     @Column(name = "sub_total", nullable = false, precision = 12, scale = 2)
     BigDecimal subTotal;
-
-    @NotBlank
-    @Size(min = 3, max = 50)
-    @Column(nullable = false, length = 50)
-    String skuSnapshot;
 
     @NotNull
     @Column(name = "is_reviewed", nullable = false)

@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 01042026-12
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - dropColumn:
+            columnName: sku_snapshot
+            tableName: order_items
+
