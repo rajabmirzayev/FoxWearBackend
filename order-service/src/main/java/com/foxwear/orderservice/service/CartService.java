@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Service
@@ -105,17 +106,32 @@ public class CartService {
      * @param userId The ID of the user.
      * @return CartGetResponse containing cart details and the list of items.
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public CartGetResponse getCart(Long userId) {
         checkUserIdIsNotNull(userId);
-
         Cart cart = findCartOrThrow(userId);
 
+        AtomicBoolean isCartUpdated = new AtomicBoolean(false);
+
+        cart.getItems().forEach(item -> {
+            ProductResponse currentProduct = productClient.getProductWithItemId(item.getProductItemId()).getData();
+
+            if (item.getActualUnitPrice().compareTo(currentProduct.getDiscountPrice()) != 0) {
+                item.setActualUnitPrice(currentProduct.getDiscountPrice());
+                item.updateSubtotal();
+                isCartUpdated.set(true);
+            }
+        });
+
+        if (isCartUpdated.get()) {
+            cart.updateTotalPrice();
+            cartRepository.save(cart);
+        }
+
         CartGetResponse cartResponse = cartMapper.toGetResponse(cart);
-        var itemsRes = cart.getItems().stream()
+        cartResponse.setItems(cart.getItems().stream()
                 .map(cartItemMapper::toGetResponse)
-                .toList();
-        cartResponse.setItems(itemsRes);
+                .toList());
 
         return cartResponse;
     }
