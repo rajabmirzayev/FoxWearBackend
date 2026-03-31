@@ -1,6 +1,7 @@
 package com.foxwear.orderservice.service;
 
 import com.foxwear.common.dto.ApiResponse;
+import com.foxwear.common.dto.response.ProductResponse;
 import com.foxwear.common.exception.InvalidArgumentException;
 import com.foxwear.common.exception.UnauthorizedException;
 import com.foxwear.orderservice.client.ProductClient;
@@ -21,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -61,22 +61,17 @@ public class CartService {
         log.info("Adding item to cart for user: {}", userId);
         checkUserIdIsNotNull(userId);
 
-        ApiResponse<BigDecimal> response = productClient.getProductPrice(request.getProductItemId());
+        ApiResponse<ProductResponse> response = productClient.getProductWithItemId(request.getProductItemId());
         if (response == null || response.getData() == null) {
             throw new InvalidArgumentException("Product not found");
         }
 
-        if (response.getData().compareTo(request.getActualUnitPrice()) != 0) {
-            throw new InvalidArgumentException("Invalid price");
-        }
-
         Cart cart = findCartOrThrow(userId);
+        CartItem item;
 
         Optional<CartItem> existingItem = cart.getItems().stream()
                 .filter(i -> i.getProductItemId().equals(request.getProductItemId()))
                 .findFirst();
-
-        CartItem item;
 
         if (existingItem.isPresent()) {
             item = existingItem.get();
@@ -86,6 +81,14 @@ public class CartService {
             item.setCart(cart);
             cart.getItems().add(item);
         }
+
+        item.setProductName(response.getData().getTitle());
+        item.setColorName(response.getData().getColor());
+        item.setImageUrl(response.getData().getImageUrl());
+        item.setSizeValue(response.getData().getSize());
+        item.setOriginalUnitPrice(response.getData().getOriginalPrice());
+        item.setActualUnitPrice(response.getData().getDiscountPrice());
+        item.setSlug(response.getData().getSlug());
 
         item.updateSubtotal();
         cart.updateTotalPrice();

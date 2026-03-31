@@ -18,6 +18,7 @@ public class CartItemCreateResponse {
     String colorName;
     String imageUrl;
     String sizeValue;
+    String slug;
     Integer quantity;
     BigDecimal originalUnitPrice;
     BigDecimal actualUnitPrice;

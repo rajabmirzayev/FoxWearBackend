@@ -1,6 +1,7 @@
 package com.foxwear.productservice.controller;
 
 import com.foxwear.common.dto.ApiResponse;
+import com.foxwear.common.dto.response.ProductResponse;
 import com.foxwear.productservice.dto.request.ProductUserFilterRequest;
 import com.foxwear.productservice.dto.response.*;
 import com.foxwear.productservice.service.ProductService;
@@ -30,6 +31,14 @@ public class ProductController {
             @RequestHeader(value = "X-User-Id") Long userId
     ) {
         var response = productService.getProductWithSlug(slug, userId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/basic/{itemId}")
+    public ResponseEntity<ApiResponse<ProductResponse>> getProduct(
+            @Parameter(description = "ID of the product item") @PathVariable Long itemId
+    ) {
+        var response = productService.getProductWithItemId(itemId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

@@ -19,6 +19,7 @@ public class CartItemUpdateResponse {
     String imageUrl;
     String sizeValue;
     Integer quantity;
+    String slug;
     BigDecimal originalUnitPrice;
     BigDecimal actualUnitPrice;
     BigDecimal subTotal;

@@ -51,6 +51,10 @@ public class CartItem {
     String sizeValue;
 
     @NotNull
+    @Column(nullable = false)
+    String slug;
+
+    @NotNull
     @Min(0)
     @Column(nullable = false)
     Integer quantity;

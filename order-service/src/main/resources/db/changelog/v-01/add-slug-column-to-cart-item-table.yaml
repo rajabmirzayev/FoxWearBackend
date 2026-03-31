@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+      id: 31032026-01
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: slug
+                  type: VARCHAR(255)
+            tableName: cart_items
+  - changeSet:
+      id: 31032026-02
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: slug
+            tableName: cart_items
+

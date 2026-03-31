@@ -1,6 +1,7 @@
 package com.foxwear.productservice.service;
 
 import com.foxwear.common.dto.ApiResponse;
+import com.foxwear.common.dto.response.ProductResponse;
 import com.foxwear.common.exception.InvalidArgumentException;
 import com.foxwear.common.utils.CodeGenerator;
 import com.foxwear.common.utils.StringHelper;
@@ -184,6 +185,30 @@ public class ProductService {
                 .toList());
 
         return productResponse;
+    }
+
+    /**
+     * Retrieves basic product information associated with a specific product item ID.
+     * This is typically used for order processing or cart displays.
+     */
+    @Transactional(readOnly = true)
+    public ProductResponse getProductWithItemId(Long itemId) {
+        log.info("Fetching product information for item ID: {}", itemId);
+        ProductItem item = findProductItemOrThrow(itemId);
+        Product product = item.getColorOption().getProduct();
+
+        ProductResponse response = productMapper.toResponse(product);
+        response.setImageUrl(
+                item.getColorOption()
+                        .getImages().stream()
+                        .filter(ColorOptionImage::isMain)
+                        .findFirst()
+                        .get().getImage()
+        );
+        response.setColor(item.getColorOption().getColorName());
+        response.setSize(item.getProductSize().getSizeValue());
+
+        return response;
     }
 
     /**

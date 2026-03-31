@@ -15,3 +15,5 @@ databaseChangeLog:
       file: classpath://db/changelog/v-01/create-courier-locations-table.yaml
   - include:
       file: classpath://db/changelog/v-01/add-new-columns-cart-items-table.yaml
+  - include:
+      file: classpath://db/changelog/v-01/add-slug-column-to-cart-item-table.yaml
