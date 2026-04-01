@@ -10,13 +10,14 @@ import com.foxwear.orderservice.entity.Order;
 import com.foxwear.orderservice.entity.OrderItem;
 import com.foxwear.orderservice.enums.OrderStatus;
 import com.foxwear.orderservice.enums.PaymentStatus;
+import com.foxwear.orderservice.exception.OrderNotFoundException;
 import com.foxwear.orderservice.mapper.OrderItemMapper;
 import com.foxwear.orderservice.mapper.OrderMapper;
 import com.foxwear.orderservice.repository.OrderRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -77,6 +78,119 @@ public class OrderService {
 
         cartService.clearCart(userId);
         return mapToOrderResponse(savedOrder);
+    }
+
+    /**
+     * Retrieves all orders that are currently in PENDING status.
+     *
+     * @return A list of OrderCreateResponse DTOs
+     */
+    @Transactional(readOnly = true)
+    public List<OrderCreateResponse> getPendingOrders() {
+        return orderRepository.findAllByStatus(OrderStatus.PENDING)
+                .stream()
+                .map(this::mapToOrderResponse)
+                .toList();
+    }
+
+    /**
+     * Updates the order status to PREPARING.
+     *
+     * @param orderId The ID of the order to update
+     * @param adminId The ID of the admin performing the action
+     */
+    @Transactional
+    public void setPreparingOrder(Long orderId, Long adminId) {
+        log.info("Admin {} is setting order {} to PREPARING status", adminId, orderId);
+        checkUserIdIsNotNull(adminId);
+        Order order = findOrderOrThrow(orderId);
+
+        if (order.getStatus() == OrderStatus.PENDING)
+            order.setStatus(OrderStatus.PREPARING);
+        else
+            throw new InvalidArgumentException("Cannot set preparing order");
+    }
+
+    /**
+     * Updates the order status to READY_FOR_PICKUP and records the preparation time.
+     *
+     * @param orderId The ID of the order to update
+     * @param adminId The ID of the admin performing the action
+     */
+    @Transactional
+    public void setPreparedOrder(Long orderId, Long adminId) {
+        log.info("Admin {} is setting order {} to READY_FOR_PICKUP status", adminId, orderId);
+        checkUserIdIsNotNull(adminId);
+        Order order = findOrderOrThrow(orderId);
+
+        if (order.getStatus() == OrderStatus.PREPARING) {
+            order.setStatus(OrderStatus.READY_FOR_PICKUP);
+            order.setPreparedAt(LocalDateTime.now());
+        } else {
+            throw new InvalidArgumentException("Cannot set prepared order");
+        }
+    }
+
+    /**
+     * Assigns a courier to the order and updates status to SHIPPED.
+     *
+     * @param orderId   The ID of the order
+     * @param courierId The ID of the courier to assign
+     */
+    @Transactional
+    public void assignCourier(Long orderId, Long courierId) {
+        log.info("Assigning courier {} to order {}", courierId, orderId);
+        checkUserIdIsNotNull(courierId);
+        Order order = findOrderOrThrow(orderId);
+
+        if (order.getCourierId() != null) {
+            log.warn("Assignment failed: Order {} already has courier {}", orderId, order.getCourierId());
+            throw new InvalidArgumentException("Order already has a courier assigned");
+        }
+
+        if (order.getStatus() == OrderStatus.READY_FOR_PICKUP) {
+            order.setCourierId(courierId);
+            order.setStatus(OrderStatus.SHIPPED);
+            order.setPickedUpAt(LocalDateTime.now());
+            log.info("Order {} successfully assigned to courier and status updated to SHIPPED", orderId);
+        } else {
+            throw new InvalidArgumentException("Cannot assign courier to order");
+        }
+    }
+
+    /**
+     * Marks the order as DELIVERED and updates payment status.
+     *
+     * @param orderId The ID of the order to deliver
+     */
+    @Transactional
+    public void deliverOrder(Long orderId) {
+        log.info("Marking order {} as DELIVERED", orderId);
+        Order order = findOrderOrThrow(orderId);
+
+        if (order.getStatus() == OrderStatus.SHIPPED) {
+            order.setStatus(OrderStatus.DELIVERED);
+            order.setPaymentStatus(PaymentStatus.PAID);
+            order.setDeliveredAt(LocalDateTime.now());
+            log.info("Order {} successfully delivered", orderId);
+        } else {
+            throw new InvalidArgumentException("Cannot deliver order");
+        }
+    }
+
+    /**
+     * Finds an order by its ID or throws an exception if not found.
+     *
+     * @param orderId The ID of the order to find
+     * @return The found Order entity
+     * @throws OrderNotFoundException if the order does not exist
+     */
+    private Order findOrderOrThrow(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> {
+                    log.error("Order not found with ID: {}", orderId);
+                    return new OrderNotFoundException("Order not found");
+                });
     }
 
     /**
