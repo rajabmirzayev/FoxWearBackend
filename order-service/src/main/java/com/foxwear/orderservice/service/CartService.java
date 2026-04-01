@@ -205,6 +205,7 @@ public class CartService {
             cartItem.updateSubtotal();
         }
 
+        cart.updateTotalPrice();
         log.info("Quantity decreased for item: {}", itemId);
 
         return cartItemMapper.toUpdateResponse(cartItem);
