@@ -67,6 +67,7 @@ public class OrderService {
                 .longitudeSnapshot(request.getLongitude())
                 .orderNote(request.getOrderNote())
                 .couponId(request.getCouponId())
+                .phoneNumber(request.getPhoneNumber())
                 .shippingFee(shippingFee)
                 .totalDiscountPrice(cart.getTotalPrice().add(shippingFee))
                 .build();
