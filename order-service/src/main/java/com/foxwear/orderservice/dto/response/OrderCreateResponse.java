@@ -22,7 +22,6 @@ public class OrderCreateResponse {
     Long userId;
     OrderStatus status;
     BigDecimal totalDiscountPrice;
-    Long couponId;
     BigDecimal shippingFee;
     PaymentStatus paymentStatus;
     PaymentMethod paymentMethod;

@@ -22,6 +22,7 @@ public class CartItemGetResponse {
     Integer quantity;
     BigDecimal originalUnitPrice;
     BigDecimal actualUnitPrice;
+    BigDecimal originalSubTotal;
     BigDecimal subTotal;
 
 }

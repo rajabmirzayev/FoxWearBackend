@@ -16,6 +16,7 @@ public class CartGetResponse {
     Long id;
     Long userId;
     List<CartItemGetResponse> items;
+    BigDecimal totalOriginalPrice;
     BigDecimal totalPrice;
 
 }

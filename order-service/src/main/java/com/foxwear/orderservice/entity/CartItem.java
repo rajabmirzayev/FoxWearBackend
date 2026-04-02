@@ -71,6 +71,11 @@ public class CartItem {
 
     @NotNull
     @DecimalMin("0.0")
+    @Column(name = "original_sub_total", nullable = false, precision = 12, scale = 2)
+    BigDecimal originalSubTotal;
+
+    @NotNull
+    @DecimalMin("0.0")
     @Column(name = "sub_total", nullable = false, precision = 12, scale = 2)
     BigDecimal subTotal;
 
@@ -80,6 +85,9 @@ public class CartItem {
         int qty = (this.quantity == null) ? 0 : this.quantity;
 
         this.subTotal = this.actualUnitPrice.multiply(BigDecimal.valueOf(qty))
+                .setScale(2, RoundingMode.HALF_UP);
+
+        this.originalSubTotal = this.originalUnitPrice.multiply(BigDecimal.valueOf(qty))
                 .setScale(2, RoundingMode.HALF_UP);
     }
 

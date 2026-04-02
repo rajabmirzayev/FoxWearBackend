@@ -27,7 +27,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -85,7 +84,6 @@ public class OrderService {
                 .latitudeSnapshot(request.getLatitude())
                 .longitudeSnapshot(request.getLongitude())
                 .orderNote(request.getOrderNote())
-                .couponId(request.getCouponId())
                 .phoneNumber(request.getPhoneNumber())
                 .shippingFee(shippingFee)
                 .totalDiscountPrice(cart.getTotalPrice().add(shippingFee))
@@ -240,14 +238,7 @@ public class OrderService {
                 .quantity(cartItem.getQuantity())
                 .priceAtPurchase(cartItem.getOriginalUnitPrice())
                 .subTotal(cartItem.getSubTotal())
-                .discountAtPurchase(
-                        Objects.equals(
-                                cartItem.getOriginalUnitPrice(),
-                                cartItem.getActualUnitPrice()
-                        )
-                                ? BigDecimal.ZERO
-                                : cartItem.getOriginalUnitPrice().subtract(cartItem.getActualUnitPrice())
-                )
+                .discountAtPurchase(cartItem.getOriginalSubTotal().subtract(cartItem.getSubTotal()))
                 .build();
     }
 

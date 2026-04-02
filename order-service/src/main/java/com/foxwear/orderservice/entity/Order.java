@@ -53,9 +53,6 @@ public class Order extends BaseAuditEntity {
     @Column(name = "total_discount_price", precision = 12, scale = 2, nullable = false)
     BigDecimal totalDiscountPrice;
 
-    @Column(name = "coupon_id")
-    Long couponId;
-
     @NotNull
     @DecimalMin("0.0")
     @Column(name = "shipping_fee", nullable = false, precision = 10, scale = 2)

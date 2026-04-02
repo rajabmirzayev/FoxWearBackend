@@ -22,6 +22,7 @@ public class CartItemUpdateResponse {
     String slug;
     BigDecimal originalUnitPrice;
     BigDecimal actualUnitPrice;
+    BigDecimal originalSubTotal;
     BigDecimal subTotal;
 
 }

@@ -28,8 +28,16 @@ public class Cart {
     @Column(name = "user_id", nullable = false)
     Long userId;
 
+    @Column(name = "coupon_id")
+    Long couponId;
+
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     List<CartItem> items = new ArrayList<>();
+
+    @NotNull
+    @DecimalMin("0.0")
+    @Column(name = "total_original_price", precision = 12, scale = 2, nullable = false)
+    BigDecimal totalOriginalPrice = BigDecimal.ZERO;
 
     @NotNull
     @DecimalMin("0.0")
@@ -40,6 +48,12 @@ public class Cart {
         this.totalPrice = items.stream()
                 .filter(item -> item.getProductItemId() != null)
                 .map(item -> item.getSubTotal() != null ? item.getSubTotal() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+
+        this.totalOriginalPrice = items.stream()
+                .filter(item -> item.getProductItemId() != null)
+                .map(item -> item.getOriginalSubTotal() != null ? item.getOriginalSubTotal() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .setScale(2, RoundingMode.HALF_UP);
     }

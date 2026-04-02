@@ -23,3 +23,9 @@ databaseChangeLog:
       file: classpath://db/changelog/v-01/delete-sku-column-in-order-items.yaml
   - include:
       file: db/changelog/v-01/add-phone-number-column-to-orders-table.yaml
+  - include:
+      file: db/changelog/v-01/change-coupon-id-from-orders-to-carts-table.yaml
+  - include:
+      file: db/changelog/v-01/add-total-original-price-column-to-carts-table.yaml
+  - include:
+      file: db/changelog/v-01/add-original-total-column-to-cart-items-table.yaml
