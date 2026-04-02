@@ -3,6 +3,8 @@ package com.foxwear.orderservice.controller;
 import com.foxwear.common.dto.ApiResponse;
 import com.foxwear.orderservice.dto.request.OrderCreateRequest;
 import com.foxwear.orderservice.dto.response.OrderCreateResponse;
+import com.foxwear.orderservice.dto.response.OrderGetAllResponse;
+import com.foxwear.orderservice.enums.OrderStatus;
 import com.foxwear.orderservice.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,8 +38,15 @@ public class OrderController {
 
     @Operation(summary = "Get pending orders", description = "Retrieves a list of all orders that are currently in PENDING status")
     @GetMapping("/pending")
-    public ResponseEntity<ApiResponse<List<OrderCreateResponse>>> getPendingOrders() {
-        var response = orderService.getPendingOrders();
+    public ResponseEntity<ApiResponse<List<OrderGetAllResponse>>> getPendingOrders() {
+        var response = orderService.getOrdersByStatus(OrderStatus.PENDING);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @Operation(summary = "Get ready orders", description = "Retrieves a list of all orders that are currently in READY_FOR_PICKUP status")
+    @GetMapping("/ready")
+    public ResponseEntity<ApiResponse<List<OrderGetAllResponse>>> getReadyOrders() {
+        var response = orderService.getOrdersByStatus(OrderStatus.READY_FOR_PICKUP);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -71,8 +80,10 @@ public class OrderController {
     @Operation(summary = "Mark order as delivered", description = "Updates the order status to DELIVERED")
     @PatchMapping("/{orderId}/deliver")
     public ResponseEntity<ApiResponse<Void>> deliverOrder(
-            @Parameter(description = "ID of the order to mark as delivered") @PathVariable Long orderId) {
-        orderService.deliverOrder(orderId);
+            @Parameter(description = "ID of the order to mark as delivered") @PathVariable Long orderId,
+            @RequestHeader("X-User-Id") Long courierId
+    ) {
+        orderService.deliverOrder(orderId, courierId);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 

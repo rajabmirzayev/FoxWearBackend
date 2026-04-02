@@ -7,35 +7,24 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class OrderCreateResponse {
+public class OrderGetAllResponse {
 
     Long id;
     String orderNumber;
     Long userId;
     OrderStatus status;
     BigDecimal totalDiscountPrice;
-    Long couponId;
     BigDecimal shippingFee;
     PaymentStatus paymentStatus;
     PaymentMethod paymentMethod;
     String addressSnapshot;
     Double latitudeSnapshot;
     Double longitudeSnapshot;
-    String orderNote;
-    String trackingNumber;
-    LocalDateTime estimatedDeliveryDate;
-    Long courierId;
-    LocalDateTime pickedUpAt;
-    LocalDateTime preparedAt;
-    LocalDateTime deliveredAt;
-    List<OrderItemCreateResponse> items;
 
 }

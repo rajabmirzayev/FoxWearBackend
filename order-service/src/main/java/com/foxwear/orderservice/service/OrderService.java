@@ -6,11 +6,14 @@ import com.foxwear.orderservice.dto.request.OrderCreateRequest;
 import com.foxwear.orderservice.dto.response.CartGetResponse;
 import com.foxwear.orderservice.dto.response.CartItemGetResponse;
 import com.foxwear.orderservice.dto.response.OrderCreateResponse;
+import com.foxwear.orderservice.dto.response.OrderGetAllResponse;
 import com.foxwear.orderservice.entity.Order;
 import com.foxwear.orderservice.entity.OrderItem;
 import com.foxwear.orderservice.enums.OrderStatus;
+import com.foxwear.orderservice.enums.PaymentMethod;
 import com.foxwear.orderservice.enums.PaymentStatus;
 import com.foxwear.orderservice.exception.OrderNotFoundException;
+import com.foxwear.orderservice.exception.UnpaidException;
 import com.foxwear.orderservice.mapper.OrderItemMapper;
 import com.foxwear.orderservice.mapper.OrderMapper;
 import com.foxwear.orderservice.repository.OrderRepository;
@@ -86,10 +89,10 @@ public class OrderService {
      * @return A list of OrderCreateResponse DTOs
      */
     @Transactional(readOnly = true)
-    public List<OrderCreateResponse> getPendingOrders() {
-        return orderRepository.findAllByStatus(OrderStatus.PENDING)
+    public List<OrderGetAllResponse> getOrdersByStatus(OrderStatus status) {
+        return orderRepository.findAllByStatus(status)
                 .stream()
-                .map(this::mapToOrderResponse)
+                .map(orderMapper::toGetAllResponse)
                 .toList();
     }
 
@@ -104,6 +107,10 @@ public class OrderService {
         log.info("Admin {} is setting order {} to PREPARING status", adminId, orderId);
         checkUserIdIsNotNull(adminId);
         Order order = findOrderOrThrow(orderId);
+
+        if (order.getPaymentMethod() != PaymentMethod.CASH_ON_DELIVERY && order.getPaymentStatus() != PaymentStatus.PAID) {
+            throw new UnpaidException("The order cannot be processed because the online payment was unsuccessful.");
+        }
 
         if (order.getStatus() == OrderStatus.PENDING)
             order.setStatus(OrderStatus.PREPARING);
@@ -164,8 +171,9 @@ public class OrderService {
      * @param orderId The ID of the order to deliver
      */
     @Transactional
-    public void deliverOrder(Long orderId) {
+    public void deliverOrder(Long orderId, Long courierId) {
         log.info("Marking order {} as DELIVERED", orderId);
+        checkUserIdIsNotNull(courierId);
         Order order = findOrderOrThrow(orderId);
 
         if (order.getStatus() == OrderStatus.SHIPPED) {

@@ -1,6 +1,7 @@
 package com.foxwear.orderservice.mapper;
 
 import com.foxwear.orderservice.dto.response.OrderCreateResponse;
+import com.foxwear.orderservice.dto.response.OrderGetAllResponse;
 import com.foxwear.orderservice.entity.Order;
 import org.mapstruct.Mapper;
 
@@ -8,5 +9,7 @@ import org.mapstruct.Mapper;
 public interface OrderMapper {
 
     OrderCreateResponse toCreateResponse(Order order);
+
+    OrderGetAllResponse toGetAllResponse(Order order);
 
 }

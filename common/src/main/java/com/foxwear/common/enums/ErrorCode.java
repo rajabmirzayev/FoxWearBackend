@@ -49,6 +49,7 @@ public enum ErrorCode {
 
     // Order related errors
     ORDER_NOT_FOUND("ORDER_001"),
+    UNPAID("ORDER_002"),
 
     // Server errors
     INTERNAL_SERVER_ERROR("SERVER_001");
