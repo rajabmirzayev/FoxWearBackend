@@ -51,6 +51,9 @@ public enum ErrorCode {
     ORDER_NOT_FOUND("ORDER_001"),
     UNPAID("ORDER_002"),
 
+    // Payment related errors
+    PAYMENT_ERROR("PAYMENT_001"),
+
     // Server errors
     INTERNAL_SERVER_ERROR("SERVER_001");
 

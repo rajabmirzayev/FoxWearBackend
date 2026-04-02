@@ -13,6 +13,7 @@ import com.foxwear.orderservice.enums.OrderStatus;
 import com.foxwear.orderservice.enums.PaymentMethod;
 import com.foxwear.orderservice.enums.PaymentStatus;
 import com.foxwear.orderservice.exception.OrderNotFoundException;
+import com.foxwear.orderservice.exception.PaymentException;
 import com.foxwear.orderservice.exception.UnpaidException;
 import com.foxwear.orderservice.mapper.OrderItemMapper;
 import com.foxwear.orderservice.mapper.OrderMapper;
@@ -33,6 +34,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class OrderService {
 
+    private final PaymentService paymentService;
     private final OrderRepository orderRepository;
     private final CartService cartService;
     private final OrderMapper orderMapper;
@@ -56,11 +58,28 @@ public class OrderService {
         }
 
         BigDecimal shippingFee = calculateShippingFee(cart.getTotalPrice());
+
+        if (request.getPaymentMethod() == PaymentMethod.CARD) {
+            if (request.getCardNumber() == null || request.getExpiryMonth() == null || request.getExpiryYear() == null || request.getCvc() == null) {
+                throw new InvalidArgumentException("Card details are required for card payments");
+            }
+
+            boolean paymentSuccess = paymentService.process(cart.getTotalPrice().add(shippingFee), request);
+
+            if (!paymentSuccess) {
+                throw new PaymentException("Payment failed");
+            }
+        }
+
+        PaymentStatus initialPaymentStatus = (request.getPaymentMethod() == PaymentMethod.CARD)
+                ? PaymentStatus.PAID
+                : PaymentStatus.UNPAID;
+
         Order order = Order.builder()
                 .orderNumber(generateOrderNumber())
                 .userId(userId)
                 .status(OrderStatus.PENDING)
-                .paymentStatus(PaymentStatus.UNPAID)
+                .paymentStatus(initialPaymentStatus)
                 .paymentMethod(request.getPaymentMethod())
                 .addressSnapshot(request.getAddressSnapshot())
                 .latitudeSnapshot(request.getLatitude())

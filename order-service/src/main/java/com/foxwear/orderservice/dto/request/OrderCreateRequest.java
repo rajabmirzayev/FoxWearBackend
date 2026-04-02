@@ -36,4 +36,9 @@ public class OrderCreateRequest {
     )
     String phoneNumber;
 
+    String cardNumber;
+    String expiryMonth;
+    String expiryYear;
+    String cvc;
+
 }
