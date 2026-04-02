@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 03042026-01
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: shipping_fee
+                  type: DECIMAL(10, 2)
+            tableName: carts
+  - changeSet:
+      id: 03042026-02
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: shipping_fee
+            tableName: carts
+  - changeSet:
+      id: 03042026-03
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - dropColumn:
+            columnName: shipping_fee
+            tableName: orders
+

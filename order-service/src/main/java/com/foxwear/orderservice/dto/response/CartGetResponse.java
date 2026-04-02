@@ -18,5 +18,6 @@ public class CartGetResponse {
     List<CartItemGetResponse> items;
     BigDecimal totalOriginalPrice;
     BigDecimal totalPrice;
+    BigDecimal shippingFee;
 
 }

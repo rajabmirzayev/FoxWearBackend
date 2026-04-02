@@ -94,6 +94,7 @@ public class CartService {
 
         item.updateSubtotal();
         cart.updateTotalPrice();
+        cart.updateShippingFee();
 
         log.info("Item processed successfully for cart ID: {}", cart.getId());
 
@@ -173,6 +174,7 @@ public class CartService {
         cartItem.setQuantity(cartItem.getQuantity() + 1);
         cartItem.updateSubtotal();
         cart.updateTotalPrice();
+        cart.updateShippingFee();
 
         return cartItemMapper.toUpdateResponse(cartItem);
     }
@@ -196,16 +198,20 @@ public class CartService {
 
         cartItem.setQuantity(cartItem.getQuantity() - 1);
 
-        cart.updateTotalPrice();
-
         if (cartItem.getQuantity() <= 0) {
             cart.getItems().remove(cartItem);
             cartItemRepository.delete(cartItem);
+
+            if (cart.getItems().isEmpty()) {
+                cart.setTotalPrice(BigDecimal.ZERO);
+                cart.setShippingFee(BigDecimal.ZERO);
+            }
         } else {
             cartItem.updateSubtotal();
         }
 
         cart.updateTotalPrice();
+        cart.updateShippingFee();
         log.info("Quantity decreased for item: {}", itemId);
 
         return cartItemMapper.toUpdateResponse(cartItem);
@@ -230,6 +236,7 @@ public class CartService {
         cartItemRepository.delete(item);
 
         cart.updateTotalPrice();
+        cart.updateShippingFee();
         log.info("Item: {} successfully deleted and cart total updated", itemId);
     }
 
@@ -246,6 +253,7 @@ public class CartService {
         cart.getItems().clear();
 
         cart.setTotalPrice(BigDecimal.ZERO);
+        cart.setShippingFee(BigDecimal.ZERO);
 
         cartRepository.save(cart);
 

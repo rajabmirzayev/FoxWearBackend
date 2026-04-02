@@ -44,6 +44,11 @@ public class Cart {
     @Column(name = "total_price", precision = 12, scale = 2, nullable = false)
     BigDecimal totalPrice = BigDecimal.ZERO;
 
+    @NotNull
+    @DecimalMin("0.0")
+    @Column(name = "shipping_fee", nullable = false, precision = 10, scale = 2)
+    BigDecimal shippingFee;
+
     public void updateTotalPrice() {
         this.totalPrice = items.stream()
                 .filter(item -> item.getProductItemId() != null)
@@ -56,6 +61,14 @@ public class Cart {
                 .map(item -> item.getOriginalSubTotal() != null ? item.getOriginalSubTotal() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .setScale(2, RoundingMode.HALF_UP);
+
+        if (shippingFee != null && !shippingFee.equals(BigDecimal.ZERO)) {
+            this.totalPrice = this.totalPrice.add(this.shippingFee);
+        }
+    }
+
+    public void updateShippingFee() {
+        this.shippingFee = (this.totalPrice == null || this.totalPrice.compareTo(BigDecimal.valueOf(70)) >= 0) ? BigDecimal.ZERO : BigDecimal.valueOf(5.00);
     }
 
 }

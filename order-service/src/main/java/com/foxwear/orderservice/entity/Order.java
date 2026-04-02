@@ -54,11 +54,6 @@ public class Order extends BaseAuditEntity {
     BigDecimal totalDiscountPrice;
 
     @NotNull
-    @DecimalMin("0.0")
-    @Column(name = "shipping_fee", nullable = false, precision = 10, scale = 2)
-    BigDecimal shippingFee;
-
-    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false, length = 25)
     PaymentStatus paymentStatus;

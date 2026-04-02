@@ -56,14 +56,12 @@ public class OrderService {
             throw new InvalidArgumentException("Cannot create order with an empty cart");
         }
 
-        BigDecimal shippingFee = calculateShippingFee(cart.getTotalPrice());
-
         if (request.getPaymentMethod() == PaymentMethod.CARD) {
             if (request.getCardNumber() == null || request.getExpiryMonth() == null || request.getExpiryYear() == null || request.getCvc() == null) {
                 throw new InvalidArgumentException("Card details are required for card payments");
             }
 
-            boolean paymentSuccess = paymentService.process(cart.getTotalPrice().add(shippingFee), request);
+            boolean paymentSuccess = paymentService.process(cart.getTotalPrice(), request);
 
             if (!paymentSuccess) {
                 throw new PaymentException("Payment failed");
@@ -85,8 +83,7 @@ public class OrderService {
                 .longitudeSnapshot(request.getLongitude())
                 .orderNote(request.getOrderNote())
                 .phoneNumber(request.getPhoneNumber())
-                .shippingFee(shippingFee)
-                .totalDiscountPrice(cart.getTotalPrice().add(shippingFee))
+                .totalDiscountPrice(cart.getTotalPrice())
                 .build();
 
         List<OrderItem> orderItems = cart.getItems().stream()
@@ -249,18 +246,6 @@ public class OrderService {
      */
     private String generateOrderNumber() {
         return "FW-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
-    }
-
-    /**
-     * Calculates the shipping fee based on the total order amount.
-     *
-     * @param totalAmount The total price of items in the cart
-     * @return The calculated shipping fee
-     */
-    private BigDecimal calculateShippingFee(BigDecimal totalAmount) {
-        return totalAmount.compareTo(BigDecimal.valueOf(70)) >= 0
-                ? BigDecimal.ZERO
-                : BigDecimal.valueOf(5.00);
     }
 
     /**
