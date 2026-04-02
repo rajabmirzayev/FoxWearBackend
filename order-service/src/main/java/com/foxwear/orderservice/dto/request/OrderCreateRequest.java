@@ -3,6 +3,7 @@ package com.foxwear.orderservice.dto.request;
 import com.foxwear.orderservice.enums.PaymentMethod;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -27,5 +28,11 @@ public class OrderCreateRequest {
     Double latitude;
     Double longitude;
     Long couponId;
+
+    @Pattern(
+            regexp = "^(\\+994\\s(50|51|55|70|77|99|10)\\s\\d{3}\\s\\d{2}\\s\\d{2})?$",
+            message = "Phone number must this format: +994 12 345 67 89)"
+    )
+    String phoneNumber;
 
 }

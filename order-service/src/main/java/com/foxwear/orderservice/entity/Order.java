@@ -97,6 +97,10 @@ public class Order extends BaseAuditEntity {
     @Column(name = "courier_id")
     Long courierId;
 
+    @NotNull
+    @Column(name = "phone_number", nullable = false)
+    String phoneNumber;
+
     @Column(name = "picked_up_at")
     LocalDateTime pickedUpAt;
 

@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+      id: 02042026-01
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: phone_number
+                  type: VARCHAR(255)
+            tableName: orders
+  - changeSet:
+      id: 02042026-02
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: phone_number
+            tableName: orders
+

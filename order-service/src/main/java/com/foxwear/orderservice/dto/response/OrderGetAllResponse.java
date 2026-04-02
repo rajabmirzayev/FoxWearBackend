@@ -24,6 +24,7 @@ public class OrderGetAllResponse {
     PaymentStatus paymentStatus;
     PaymentMethod paymentMethod;
     String addressSnapshot;
+    String phoneNumber;
     Double latitudeSnapshot;
     Double longitudeSnapshot;
 
