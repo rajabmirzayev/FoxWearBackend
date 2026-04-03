@@ -11,8 +11,8 @@ import com.foxwear.orderservice.dto.response.CartItemCreateResponse;
 import com.foxwear.orderservice.dto.response.CartItemUpdateResponse;
 import com.foxwear.orderservice.entity.Cart;
 import com.foxwear.orderservice.entity.CartItem;
-import com.foxwear.orderservice.exception.CartItemNotFoundException;
-import com.foxwear.orderservice.exception.CartNotFoundException;
+import com.foxwear.orderservice.entity.Coupon;
+import com.foxwear.orderservice.exception.*;
 import com.foxwear.orderservice.mapper.CartItemMapper;
 import com.foxwear.orderservice.mapper.CartMapper;
 import com.foxwear.orderservice.repository.CartItemRepository;
@@ -23,14 +23,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CartService {
+    private final CouponService couponService;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductClient productClient;
@@ -94,7 +95,6 @@ public class CartService {
 
         item.updateSubtotal();
         cart.updateTotalPrice();
-        cart.updateShippingFee();
 
         log.info("Item processed successfully for cart ID: {}", cart.getId());
 
@@ -113,22 +113,16 @@ public class CartService {
         checkUserIdIsNotNull(userId);
         Cart cart = findCartOrThrow(userId);
 
-        AtomicBoolean isCartUpdated = new AtomicBoolean(false);
-
         cart.getItems().forEach(item -> {
             ProductResponse currentProduct = productClient.getProductWithItemId(item.getProductItemId()).getData();
 
             if (item.getActualUnitPrice().compareTo(currentProduct.getDiscountPrice()) != 0) {
                 item.setActualUnitPrice(currentProduct.getDiscountPrice());
                 item.updateSubtotal();
-                isCartUpdated.set(true);
+                cart.updateTotalPrice();
             }
         });
-
-        if (isCartUpdated.get()) {
-            cart.updateTotalPrice();
-            cartRepository.save(cart);
-        }
+        cartRepository.save(cart);
 
         CartGetResponse cartResponse = cartMapper.toGetResponse(cart);
         cartResponse.setItems(cart.getItems().stream()
@@ -174,7 +168,6 @@ public class CartService {
         cartItem.setQuantity(cartItem.getQuantity() + 1);
         cartItem.updateSubtotal();
         cart.updateTotalPrice();
-        cart.updateShippingFee();
 
         return cartItemMapper.toUpdateResponse(cartItem);
     }
@@ -211,10 +204,36 @@ public class CartService {
         }
 
         cart.updateTotalPrice();
-        cart.updateShippingFee();
         log.info("Quantity decreased for item: {}", itemId);
 
         return cartItemMapper.toUpdateResponse(cartItem);
+    }
+
+    @Transactional
+    public void applyCoupon(String code, Long userId) {
+        checkUserIdIsNotNull(userId);
+
+        var coupon = couponService.findCouponOrThrow(code);
+        checkCouponIsReadyForUse(coupon);
+
+        Cart cart = findCartOrThrow(userId);
+        cart.setCoupon(coupon);
+
+        cart.updateTotalPrice();
+    }
+
+    @Transactional
+    public void removeCoupon(Long userId) {
+        checkUserIdIsNotNull(userId);
+        Cart cart = findCartOrThrow(userId);
+
+        if (cart.getCoupon() == null) {
+            throw new InvalidArgumentException("No coupon applied to this cart");
+        }
+
+        cart.setCoupon(null);
+        cart.updateTotalPrice();
+        log.info("Coupon removed successfully for user: {}", userId);
     }
 
     /**
@@ -236,7 +255,6 @@ public class CartService {
         cartItemRepository.delete(item);
 
         cart.updateTotalPrice();
-        cart.updateShippingFee();
         log.info("Item: {} successfully deleted and cart total updated", itemId);
     }
 
@@ -311,4 +329,20 @@ public class CartService {
         }
     }
 
+    private void checkCouponIsReadyForUse(Coupon coupon) {
+        if (!coupon.isActive()) {
+            log.error("Coupon is not active for item: {}", coupon.getId());
+            throw new CouponIsNotActiveException("Coupon is not active");
+        }
+
+        if (coupon.getExpiryDate().isBefore(LocalDate.now())) {
+            log.error("Coupon is expired for item: {}", coupon.getId());
+            throw new CouponExpiredException("Coupon is expired");
+        }
+
+        if (coupon.getUsedCount() >= coupon.getUsageLimit()) {
+            log.error("Coupon used limit for item: {}", coupon.getId());
+            throw new CouponUsedLimitException("Coupon used limit");
+        }
+    }
 }

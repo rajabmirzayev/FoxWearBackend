@@ -54,6 +54,13 @@ public enum ErrorCode {
     // Payment related errors
     PAYMENT_ERROR("PAYMENT_001"),
 
+    // Coupon related errors
+    COUPON_NOT_FOUND("COUPON_001"),
+    COUPON_ALREADY_EXISTS("COUPON_002"),
+    COUPON_IS_NOT_ACTIVE("COUPON_003"),
+    COUPON_EXPIRED("COUPON_004"),
+    COUPON_USED_LIMIT("COUPON_005"),
+
     // Server errors
     INTERNAL_SERVER_ERROR("SERVER_001");
 

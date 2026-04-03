@@ -31,3 +31,5 @@ databaseChangeLog:
       file: db/changelog/v-01/add-original-total-column-to-cart-items-table.yaml
   - include:
       file: db/changelog/v-01/change-shipping-fee-field-from-orders-to-carts-table.yaml
+  - include:
+      file: db/changelog/v-01/create-coupon-logic.yaml

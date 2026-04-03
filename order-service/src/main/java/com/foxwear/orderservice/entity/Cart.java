@@ -1,5 +1,7 @@
 package com.foxwear.orderservice.entity;
 
+import com.foxwear.common.exception.InvalidArgumentException;
+import com.foxwear.orderservice.enums.DiscountType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
@@ -28,8 +30,12 @@ public class Cart {
     @Column(name = "user_id", nullable = false)
     Long userId;
 
-    @Column(name = "coupon_id")
-    Long couponId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "coupon_id", referencedColumnName = "id")
+    Coupon coupon;
+
+    @Column(name = "coupon_applied", nullable = false)
+    boolean couponApplied = false;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     List<CartItem> items = new ArrayList<>();
@@ -50,25 +56,41 @@ public class Cart {
     BigDecimal shippingFee;
 
     public void updateTotalPrice() {
-        this.totalPrice = items.stream()
+        // 1. Calculate items total (Products only)
+        BigDecimal itemsTotal = items.stream()
                 .filter(item -> item.getProductItemId() != null)
-                .map(item -> item.getSubTotal() != null ? item.getSubTotal() : BigDecimal.ZERO)
+                .map(item -> item.getActualUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .setScale(2, RoundingMode.HALF_UP);
 
         this.totalOriginalPrice = items.stream()
                 .filter(item -> item.getProductItemId() != null)
-                .map(item -> item.getOriginalSubTotal() != null ? item.getOriginalSubTotal() : BigDecimal.ZERO)
+                .map(item -> item.getOriginalUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .setScale(2, RoundingMode.HALF_UP);
 
-        if (shippingFee != null && !shippingFee.equals(BigDecimal.ZERO)) {
-            this.totalPrice = this.totalPrice.add(this.shippingFee);
+        // 2. Calculate discount based on ITEMS TOTAL only
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        if (coupon != null && itemsTotal.compareTo(BigDecimal.ZERO) > 0) {
+            if (coupon.getDiscountType() == DiscountType.PERCENTAGE) {
+                BigDecimal percentage = coupon.getValue().divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+                discountAmount = itemsTotal.multiply(percentage);
+            } else {
+                discountAmount = coupon.getValue();
+            }
+            this.couponApplied = true;
+        } else {
+            this.couponApplied = false;
         }
-    }
 
-    public void updateShippingFee() {
-        this.shippingFee = (this.totalPrice == null || this.totalPrice.compareTo(BigDecimal.valueOf(70)) >= 0) ? BigDecimal.ZERO : BigDecimal.valueOf(5.00);
-    }
+        // 3. Determine shipping fee based on "itemsTotal - discountAmount" (actual payment)
+        BigDecimal discountedTotal = itemsTotal.subtract(discountAmount);
+        if (discountedTotal.compareTo(BigDecimal.ZERO) < 0) discountedTotal = BigDecimal.ZERO;
 
+        this.shippingFee = (discountedTotal.compareTo(BigDecimal.valueOf(70)) >= 0 || discountedTotal.compareTo(BigDecimal.ZERO) == 0)
+                ? BigDecimal.ZERO : BigDecimal.valueOf(5.00);
+
+        // 4. Final price
+        this.totalPrice = discountedTotal.add(this.shippingFee).setScale(2, RoundingMode.HALF_UP);
+    }
 }

@@ -1,4 +1,4 @@
-package com.foxwear.productservice.enums;
+package com.foxwear.orderservice.enums;
 
 public enum DiscountType {
     PERCENTAGE,

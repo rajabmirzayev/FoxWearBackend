@@ -69,6 +69,15 @@ public class CartController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @PatchMapping("/coupon/{code}")
+    public ResponseEntity<ApiResponse<CartItemUpdateResponse>> applyCoupon(
+            @PathVariable String code,
+            @RequestHeader(value = "X-User-Id") Long userId
+    ) {
+        cartService.applyCoupon(code, userId);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
     @Operation(summary = "Remove item from cart", description = "Deletes a specific item from the user's shopping cart")
     @DeleteMapping("{itemId}")
     public ResponseEntity<ApiResponse<Void>> deleteItem(
@@ -85,6 +94,14 @@ public class CartController {
             @RequestHeader(value = "X-User-Id") Long userId
     ) {
         cartService.clearCart(userId);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @DeleteMapping("/coupon")
+    public ResponseEntity<ApiResponse<Void>> removeCoupon(
+            @RequestHeader(value = "X-User-Id") Long userId
+    ) {
+        cartService.removeCoupon(userId);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
