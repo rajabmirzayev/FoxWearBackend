@@ -1,6 +1,5 @@
 package com.foxwear.orderservice.entity;
 
-import com.foxwear.common.exception.InvalidArgumentException;
 import com.foxwear.orderservice.enums.DiscountType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
@@ -53,7 +52,7 @@ public class Cart {
     @NotNull
     @DecimalMin("0.0")
     @Column(name = "shipping_fee", nullable = false, precision = 10, scale = 2)
-    BigDecimal shippingFee;
+    BigDecimal shippingFee = BigDecimal.ZERO;
 
     public void updateTotalPrice() {
         // 1. Calculate items total (Products only)
