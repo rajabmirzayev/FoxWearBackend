@@ -51,7 +51,7 @@ public class OrderController {
     }
 
     @Operation(summary = "Set order to preparing", description = "Updates the order status to PREPARING. Requires admin privileges.")
-    @PatchMapping("/{orderId}/preparing")
+    @PatchMapping("/preparing/{orderId}")
     public ResponseEntity<ApiResponse<Void>> setPreparingOrder(
             @Parameter(description = "ID of the order to update") @PathVariable Long orderId,
             @RequestHeader("X-User-Id") Long adminId) {
@@ -60,7 +60,7 @@ public class OrderController {
     }
 
     @Operation(summary = "Set order to prepared", description = "Updates the order status to PREPARED. Requires admin privileges.")
-    @PatchMapping("/{orderId}/prepared")
+    @PatchMapping("/prepared/{orderId}")
     public ResponseEntity<ApiResponse<Void>> setPreparedOrder(
             @Parameter(description = "ID of the order to update") @PathVariable Long orderId,
             @RequestHeader("X-User-Id") Long adminId) {
@@ -69,7 +69,7 @@ public class OrderController {
     }
 
     @Operation(summary = "Assign courier to order", description = "Assigns a courier to the specified order and updates status to ON_THE_WAY")
-    @PatchMapping("/{orderId}/assign")
+    @PatchMapping("/assign/{orderId}")
     public ResponseEntity<ApiResponse<Void>> assignCourier(
             @Parameter(description = "ID of the order to assign") @PathVariable Long orderId,
             @RequestHeader("X-User-Id") Long courierId) {
@@ -78,7 +78,7 @@ public class OrderController {
     }
 
     @Operation(summary = "Mark order as delivered", description = "Updates the order status to DELIVERED")
-    @PatchMapping("/{orderId}/deliver")
+    @PatchMapping("/deliver/{orderId}")
     public ResponseEntity<ApiResponse<Void>> deliverOrder(
             @Parameter(description = "ID of the order to mark as delivered") @PathVariable Long orderId,
             @RequestHeader("X-User-Id") Long courierId
