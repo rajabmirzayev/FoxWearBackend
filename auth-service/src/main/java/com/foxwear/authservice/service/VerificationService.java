@@ -3,7 +3,7 @@ package com.foxwear.authservice.service;
 import com.foxwear.common.event.PasswordResetEvent;
 import com.foxwear.common.event.RegistrationEvent;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -13,13 +13,13 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class VerificationService {
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public void createAndSendVerification(String email) {
         String token = UUID.randomUUID().toString();
 
-        redisTemplate.opsForValue().set("CONFIRM:" + token, email, Duration.ofMinutes(15));
+        stringRedisTemplate.opsForValue().set("CONFIRM:" + token, email, Duration.ofMinutes(15));
 
         RegistrationEvent emailData = RegistrationEvent.builder()
                 .email(email)
@@ -33,7 +33,7 @@ public class VerificationService {
     public void resetPassword(String email) {
         String token = UUID.randomUUID().toString();
 
-        redisTemplate.opsForValue().set("PWD_RESET:" + token, email, Duration.ofMinutes(15));
+        stringRedisTemplate.opsForValue().set("PWD_RESET:" + token, email, Duration.ofMinutes(15));
 
         PasswordResetEvent passwordData = PasswordResetEvent.builder()
                 .email(email)
