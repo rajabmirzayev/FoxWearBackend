@@ -94,6 +94,13 @@ services:
     container_name: eureka-server
     ports:
       - "8761:8761"
+    develop:
+      watch:
+        - action: sync
+          path: ./eureka-server/src
+          target: /app/src
+        - action: rebuild
+          path: ./eureka-server/build.gradle
     networks:
       - foxwear-network
 
@@ -107,6 +114,13 @@ services:
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
     depends_on:
       - eureka-server
+    develop:
+      watch:
+        - action: sync
+          path: ./gateway-service/src
+          target: /app/src
+        - action: rebuild
+          path: ./gateway-service/build.gradle
     networks:
       - foxwear-network
 
@@ -123,6 +137,13 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_started
+    develop:
+      watch:
+        - action: sync
+          path: ./auth-service/src
+          target: /app/src
+        - action: rebuild
+          path: ./auth-service/build.gradle
     networks:
       - foxwear-network
 
@@ -137,6 +158,13 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_started
+    develop:
+      watch:
+        - action: sync
+          path: ./product-service/src
+          target: /app/src
+        - action: rebuild
+          path: ./product-service/build.gradle
     networks:
       - foxwear-network
 
@@ -151,6 +179,13 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_started
+    develop:
+      watch:
+        - action: sync
+          path: ./order-service/src
+          target: /app/src
+        - action: rebuild
+          path: ./order-service/build.gradle
     networks:
       - foxwear-network
 
@@ -164,6 +199,13 @@ services:
     depends_on:
       - kafka
       - eureka-server
+    develop:
+      watch:
+        - action: sync
+          path: ./notification-service/src
+          target: /app/src
+        - action: rebuild
+          path: ./notification-service/build.gradle
     networks:
       - foxwear-network
 
@@ -178,6 +220,13 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_started
+    develop:
+      watch:
+        - action: sync
+          path: ./interaction-service/src
+          target: /app/src
+        - action: rebuild
+          path: ./interaction-service/build.gradle
     networks:
       - foxwear-network
 
@@ -192,6 +241,13 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_started
+    develop:
+      watch:
+        - action: sync
+          path: ./dynamic-data-service/src
+          target: /app/src
+        - action: rebuild
+          path: ./dynamic-data-service/build.gradle
     networks:
       - foxwear-network
 

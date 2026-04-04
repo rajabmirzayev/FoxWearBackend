@@ -15,6 +15,7 @@ import com.foxwear.orderservice.entity.Coupon;
 import com.foxwear.orderservice.exception.*;
 import com.foxwear.orderservice.mapper.CartItemMapper;
 import com.foxwear.orderservice.mapper.CartMapper;
+import com.foxwear.orderservice.mapper.CouponMapper;
 import com.foxwear.orderservice.repository.CartItemRepository;
 import com.foxwear.orderservice.repository.CartRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class CartService {
     private final ProductClient productClient;
     private final CartMapper cartMapper;
     private final CartItemMapper cartItemMapper;
+    private final CouponMapper couponMapper;
 
     /**
      * Creates a new cart for a specific user.
@@ -128,6 +130,12 @@ public class CartService {
         cartResponse.setItems(cart.getItems().stream()
                 .map(cartItemMapper::toGetResponse)
                 .toList());
+
+        if (cart.getCoupon() != null) {
+            cartResponse.setCoupon(couponMapper.toGetResponse(cart.getCoupon()));
+        } else {
+            cartResponse.setCoupon(null);
+        }
 
         return cartResponse;
     }

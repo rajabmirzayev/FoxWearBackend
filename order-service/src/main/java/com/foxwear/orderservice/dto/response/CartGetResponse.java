@@ -1,6 +1,6 @@
 package com.foxwear.orderservice.dto.response;
 
-import com.foxwear.orderservice.entity.Coupon;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -17,7 +17,7 @@ public class CartGetResponse {
     Long id;
     Long userId;
     List<CartItemGetResponse> items;
-    Coupon coupon;
+    CouponGetResponse coupon;
     Boolean couponApplied;
     BigDecimal totalOriginalPrice;
     BigDecimal totalPrice;
