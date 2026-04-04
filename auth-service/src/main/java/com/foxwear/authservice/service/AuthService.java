@@ -166,6 +166,7 @@ public class AuthService {
                 .toList();
 
         user.setStatus(UserStatus.ACTIVE);
+        user.setEmailVerified(true);
         log.info("User account activated for email: {}", email);
         String jwtToken = jwtService.generateToken(email, user.getId(), roles);
         String refreshToken = refreshTokenService.createRefreshToken(user).getToken();
