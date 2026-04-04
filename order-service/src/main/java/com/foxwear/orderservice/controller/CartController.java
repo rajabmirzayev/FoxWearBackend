@@ -69,6 +69,7 @@ public class CartController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @Operation(summary = "Apply coupon to cart", description = "Applies a discount coupon code to the user's current cart")
     @PatchMapping("/coupon/{code}")
     public ResponseEntity<ApiResponse<CartItemUpdateResponse>> applyCoupon(
             @PathVariable String code,
@@ -97,6 +98,7 @@ public class CartController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
+    @Operation(summary = "Remove coupon from cart", description = "Removes any applied coupon from the user's cart")
     @DeleteMapping("/coupon")
     public ResponseEntity<ApiResponse<Void>> removeCoupon(
             @RequestHeader(value = "X-User-Id") Long userId

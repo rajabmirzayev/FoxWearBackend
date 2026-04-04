@@ -209,19 +209,34 @@ public class CartService {
         return cartItemMapper.toUpdateResponse(cartItem);
     }
 
+    /**
+     * Applies a discount coupon to the user's cart.
+     *
+     * @param code   The unique coupon code.
+     * @param userId The ID of the user.
+     */
     @Transactional
     public void applyCoupon(String code, Long userId) {
+        log.info("Applying coupon: {} for user: {}", code, userId);
         checkUserIdIsNotNull(userId);
 
-        var coupon = couponService.findCouponOrThrow(code);
-        checkCouponIsReadyForUse(coupon);
-
+        // Retrieve coupon and validate its existence
+        var coupon = couponService.findCouponOrThrow(code.trim());
         Cart cart = findCartOrThrow(userId);
-        cart.setCoupon(coupon);
 
+        // Validate if the coupon is applicable to the current cart state
+        checkCouponIsReadyForUse(coupon, cart);
+
+        cart.setCoupon(coupon);
         cart.updateTotalPrice();
+        log.info("Coupon: {} applied successfully to cart: {}", code, cart.getId());
     }
 
+    /**
+     * Removes the currently applied coupon from the user's cart.
+     *
+     * @param userId The ID of the user.
+     */
     @Transactional
     public void removeCoupon(Long userId) {
         checkUserIdIsNotNull(userId);
@@ -329,7 +344,13 @@ public class CartService {
         }
     }
 
-    private void checkCouponIsReadyForUse(Coupon coupon) {
+    /**
+     * Validates coupon status, expiration, usage limits, and minimum order requirements.
+     *
+     * @param coupon The coupon entity to validate.
+     * @param cart   The cart entity to check against.
+     */
+    private void checkCouponIsReadyForUse(Coupon coupon, Cart cart) {
         if (!coupon.isActive()) {
             log.error("Coupon is not active for item: {}", coupon.getId());
             throw new CouponIsNotActiveException("Coupon is not active");
@@ -343,6 +364,11 @@ public class CartService {
         if (coupon.getUsedCount() >= coupon.getUsageLimit()) {
             log.error("Coupon used limit for item: {}", coupon.getId());
             throw new CouponUsedLimitException("Coupon used limit");
+        }
+
+        if (cart.getTotalPrice().compareTo(coupon.getMinOrderAmount()) < 0) {
+            log.error("Cart total price is less than minimum order amount for coupon: {}", coupon.getId());
+            throw new CouponMinAmountException("Total price is less than " + coupon.getMinOrderAmount() + "AZN");
         }
     }
 }

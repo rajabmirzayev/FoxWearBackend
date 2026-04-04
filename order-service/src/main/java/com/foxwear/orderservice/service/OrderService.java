@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -34,6 +33,7 @@ import java.util.List;
 public class OrderService {
 
     private final PaymentService paymentService;
+    private final CouponService couponService;
     private final OrderRepository orderRepository;
     private final CartService cartService;
     private final OrderMapper orderMapper;
@@ -52,6 +52,7 @@ public class OrderService {
         checkUserIdIsNotNull(userId);
         CartGetResponse cart = cartService.getCart(userId);
 
+        // Validate that the cart is not empty before proceeding
         if (cart.getItems().isEmpty()) {
             throw new InvalidArgumentException("Cannot create order with an empty cart");
         }
@@ -61,12 +62,14 @@ public class OrderService {
                 throw new InvalidArgumentException("Card details are required for card payments");
             }
 
+            log.info("Processing card payment for user: {} amount: {}", userId, cart.getTotalPrice());
             boolean paymentSuccess = paymentService.process(cart.getTotalPrice(), request);
 
             if (!paymentSuccess) {
                 throw new PaymentException("Payment failed");
             }
         }
+        log.info("Payment validation passed for user: {}", userId);
 
         PaymentStatus initialPaymentStatus = (request.getPaymentMethod() == PaymentMethod.CARD)
                 ? PaymentStatus.PAID
@@ -86,15 +89,21 @@ public class OrderService {
                 .totalDiscountPrice(cart.getTotalPrice())
                 .build();
 
+        // Map cart items to order items and link them to the order
         List<OrderItem> orderItems = cart.getItems().stream()
                 .map(cartItem -> mapToOrderItem(cartItem, order))
                 .toList();
         order.setItems(orderItems);
 
+        // Persist the order to the database
         Order savedOrder = orderRepository.save(order);
         log.info("Order created successfully. Order Number: {}", savedOrder.getOrderNumber());
 
+        // Post-creation cleanup: clear cart and update coupon usage
         cartService.clearCart(userId);
+        if (cart.getCoupon() != null) {
+            couponService.increaseUsedCount(cart.getCoupon().getId());
+        }
         return mapToOrderResponse(savedOrder);
     }
 
@@ -102,9 +111,11 @@ public class OrderService {
      * Retrieves all orders that are currently in PENDING status.
      *
      * @return A list of OrderCreateResponse DTOs
+     * @param status The status to filter orders by
      */
     @Transactional(readOnly = true)
     public List<OrderGetAllResponse> getOrdersByStatus(OrderStatus status) {
+        log.info("Fetching all orders with status: {}", status);
         return orderRepository.findAllByStatus(status)
                 .stream()
                 .map(orderMapper::toGetAllResponse)
@@ -123,12 +134,15 @@ public class OrderService {
         checkUserIdIsNotNull(adminId);
         Order order = findOrderOrThrow(orderId);
 
+        // Ensure payment is secured for non-COD orders
         if (order.getPaymentMethod() != PaymentMethod.CASH_ON_DELIVERY && order.getPaymentStatus() != PaymentStatus.PAID) {
             throw new UnpaidException("The order cannot be processed because the online payment was unsuccessful.");
         }
 
-        if (order.getStatus() == OrderStatus.PENDING)
+        if (order.getStatus() == OrderStatus.PENDING) {
             order.setStatus(OrderStatus.PREPARING);
+            log.info("Order {} status updated to PREPARING", orderId);
+        }
         else
             throw new InvalidArgumentException("Cannot set preparing order");
     }

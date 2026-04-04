@@ -20,6 +20,12 @@ public class CouponService {
     private final CouponRepository couponRepository;
     private final CouponMapper couponMapper;
 
+    /**
+     * Creates a new coupon if the code doesn't already exist.
+     *
+     * @param request the coupon creation details
+     * @return the created coupon response
+     */
     @Transactional
     public CouponCreateResponse createCoupon(CouponCreateRequest request) {
         if (couponRepository.existsByCode(request.getCode())) {
@@ -27,26 +33,59 @@ public class CouponService {
             throw new CouponAlreadyExistsException("Coupon with code " + request.getCode() + " already exists");
         }
 
+        log.info("Creating new coupon with code: {}", request.getCode());
         Coupon coupon = couponMapper.toEntity(request);
         var savedCoupon = couponRepository.save(coupon);
 
         return couponMapper.toCreateResponse(savedCoupon);
     }
 
+    /**
+     * Retrieves a coupon by its unique identifier.
+     *
+     * @param id the coupon ID
+     * @return the coupon details
+     */
     @Transactional(readOnly = true)
     public CouponGetResponse getCouponById(Long id) {
+        log.debug("Fetching coupon by id: {}", id);
         Coupon coupon = findCouponOrThrow(id);
 
         return couponMapper.toGetResponse(coupon);
     }
 
+    /**
+     * Retrieves a coupon by its unique code.
+     *
+     * @param code the coupon code
+     * @return the coupon details
+     */
     @Transactional(readOnly = true)
     public CouponGetResponse getCouponByCode(String code) {
+        log.debug("Fetching coupon by code: {}", code);
         Coupon coupon = findCouponOrThrow(code);
 
         return couponMapper.toGetResponse(coupon);
     }
 
+    /**
+     * Increments the usage count of a specific coupon.
+     *
+     * @param id the coupon ID
+     */
+    @Transactional
+    public void increaseUsedCount(Long id) {
+        log.info("Increasing usage count for coupon id: {}", id);
+        Coupon coupon = findCouponOrThrow(id);
+        coupon.setUsedCount(coupon.getUsedCount() + 1);
+    }
+
+    /**
+     * Toggles the active status of a coupon.
+     *
+     * @param couponId the coupon ID
+     * @return the new status of the coupon (true for active, false for inactive)
+     */
     @Transactional
     public boolean toggleActivate(Long couponId) {
         Coupon coupon = findCouponOrThrow(couponId);
