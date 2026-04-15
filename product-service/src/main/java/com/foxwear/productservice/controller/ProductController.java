@@ -61,6 +61,15 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @Operation(summary = "Get my liked products", description = "Retrieves a list of products that the authenticated user has liked.")
+    @GetMapping("/my-liked-products")
+    public ResponseEntity<ApiResponse<List<ProductGetAllResponse>>> getMyLikedProducts(
+            @RequestHeader(value = "X-User-Id") Long userId
+    ) {
+        var response = productService.getMyLikedProducts(userId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
     @Operation(summary = "Get all color option values", description = "Retrieves a list of all unique color names and codes used across products.")
     @GetMapping("/colors")
     public ResponseEntity<ApiResponse<List<ColorOptionAllValuesResponse>>> getAllColorOptionsValues() {
