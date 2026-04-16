@@ -3,10 +3,7 @@ package com.foxwear.orderservice.service;
 import com.foxwear.common.exception.InvalidArgumentException;
 import com.foxwear.common.exception.UnauthorizedException;
 import com.foxwear.orderservice.dto.request.OrderCreateRequest;
-import com.foxwear.orderservice.dto.response.CartGetResponse;
-import com.foxwear.orderservice.dto.response.CartItemGetResponse;
-import com.foxwear.orderservice.dto.response.OrderCreateResponse;
-import com.foxwear.orderservice.dto.response.OrderGetAllResponse;
+import com.foxwear.orderservice.dto.response.*;
 import com.foxwear.orderservice.entity.Order;
 import com.foxwear.orderservice.entity.OrderItem;
 import com.foxwear.orderservice.enums.OrderStatus;
@@ -25,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -104,7 +102,7 @@ public class OrderService {
         if (cart.getCoupon() != null) {
             couponService.increaseUsedCount(cart.getCoupon().getId());
         }
-        return mapToOrderResponse(savedOrder);
+        return mapToOrderCreateResponse(savedOrder);
     }
 
     /**
@@ -121,6 +119,56 @@ public class OrderService {
                 .map(orderMapper::toGetAllResponse)
                 .toList();
     }
+
+    /**
+     * Retrieves all orders belonging to a specific user.
+     *
+     * @param userId The ID of the user whose orders are being retrieved
+     * @return A list of OrderGetAllResponse DTOs
+     */
+    @Transactional(readOnly = true)
+    public List<OrderGetAllResponse> getMyOrders(Long userId) {
+        log.info("Fetching all orders for user: {}", userId);
+        checkUserIdIsNotNull(userId);
+
+        List<Order> orders = orderRepository.findAllByUserId(userId);
+
+        if (orders.isEmpty()) {
+            log.info("No orders found for user: {}", userId);
+            return Collections.emptyList();
+        }
+
+        return orders.stream()
+                .map(orderMapper::toGetAllResponse)
+                .toList();
+    }
+
+    /**
+     * Retrieves a specific order by its order number for a given user.
+     *
+     * @param orderNumber The unique order number
+     * @param userId      The ID of the user requesting the order
+     * @return OrderCreateResponse containing the order details
+     */
+    @Transactional(readOnly = true)
+    public OrderGetResponse getOrderByOrderNumber(String orderNumber, Long userId) {
+        log.info("Fetching order {} for user: {}", orderNumber, userId);
+        checkUserIdIsNotNull(userId);
+
+        Order order = orderRepository.findByOrderNumber(orderNumber.toUpperCase())
+                .orElseThrow(() -> {
+                    log.error("Order not found with number: {}", orderNumber);
+                    return new OrderNotFoundException("Order not found");
+                });
+
+        if (!order.getUserId().equals(userId)) {
+            log.warn("User {} attempted to access order {} belonging to user {}", userId, orderNumber, order.getUserId());
+            throw new UnauthorizedException("You do not have permission to view this order");
+        }
+
+        return mapToOrderGetResponse(order);
+    }
+
 
     /**
      * Updates the order status to PREPARING.
@@ -268,11 +316,28 @@ public class OrderService {
      * @param order The saved Order entity
      * @return OrderCreateResponse DTO
      */
-    private OrderCreateResponse mapToOrderResponse(Order order) {
+    private OrderCreateResponse mapToOrderCreateResponse(Order order) {
         OrderCreateResponse response = orderMapper.toCreateResponse(order);
         response.setItems(
                 order.getItems().stream()
                         .map(orderItemMapper::toCreateResponse)
+                        .toList()
+        );
+
+        return response;
+    }
+
+    /**
+     * Maps the Order entity and its items to a detailed GET response DTO.
+     *
+     * @param order The Order entity to map
+     * @return OrderGetResponse containing full order details and items
+     */
+    private OrderGetResponse mapToOrderGetResponse(Order order) {
+        OrderGetResponse response = orderMapper.toGetResponse(order);
+        response.setItems(
+                order.getItems().stream()
+                        .map(orderItemMapper::toGetResponse)
                         .toList()
         );
 

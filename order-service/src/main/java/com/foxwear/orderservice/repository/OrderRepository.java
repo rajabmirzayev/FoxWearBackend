@@ -8,11 +8,16 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT p FROM Order p WHERE p.status = :orderStatus ORDER BY p.createdAt DESC")
     List<Order> findAllByStatus(@Param("orderStatus") OrderStatus orderStatus);
+
+    List<Order> findAllByUserId(Long userId);
+
+    Optional<Order> findByOrderNumber(String orderNumber);
 
 }

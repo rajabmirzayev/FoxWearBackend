@@ -4,6 +4,7 @@ import com.foxwear.common.dto.ApiResponse;
 import com.foxwear.orderservice.dto.request.OrderCreateRequest;
 import com.foxwear.orderservice.dto.response.OrderCreateResponse;
 import com.foxwear.orderservice.dto.response.OrderGetAllResponse;
+import com.foxwear.orderservice.dto.response.OrderGetResponse;
 import com.foxwear.orderservice.enums.OrderStatus;
 import com.foxwear.orderservice.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,6 +50,26 @@ public class OrderController {
         var response = orderService.getOrdersByStatus(OrderStatus.READY_FOR_PICKUP);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
+
+    @Operation(summary = "Get my orders", description = "Retrieves a list of all orders belonging to the authenticated user")
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<List<OrderGetAllResponse>>> getMyOrders(
+            @Parameter(description = "ID of the user whose orders are being retrieved") @RequestHeader("X-User-Id") Long userId
+    ) {
+        var response = orderService.getMyOrders(userId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @Operation(summary = "Get order details", description = "Retrieves details of a specific order by its order number for the authenticated user")
+    @GetMapping("/{orderNumber}")
+    public ResponseEntity<ApiResponse<OrderGetResponse>> getOrderDetails(
+            @Parameter(description = "The unique order number") @PathVariable String orderNumber,
+            @RequestHeader("X-User-Id") Long userId
+    ) {
+        OrderGetResponse response = orderService.getOrderByOrderNumber(orderNumber, userId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
 
     @Operation(summary = "Set order to preparing", description = "Updates the order status to PREPARING. Requires admin privileges.")
     @PatchMapping("/preparing/{orderId}")
