@@ -1,7 +1,9 @@
 package com.foxwear.productservice.service;
 
 import com.foxwear.common.dto.ApiResponse;
+import com.foxwear.common.dto.response.ProductResponse;
 import com.foxwear.common.exception.InvalidArgumentException;
+import com.foxwear.common.exception.UnauthorizedException;
 import com.foxwear.common.utils.CodeGenerator;
 import com.foxwear.common.utils.StringHelper;
 import com.foxwear.productservice.client.InteractionClient;
@@ -187,6 +189,30 @@ public class ProductService {
     }
 
     /**
+     * Retrieves basic product information associated with a specific product item ID.
+     * This is typically used for order processing or cart displays.
+     */
+    @Transactional(readOnly = true)
+    public ProductResponse getProductWithItemId(Long itemId) {
+        log.info("Fetching product information for item ID: {}", itemId);
+        ProductItem item = findProductItemOrThrow(itemId);
+        Product product = item.getColorOption().getProduct();
+
+        ProductResponse response = productMapper.toResponse(product);
+        response.setImageUrl(
+                item.getColorOption()
+                        .getImages().stream()
+                        .filter(ColorOptionImage::isMain)
+                        .findFirst()
+                        .get().getImage()
+        );
+        response.setColor(item.getColorOption().getColorName());
+        response.setSize(item.getProductSize().getSizeValue());
+
+        return response;
+    }
+
+    /**
      * Retrieves all unique color options used in the catalog.
      */
     @Transactional(readOnly = true)
@@ -255,31 +281,45 @@ public class ProductService {
         log.info("Fetching top 10 most liked products");
         var products = productRepository.findTop10MostLiked();
 
-        Set<Long> likedIds = Collections.emptySet();
-
-        try {
-            ApiResponse<Set<Long>> response = interactionClient.getMyLikedIds(userId);
-            likedIds = (response != null && response.getData() != null)
-                    ? response.getData()
-                    : Collections.emptySet();
-        } catch (Exception ex) {
-            log.error("Error fetching liked ids from interaction service: {}", ex.getMessage());
-        }
-
-        Set<Long> finalLikedIds = likedIds;
+        Set<Long> likedIds = findLikedIds(userId);
 
         return products.stream()
-                .map(product -> {
-                    ProductGetAllResponse productResponse = productMapper.toGetAllResponse(product);
-                    productResponse.setLiked(finalLikedIds.contains(product.getId()));
-                    productResponse.setCategoryName(product.getCategory().getName());
-                    productResponse.setColors(product.getColors().stream()
-                            .map(this::getColorGetAllResponse)
-                            .collect(Collectors.toCollection(ArrayList::new)));
-
-                    return productResponse;
-                })
+                .map(product -> getProductGetAllResponse(product, likedIds))
                 .toList();
+    }
+
+    /**
+     * Retrieves the current price of a product item, considering discounts.
+     */
+    @Transactional(readOnly = true)
+    public List<ProductGetAllResponse> getMyLikedProducts(Long userId) {
+        log.info("Fetching liked products for user: {}", userId);
+
+        if (userId == null) {
+            throw new UnauthorizedException("Unauthorized user");
+        }
+
+        Set<Long> likedIds = findLikedIds(userId);
+
+        if (likedIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Product> likedProducts = productRepository.findAllById(likedIds);
+
+        return likedProducts.stream()
+                .map(product -> getProductGetAllResponse(product, likedIds))
+                .toList();
+    }
+
+    /**
+     * Calculates the effective price for a specific product item.
+     */
+    public BigDecimal getProductPrice(Long itemId) {
+        ProductItem item = findProductItemOrThrow(itemId);
+        Product product = item.getColorOption().getProduct();
+
+        return product.getDiscountPrice() != null ? product.getDiscountPrice() : product.getOriginalPrice();
     }
 
     /**
@@ -405,6 +445,9 @@ public class ProductService {
         log.info("Product size deleted successfully with ID: {}", id);
     }
 
+    /**
+     * Permanently removes a category from the database.
+     */
     @Transactional
     public void deleteCategory(Long id) {
         log.info("Deleting category ID: {}", id);
@@ -586,18 +629,12 @@ public class ProductService {
     }
 
     /**
-     * Transforms a {@link Product} entity into a {@link ProductGetAllResponse} DTO.
-     * If a specific color or size filter is applied, the matching color option is moved to the
-     * front of the list to ensure the relevant variant is displayed first.
+     * Transforms a {@link Product} entity into a {@link ProductGetAllResponse} DTO, applying filters
+     * to ensure that the most relevant color option (matching the search keyword, color, or size)
+     * is prioritized in the response.
      */
-    private ProductGetAllResponse getProductGetAllResponse(Product product, String searchKeyword, List<String> filterColors, List<String> filterSizes, Set<Long> likedIds) {
-        ProductGetAllResponse productResponse = productMapper.toGetAllResponse(product);
-        productResponse.setCategoryName(product.getCategory().getName());
-        productResponse.setLiked(likedIds.contains(product.getId()));
-        productResponse.setColors(product.getColors().stream()
-                .map(this::getColorGetAllResponse)
-                .collect(Collectors.toCollection(ArrayList::new)));
-
+    private ProductGetAllResponse getProductGetAllResponseWithFilter(Product product, String searchKeyword, List<String> filterColors, List<String> filterSizes, Set<Long> likedIds) {
+        var productResponse = getProductGetAllResponse(product, likedIds);
 
         if (productResponse.getColors() != null) {
             var matchingColor = productResponse.getColors().stream()
@@ -614,6 +651,20 @@ public class ProductService {
     }
 
     /**
+     * Transforms a {@link Product} entity into a {@link ProductGetAllResponse} DTO.
+     */
+    private ProductGetAllResponse getProductGetAllResponse(Product product, Set<Long> likedIds) {
+        ProductGetAllResponse productResponse = productMapper.toGetAllResponse(product);
+        productResponse.setCategoryName(product.getCategory().getName());
+        productResponse.setLiked(likedIds.contains(product.getId()));
+        productResponse.setColors(product.getColors().stream()
+                .map(this::getColorGetAllResponse)
+                .collect(Collectors.toCollection(ArrayList::new)));
+
+        return productResponse;
+    }
+
+    /**
      * Processes a page of products to convert them into DTOs, ensuring that matching variants
      * are prioritized in the response based on the search criteria.
      */
@@ -623,7 +674,7 @@ public class ProductService {
         List<String> filterSizes = productSizes == null ? null : productSizes.stream().map(String::toLowerCase).toList();
 
         return products.map(p ->
-                getProductGetAllResponse(p, searchKeyword, filterColors, filterSizes, likedIds));
+                getProductGetAllResponseWithFilter(p, searchKeyword, filterColors, filterSizes, likedIds));
     }
 
     /**
@@ -726,6 +777,9 @@ public class ProductService {
         return categoryResponse;
     }
 
+    /**
+     * Transforms a {@link WearCategory} entity into a {@link CategoryGetAllResponse} DTO.
+     */
     private CategoryGetAllResponse getAllCategoryResponse(WearCategory category) {
         CategoryGetAllResponse categoryResponse = categoryMapper.toGetAllResponse(category);
         categoryResponse.setParentName(
@@ -879,6 +933,24 @@ public class ProductService {
         }
 
         return false;
+    }
+
+    /**
+     * Fetches the set of product IDs liked by a specific user from the interaction service.
+     */
+    private Set<Long> findLikedIds(Long userId) {
+        Set<Long> likedIds = Collections.emptySet();
+
+        try {
+            ApiResponse<Set<Long>> response = interactionClient.getMyLikedIds(userId);
+            likedIds = (response != null && response.getData() != null)
+                    ? response.getData()
+                    : Collections.emptySet();
+        } catch (Exception ex) {
+            log.error("Error fetching liked ids from interaction service: {}", ex.getMessage());
+        }
+
+        return likedIds;
     }
 
 }

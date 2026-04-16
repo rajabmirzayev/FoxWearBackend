@@ -44,6 +44,24 @@ public enum ErrorCode {
     REVIEW_NOT_FOUND("RVW_001"),
     REVIEW_IS_NOT_ACTIVE("RVW_002"),
 
+    // Cart related errors
+    CART_NOT_FOUND("CART_001"),
+
+    // Order related errors
+    ORDER_NOT_FOUND("ORDER_001"),
+    UNPAID("ORDER_002"),
+
+    // Payment related errors
+    PAYMENT_ERROR("PAYMENT_001"),
+
+    // Coupon related errors
+    COUPON_NOT_FOUND("COUPON_001"),
+    COUPON_ALREADY_EXISTS("COUPON_002"),
+    COUPON_IS_NOT_ACTIVE("COUPON_003"),
+    COUPON_EXPIRED("COUPON_004"),
+    COUPON_USED_LIMIT("COUPON_005"),
+    COUPON_MIN_ORDER("COUPON_006"),
+
     // Server errors
     INTERNAL_SERVER_ERROR("SERVER_001");
 

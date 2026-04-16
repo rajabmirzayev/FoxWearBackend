@@ -14,6 +14,7 @@ import com.foxwear.authservice.mapper.UserMapper;
 import com.foxwear.authservice.repository.UserRepository;
 import com.foxwear.common.enums.Role;
 import com.foxwear.common.enums.UserStatus;
+import com.foxwear.common.event.UserCreatedEvent;
 import com.foxwear.common.exception.InvalidArgumentException;
 import com.foxwear.common.exception.InvalidTokenException;
 import com.foxwear.common.exception.UnauthorizedException;
@@ -21,7 +22,7 @@ import com.foxwear.common.service.JwtService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -46,7 +47,7 @@ public class AuthService {
     private final UserService userService;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -71,6 +72,12 @@ public class AuthService {
         log.info("User registered successfully with ID: {}", savedUser.getId());
 
         verificationService.createAndSendVerification(user.getEmail());
+
+        UserCreatedEvent userCreatedEvent = UserCreatedEvent.builder()
+                .userId(savedUser.getId())
+                .email(savedUser.getEmail())
+                .build();
+        kafkaTemplate.send("user-created-topic", userCreatedEvent);
     }
 
     /**
@@ -143,7 +150,7 @@ public class AuthService {
      */
     @Transactional
     public String confirm(String token) {
-        String email = (String) redisTemplate.opsForValue().get("CONFIRM:" + token);
+        String email = stringRedisTemplate.opsForValue().get("CONFIRM:" + token);
 
         if (email == null) {
             throw new InvalidTokenException("Invalid or expired confirmation token");
@@ -151,7 +158,7 @@ public class AuthService {
 
         UserEntity user = userService.findUserOrThrow(email);
 
-        redisTemplate.delete("CONFIRM:" + token);
+        stringRedisTemplate.delete("CONFIRM:" + token);
 
         var authorities = user.getAuthorities();
         List<String> roles = authorities.stream()
@@ -159,6 +166,7 @@ public class AuthService {
                 .toList();
 
         user.setStatus(UserStatus.ACTIVE);
+        user.setEmailVerified(true);
         log.info("User account activated for email: {}", email);
         String jwtToken = jwtService.generateToken(email, user.getId(), roles);
         String refreshToken = refreshTokenService.createRefreshToken(user).getToken();
@@ -177,7 +185,7 @@ public class AuthService {
      */
     @Transactional
     public void resetPassword(PasswordResetRequest request, String token) {
-        String email = (String) redisTemplate.opsForValue().get("PWD_RESET:" + token);
+        String email = stringRedisTemplate.opsForValue().get("PWD_RESET:" + token);
 
         if (email == null) {
             throw new InvalidArgumentException("Invalid or expired token");
@@ -185,7 +193,7 @@ public class AuthService {
 
         UserEntity user = userService.findUserOrThrow(email);
 
-        redisTemplate.delete("PWD_RESET:" + token);
+        stringRedisTemplate.delete("PWD_RESET:" + token);
 
         checkPasswordsMatch(request.getPassword(), request.getConfirmPassword());
 

@@ -1,0 +1,106 @@
+databaseChangeLog:
+  - changeSet:
+      id: 01042026-01
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: color_name
+                  type: VARCHAR(255)
+              - column:
+                  name: image_url
+                  type: VARCHAR(255)
+              - column:
+                  name: product_name
+                  type: VARCHAR(255)
+              - column:
+                  name: size_value
+                  type: VARCHAR(255)
+              - column:
+                  name: slug
+                  type: VARCHAR(255)
+            tableName: order_items
+  - changeSet:
+      id: 01042026-02
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: color_name
+            tableName: order_items
+  - changeSet:
+      id: 01042026-03
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: courier_id
+                  type: BIGINT
+              - column:
+                  name: picked_up_at
+                  type: DATETIME
+              - column:
+                  name: prepared_at
+                  type: DATETIME
+            tableName: orders
+  - changeSet:
+      id: 01042026-04
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: image_url
+            tableName: order_items
+  - changeSet:
+      id: 01042026-05
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: product_name
+            tableName: order_items
+  - changeSet:
+      id: 01042026-06
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: size_value
+            tableName: order_items
+  - changeSet:
+      id: 01042026-08
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: slug
+            tableName: cart_items
+  - changeSet:
+      id: 01042026-09
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: slug
+            tableName: order_items
+  - changeSet:
+      id: 01042026-10
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - dropColumn:
+            columnName: product_title_snapshot
+            tableName: order_items
+  - changeSet:
+      id: 01042026-11
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - dropColumn:
+            columnName: total_original_price
+            tableName: orders
+

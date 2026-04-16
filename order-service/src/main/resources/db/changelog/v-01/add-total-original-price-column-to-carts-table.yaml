@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+      id: 02042026-05
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: total_original_price
+                  type: DECIMAL(12, 2)
+            tableName: carts
+  - changeSet:
+      id: 02042026-06
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: total_original_price
+            tableName: carts
+

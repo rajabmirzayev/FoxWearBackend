@@ -1,8 +1,8 @@
-package com.foxwear.productservice.entity;
+package com.foxwear.orderservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.foxwear.common.entity.BaseAuditEntity;
-import com.foxwear.productservice.enums.DiscountType;
+import com.foxwear.orderservice.enums.DiscountType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;

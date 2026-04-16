@@ -1,3 +1,16 @@
+x-spring-common-env: &spring-common-env
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+  SPRING_DATASOURCE_USERNAME: foxwear
+  SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+  SPRING_DATA_REDIS_HOST: redis
+  SPRING_DATA_REDIS_PORT: 6379
+  JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+  ACCESS_KEY: ${ACCESS_KEY}
+  SECRET_KEY: ${SECRET_KEY}
+  GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+  GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+
 services:
   foxwear-db:
     image: postgres:latest
@@ -6,7 +19,7 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_USER: foxwear
-      POSTGRES_PASSWORD: 1234
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: foxwear_db
     volumes:
       - postgres_data:/var/lib/postgresql
@@ -58,20 +71,185 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    networks:
+      - foxwear-network
 
-    # dev only
   redis-commander:
     image: rediscommander/redis-commander:latest
     container_name: redis-commander
     environment:
       REDIS_HOSTS: local:redis:6379
     ports:
-      - "8081:8081"
+      - "8090:8090"
     depends_on:
       redis:
         condition: service_healthy
     profiles:
       - dev
+    networks:
+      - foxwear-network
+
+  eureka-server:
+    build: ./eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    develop:
+      watch:
+        - action: sync
+          path: ./eureka-server/src
+          target: /app/src
+        - action: rebuild
+          path: ./eureka-server/build.gradle
+    networks:
+      - foxwear-network
+
+  gateway-service:
+    build: ./gateway-service
+    container_name: gateway-service
+    ports:
+      - "8080:8080"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    depends_on:
+      - eureka-server
+    develop:
+      watch:
+        - action: sync
+          path: ./gateway-service/src
+          target: /app/src
+        - action: rebuild
+          path: ./gateway-service/build.gradle
+    networks:
+      - foxwear-network
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    environment:
+      <<: *spring-common-env
+      SPRING_DATASOURCE_URL: jdbc:postgresql://foxwear-db:5432/auth_db
+    depends_on:
+      foxwear-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    develop:
+      watch:
+        - action: sync
+          path: ./auth-service/src
+          target: /app/src
+        - action: rebuild
+          path: ./auth-service/build.gradle
+    networks:
+      - foxwear-network
+
+  product-service:
+    build: ./product-service
+    container_name: product-service
+    environment:
+      <<: *spring-common-env
+      SPRING_DATASOURCE_URL: jdbc:postgresql://foxwear-db:5432/catalog_db
+    depends_on:
+      foxwear-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    develop:
+      watch:
+        - action: sync
+          path: ./product-service/src
+          target: /app/src
+        - action: rebuild
+          path: ./product-service/build.gradle
+    networks:
+      - foxwear-network
+
+  order-service:
+    build: ./order-service
+    container_name: order-service
+    environment:
+      <<: *spring-common-env
+      SPRING_DATASOURCE_URL: jdbc:postgresql://foxwear-db:5432/order_db
+    depends_on:
+      foxwear-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    develop:
+      watch:
+        - action: sync
+          path: ./order-service/src
+          target: /app/src
+        - action: rebuild
+          path: ./order-service/build.gradle
+    networks:
+      - foxwear-network
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    environment:
+      <<: *spring-common-env
+      SPRING_MAIL_PASSWORD: ${GMAIL_APP_PASSWORD}
+      SPRING_MAIL_USERNAME: "mreceb0111@gmail.com"
+    depends_on:
+      - kafka
+      - eureka-server
+    develop:
+      watch:
+        - action: sync
+          path: ./notification-service/src
+          target: /app/src
+        - action: rebuild
+          path: ./notification-service/build.gradle
+    networks:
+      - foxwear-network
+
+  interaction-service:
+    build: ./interaction-service
+    container_name: interaction-service
+    environment:
+      <<: *spring-common-env
+      SPRING_DATASOURCE_URL: jdbc:postgresql://foxwear-db:5432/interaction_db
+    depends_on:
+      foxwear-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    develop:
+      watch:
+        - action: sync
+          path: ./interaction-service/src
+          target: /app/src
+        - action: rebuild
+          path: ./interaction-service/build.gradle
+    networks:
+      - foxwear-network
+
+  dynamic-data-service:
+    build: ./dynamic-data-service
+    container_name: dynamic-data-service
+    environment:
+      <<: *spring-common-env
+      SPRING_DATASOURCE_URL: jdbc:postgresql://foxwear-db:5432/dynamic_db
+    depends_on:
+      foxwear-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    develop:
+      watch:
+        - action: sync
+          path: ./dynamic-data-service/src
+          target: /app/src
+        - action: rebuild
+          path: ./dynamic-data-service/build.gradle
+    networks:
+      - foxwear-network
 
 networks:
   foxwear-network:

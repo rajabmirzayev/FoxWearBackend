@@ -1,0 +1,55 @@
+databaseChangeLog:
+  - changeSet:
+      id: 30032026-09
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_courier_locations
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: courier_id
+                  type: BIGINT
+              - column:
+                  name: current_latitude
+                  type: DOUBLE
+              - column:
+                  name: current_longitude
+                  type: DOUBLE
+              - column:
+                  name: last_updated_at
+                  type: DATETIME
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+            tableName: courier_locations
+  - changeSet:
+      id: 1774881459888-10
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: courier_id
+            constraintName: uc_courier_locations_courier
+            tableName: courier_locations
+  - changeSet:
+      id: 1774881459888-11
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: courier_id
+            indexName: idx_courier_id
+            tableName: courier_locations
+

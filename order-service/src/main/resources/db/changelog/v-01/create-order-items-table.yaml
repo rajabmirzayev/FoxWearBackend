@@ -1,0 +1,61 @@
+databaseChangeLog:
+  - changeSet:
+      id: 30032026-03
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_order_items
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: order_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: product_item_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: product_title_snapshot
+                  type: VARCHAR(100)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: quantity
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: price_at_purchase
+                  type: DECIMAL(10, 2)
+              - column:
+                  name: discount_at_purchase
+                  type: DECIMAL(10, 2)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: sub_total
+                  type: DECIMAL(12, 2)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: sku_snapshot
+                  type: VARCHAR(50)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: is_reviewed
+                  type: BOOLEAN
+            tableName: order_items
+

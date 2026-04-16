@@ -1,6 +1,7 @@
 package com.foxwear.productservice.controller;
 
 import com.foxwear.common.dto.ApiResponse;
+import com.foxwear.common.dto.response.ProductResponse;
 import com.foxwear.productservice.dto.request.ProductUserFilterRequest;
 import com.foxwear.productservice.dto.response.*;
 import com.foxwear.productservice.service.ProductService;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -32,6 +34,14 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @GetMapping("/basic/{itemId}")
+    public ResponseEntity<ApiResponse<ProductResponse>> getProduct(
+            @Parameter(description = "ID of the product item") @PathVariable Long itemId
+    ) {
+        var response = productService.getProductWithItemId(itemId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
     @Operation(summary = "Get all products (User Filter)", description = "Retrieves a paginated list of products based on user-defined filters like category, color, size, and price.")
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ProductGetAllResponse>>> getAllProducts(
@@ -48,6 +58,15 @@ public class ProductController {
             @RequestHeader(value = "X-User-Id", required = false) Long userId
     ) {
         var response = productService.getMostLiked(userId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @Operation(summary = "Get my liked products", description = "Retrieves a list of products that the authenticated user has liked.")
+    @GetMapping("/my-liked-products")
+    public ResponseEntity<ApiResponse<List<ProductGetAllResponse>>> getMyLikedProducts(
+            @RequestHeader(value = "X-User-Id") Long userId
+    ) {
+        var response = productService.getMyLikedProducts(userId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -77,6 +96,14 @@ public class ProductController {
     @GetMapping("/size")
     public ResponseEntity<ApiResponse<List<SizeResponse>>> getAllSizes() {
         var response = productService.getAllSizes();
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/{id}/price")
+    public ResponseEntity<ApiResponse<BigDecimal>> getProductPrice(
+            @Parameter(description = "ID of the product item") @PathVariable Long id
+    ) {
+        var response = productService.getProductPrice(id);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

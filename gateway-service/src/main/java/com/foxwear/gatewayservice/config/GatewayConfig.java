@@ -58,6 +58,15 @@ public class GatewayConfig {
                         .filters(f -> f.filter(commonFilter))
                         .uri("lb://INTERACTION-SERVICE")
                 )
+
+                .route("order-service-route", r -> r
+                        .path(
+                                "/api/v1/carts/**",
+                                "/api/v1/orders/**"
+                        )
+                        .filters(f -> f.filter(commonFilter))
+                        .uri("lb://ORDER-SERVICE")
+                )
                 .build();
 
     }
