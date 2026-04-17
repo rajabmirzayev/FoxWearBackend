@@ -5,3 +5,5 @@ databaseChangeLog:
       file: /db/changelog/v-01/create-product-reviews-table.yaml
   - include:
       file: db/changelog/v-01/create-site-reviews-table.yaml
+  - include:
+      file: db/changelog/v-01/create-messages-table.yaml

@@ -53,7 +53,9 @@ public class GatewayConfig {
                         .path(
                                 "/api/v1/likes/**",
                                 "/api/v1/reviews/**",
+                                "/api/v1/messages/**",
                                 "/api/admin/reviews/**"
+
                         )
                         .filters(f -> f.filter(commonFilter))
                         .uri("lb://INTERACTION-SERVICE")
