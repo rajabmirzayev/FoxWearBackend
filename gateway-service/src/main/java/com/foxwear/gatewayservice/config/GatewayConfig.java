@@ -32,6 +32,7 @@ public class GatewayConfig {
                                 "/api/v1/auth/**",
                                 "/api/v1/users/**",
                                 "/api/v1/addresses/**",
+                                "/api/admin/users/**",
                                 "/login/**",
                                 "/oauth2/**"
                         )

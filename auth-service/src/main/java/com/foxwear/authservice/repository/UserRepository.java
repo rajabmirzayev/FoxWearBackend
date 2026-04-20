@@ -1,6 +1,9 @@
 package com.foxwear.authservice.repository;
 
 import com.foxwear.authservice.entity.UserEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,4 +27,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @Query("SELECT u FROM UserEntity u WHERE u.username = :identifier " +
             "OR u.email = :identifier OR u.phoneNumber = :identifier")
     Optional<UserEntity> findByIdentifier(@Param("identifier") String identifier);
+
+    Page<UserEntity> findAll(Specification<UserEntity> spec, Pageable pageable);
+
 }
