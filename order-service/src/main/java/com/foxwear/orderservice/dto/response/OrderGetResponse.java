@@ -35,5 +35,6 @@ public class OrderGetResponse {
     LocalDateTime preparedAt;
     LocalDateTime deliveredAt;
     List<OrderItemGetResponse> items;
+    LocalDateTime createdAt;
 
 }
