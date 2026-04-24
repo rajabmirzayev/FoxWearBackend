@@ -106,10 +106,10 @@ public class OrderService {
         log.info("Order created successfully. Order Number: {}", savedOrder.getOrderNumber());
 
         // Post-creation cleanup: clear cart and update coupon usage
-        cartService.clearCart(userId);
         if (cart.getCoupon() != null) {
             couponService.increaseUsedCount(cart.getCoupon().getId());
         }
+        cartService.clearCart(userId);
         return mapToOrderCreateResponse(savedOrder);
     }
 

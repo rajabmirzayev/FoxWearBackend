@@ -293,8 +293,12 @@ public class CartService {
 
         cart.getItems().clear();
 
+        cart.setShippingFee(BigDecimal.ZERO);
+        cart.setTotalOriginalPrice(BigDecimal.ZERO);
         cart.setTotalPrice(BigDecimal.ZERO);
         cart.setShippingFee(BigDecimal.ZERO);
+        cart.setCoupon(null);
+        cart.setCouponApplied(false);
 
         cartRepository.save(cart);
 
@@ -379,4 +383,5 @@ public class CartService {
             throw new CouponMinAmountException("Total price is less than " + coupon.getMinOrderAmount() + "AZN");
         }
     }
+
 }
