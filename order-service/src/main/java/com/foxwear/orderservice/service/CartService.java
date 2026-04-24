@@ -48,10 +48,15 @@ public class CartService {
     @Transactional
     public void createCart(Long userId) {
         log.info("Creating cart for user ID: {}", userId);
-        Cart cart = new Cart();
-        cart.setUserId(userId);
-        cartRepository.save(cart);
-        log.info("Cart created successfully");
+
+        var res = cartRepository.findByUserId(userId);
+
+        if (res.isEmpty()) {
+            Cart cart = new Cart();
+            cart.setUserId(userId);
+            cartRepository.save(cart);
+            log.info("Cart created successfully");
+        }
     }
 
     /**
