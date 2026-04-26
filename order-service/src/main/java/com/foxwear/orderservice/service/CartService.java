@@ -48,10 +48,15 @@ public class CartService {
     @Transactional
     public void createCart(Long userId) {
         log.info("Creating cart for user ID: {}", userId);
-        Cart cart = new Cart();
-        cart.setUserId(userId);
-        cartRepository.save(cart);
-        log.info("Cart created successfully");
+
+        var res = cartRepository.findByUserId(userId);
+
+        if (res.isEmpty()) {
+            Cart cart = new Cart();
+            cart.setUserId(userId);
+            cartRepository.save(cart);
+            log.info("Cart created successfully");
+        }
     }
 
     /**
@@ -293,8 +298,12 @@ public class CartService {
 
         cart.getItems().clear();
 
+        cart.setShippingFee(BigDecimal.ZERO);
+        cart.setTotalOriginalPrice(BigDecimal.ZERO);
         cart.setTotalPrice(BigDecimal.ZERO);
         cart.setShippingFee(BigDecimal.ZERO);
+        cart.setCoupon(null);
+        cart.setCouponApplied(false);
 
         cartRepository.save(cart);
 
@@ -379,4 +388,5 @@ public class CartService {
             throw new CouponMinAmountException("Total price is less than " + coupon.getMinOrderAmount() + "AZN");
         }
     }
+
 }

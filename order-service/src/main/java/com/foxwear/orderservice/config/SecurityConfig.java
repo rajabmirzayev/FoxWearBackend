@@ -39,12 +39,12 @@ public class SecurityConfig {
                                 "/api/v1/orders/pending",
                                 "/api/v1/orders/preparing/**",
                                 "/api/v1/orders/prepared/**"
-                        ).hasRole("SELLER")
+                        ).hasAnyRole("ADMIN", "SELLER")
                         .requestMatchers(
-                                "/api/v1/orders/ready",
+                                "/api/v1/couriers/**",
                                 "/api/v1/orders/assign/**",
                                 "/api/v1/orders/deliver/**"
-                        ).hasRole("COURIER")
+                        ).hasAnyRole("ADMIN", "COURIER")
 
                         .anyRequest().authenticated()
                 )

@@ -1,6 +1,7 @@
 package com.foxwear.authservice.mapper;
 
 import com.foxwear.authservice.dto.request.RegisterRequest;
+import com.foxwear.authservice.dto.response.UserGetAllResponse;
 import com.foxwear.authservice.dto.response.UserGetPublicResponse;
 import com.foxwear.authservice.dto.response.UserGetResponse;
 import com.foxwear.authservice.dto.response.UserUpdateResponse;
@@ -17,4 +18,7 @@ public interface UserMapper {
     UserUpdateResponse toUpdateResponse(UserEntity user);
 
     UserGetPublicResponse toGetPublicResponse(UserEntity user);
+
+    UserGetAllResponse toGetAllResponse(UserEntity user);
+
 }

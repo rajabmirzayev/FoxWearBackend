@@ -7,6 +7,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -20,12 +21,12 @@ public class OrderGetAllResponse {
     Long userId;
     OrderStatus status;
     BigDecimal totalDiscountPrice;
-    BigDecimal shippingFee;
     PaymentStatus paymentStatus;
     PaymentMethod paymentMethod;
     String addressSnapshot;
     String phoneNumber;
     Double latitudeSnapshot;
     Double longitudeSnapshot;
+    LocalDateTime deliveredAt;
 
 }

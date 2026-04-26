@@ -15,26 +15,22 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class OrderGetResponse {
+public class OrderGetCourierResponse {
 
     Long id;
     String orderNumber;
     OrderStatus status;
-    BigDecimal totalDiscountPrice;
     PaymentStatus paymentStatus;
     PaymentMethod paymentMethod;
     String addressSnapshot;
     Double latitudeSnapshot;
     Double longitudeSnapshot;
     String orderNote;
-    String trackingNumber;
-    LocalDateTime estimatedDeliveryDate;
     Long courierId;
     String phoneNumber;
     LocalDateTime pickedUpAt;
     LocalDateTime preparedAt;
-    LocalDateTime deliveredAt;
-    List<OrderItemGetResponse> items;
     LocalDateTime createdAt;
+    Integer itemsCount;
 
 }

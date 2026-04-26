@@ -32,6 +32,7 @@ public class GatewayConfig {
                                 "/api/v1/auth/**",
                                 "/api/v1/users/**",
                                 "/api/v1/addresses/**",
+                                "/api/admin/users/**",
                                 "/login/**",
                                 "/oauth2/**"
                         )
@@ -53,7 +54,9 @@ public class GatewayConfig {
                         .path(
                                 "/api/v1/likes/**",
                                 "/api/v1/reviews/**",
+                                "/api/v1/messages/**",
                                 "/api/admin/reviews/**"
+
                         )
                         .filters(f -> f.filter(commonFilter))
                         .uri("lb://INTERACTION-SERVICE")
@@ -62,7 +65,9 @@ public class GatewayConfig {
                 .route("order-service-route", r -> r
                         .path(
                                 "/api/v1/carts/**",
-                                "/api/v1/orders/**"
+                                "/api/v1/orders/**",
+                                "/api/v1/couriers/**",
+                                "/api/admin/orders/**"
                         )
                         .filters(f -> f.filter(commonFilter))
                         .uri("lb://ORDER-SERVICE")
