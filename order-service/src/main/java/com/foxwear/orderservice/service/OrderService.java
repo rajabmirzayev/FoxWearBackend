@@ -129,6 +129,63 @@ public class OrderService {
     }
 
     /**
+     * Retrieves a specific order with details optimized for courier view.
+     *
+     * @param id     The internal ID of the order
+     * @param userId The ID of the courier requesting the order
+     * @return OrderGetCourierResponse containing delivery-specific details
+     */
+    @Transactional(readOnly = true)
+    public OrderGetCourierResponse getOrderByIdWithCourierResponse(Long id, Long userId) {
+        log.info("Fetching order with id {} for courier: {}", id, userId);
+        checkUserIdIsNotNull(userId);
+
+        Order order = findOrderOrThrow(id);
+
+        return mapToOrderGetCourierResponse(order);
+    }
+
+    /**
+     * Retrieves all orders currently in SHIPPED status assigned to a specific courier.
+     *
+     * @param courierId The ID of the courier
+     * @return A list of OrderGetAllResponse DTOs representing the courier's tasks
+     */
+    public List<OrderGetAllResponse> getCourierTasks(Long courierId) {
+        log.info("Fetching tasks for courier: {}", courierId);
+        checkUserIdIsNotNull(courierId);
+
+        List<Order> orders = orderRepository.findAllByCourierIdAndStatus(courierId, OrderStatus.SHIPPED);
+
+        if (orders.isEmpty()) {
+            log.info("No tasks found for courier: {}", courierId);
+            return Collections.emptyList();
+        }
+
+        return orders.stream()
+                .map(orderMapper::toGetAllResponse)
+                .toList();
+    }
+
+    /**
+     * Retrieves a paginated list of delivered orders for a specific courier.
+     *
+     * @param courierId The ID of the courier
+     * @param page      The page number to retrieve
+     * @param size      The number of records per page
+     * @return A page of OrderGetAllResponse DTOs
+     */
+    public Page<OrderGetAllResponse> getMyDeliveredOrders(Long courierId, Integer page, Integer size) {
+        log.info("Fetching delivered orders for courier: {}, page: {}, size: {}", courierId, page, size);
+        checkUserIdIsNotNull(courierId);
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Order> orders = orderRepository.findAllByCourierIdAndStatusOrderByDeliveredAtDesc(courierId, OrderStatus.DELIVERED, pageable);
+
+        return orders.map(orderMapper::toGetAllResponse);
+    }
+
+    /**
      * Retrieves all orders belonging to a specific user.
      *
      * @param userId The ID of the user whose orders are being retrieved
@@ -356,7 +413,7 @@ public class OrderService {
         }
 
         switch (status) {
-            case PENDING, PREPARING ->  {
+            case PENDING, PREPARING -> {
                 order.setPreparedAt(null);
                 order.setPickedUpAt(null);
                 order.setDeliveredAt(null);
@@ -483,12 +540,26 @@ public class OrderService {
     }
 
     /**
+     * Maps the Order entity to a response DTO tailored for courier operations.
+     *
+     * @param order The Order entity to map
+     * @return OrderGetCourierResponse containing summary and location data
+     */
+    private OrderGetCourierResponse mapToOrderGetCourierResponse(Order order) {
+        OrderGetCourierResponse response = orderMapper.toGetCourierResponse(order);
+        response.setItemsCount(order.getItems().size());
+
+        return response;
+    }
+
+    /**
      * Validates that the user ID is not null.
      *
      * @param userId The user ID to check
      */
     private void checkUserIdIsNotNull(Long userId) {
         if (userId == null) {
+            log.error("Security violation: Attempted operation with null user ID");
             throw new UnauthorizedException("Unauthorized user");
         }
     }

@@ -44,13 +44,6 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @Operation(summary = "Get ready orders", description = "Retrieves a list of all orders that are currently in READY_FOR_PICKUP status")
-    @GetMapping("/ready")
-    public ResponseEntity<ApiResponse<List<OrderGetAllResponse>>> getReadyOrders() {
-        var response = orderService.getOrdersByStatus(OrderStatus.READY_FOR_PICKUP);
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
     @Operation(summary = "Get my orders", description = "Retrieves a list of all orders belonging to the authenticated user")
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<List<OrderGetAllResponse>>> getMyOrders(

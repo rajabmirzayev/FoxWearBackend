@@ -41,7 +41,7 @@ public class SecurityConfig {
                                 "/api/v1/orders/prepared/**"
                         ).hasAnyRole("ADMIN", "SELLER")
                         .requestMatchers(
-                                "/api/v1/orders/ready",
+                                "/api/v1/couriers/**",
                                 "/api/v1/orders/assign/**",
                                 "/api/v1/orders/deliver/**"
                         ).hasAnyRole("ADMIN", "COURIER")

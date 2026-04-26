@@ -66,6 +66,7 @@ public class GatewayConfig {
                         .path(
                                 "/api/v1/carts/**",
                                 "/api/v1/orders/**",
+                                "/api/v1/couriers/**",
                                 "/api/admin/orders/**"
                         )
                         .filters(f -> f.filter(commonFilter))
