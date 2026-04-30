@@ -1,5 +1,8 @@
 package com.foxwear.common.utils;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 @SuppressWarnings("unused")
 public class StringHelper {
 
@@ -19,4 +22,9 @@ public class StringHelper {
     public static String generateSlug(String text) {
         return text.toLowerCase().replace(" ", "-") + "-" + System.currentTimeMillis();
     }
+
+    public static String generateFWNumber() {
+        return "FW-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
+    }
+
 }

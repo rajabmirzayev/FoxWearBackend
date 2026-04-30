@@ -1,0 +1,104 @@
+databaseChangeLog:
+  - changeSet:
+      id: 30042026-01
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_sale_items
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: sale_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: product_item_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: quantity
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: unit_price
+                  type: DECIMAL
+              - column:
+                  constraints:
+                    nullable: false
+                  name: total_price
+                  type: DECIMAL
+            tableName: sale_items
+  - changeSet:
+      id: 30042026-02
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_sales
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_at
+                  type: DATETIME
+              - column:
+                  constraints:
+                    nullable: false
+                  name: updated_at
+                  type: DATETIME
+              - column:
+                  constraints:
+                    nullable: false
+                  name: receipt_number
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: cashier_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: total_amount
+                  type: DECIMAL
+              - column:
+                  name: payment_method
+                  type: VARCHAR(255)
+            tableName: sales
+  - changeSet:
+      id: 30042026-03
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: receipt_number
+            constraintName: uc_sales_receipt_number
+            tableName: sales
+  - changeSet:
+      id: 30042026-04
+      author: rajabmirzayev
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: sale_id
+            baseTableName: sale_items
+            constraintName: FK_SALE_ITEMS_ON_SALE
+            referencedColumnNames: id
+            referencedTableName: sales

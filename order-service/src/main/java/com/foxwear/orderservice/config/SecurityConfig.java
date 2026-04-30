@@ -38,7 +38,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/v1/orders/pending",
                                 "/api/v1/orders/preparing/**",
-                                "/api/v1/orders/prepared/**"
+                                "/api/v1/orders/prepared/**",
+                                "/api/v1/sellers/**"
                         ).hasAnyRole("ADMIN", "SELLER")
                         .requestMatchers(
                                 "/api/v1/couriers/**",
