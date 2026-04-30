@@ -36,9 +36,6 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         ).permitAll()
                         .requestMatchers(
-                                "/api/v1/orders/pending",
-                                "/api/v1/orders/preparing/**",
-                                "/api/v1/orders/prepared/**",
                                 "/api/v1/sellers/**"
                         ).hasAnyRole("ADMIN", "SELLER")
                         .requestMatchers(
@@ -46,6 +43,9 @@ public class SecurityConfig {
                                 "/api/v1/orders/assign/**",
                                 "/api/v1/orders/deliver/**"
                         ).hasAnyRole("ADMIN", "COURIER")
+                        .requestMatchers(
+                                "/api/v1/orders/data/**"
+                        ).hasAnyRole("ADMIN", "SELLER", "COURIER")
 
                         .anyRequest().authenticated()
                 )
