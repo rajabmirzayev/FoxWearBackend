@@ -12,6 +12,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,5 +37,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByCourierIdAndStatus(Long courierId, OrderStatus status);
 
     Page<Order> findAllByCourierIdAndStatusOrderByDeliveredAtDesc(Long courierId, OrderStatus status, Pageable pageable);
+
+    @Query("SELECT SUM(o.totalDiscountPrice) FROM Order o WHERE o.paymentStatus = 'PAID'")
+    BigDecimal sumTotalRevenue();
+
+    @Query("SELECT SUM(o.totalDiscountPrice) FROM Order o WHERE o.paymentStatus = 'PAID' AND o.createdAt BETWEEN :start AND :end")
+    BigDecimal sumRevenueByDateRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.createdAt >= :start AND o.createdAt < :end")
+    long countOrdersByDateRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
 }
