@@ -1,6 +1,7 @@
 package com.foxwear.productservice.controller;
 
 import com.foxwear.common.dto.ApiResponse;
+import com.foxwear.common.dto.response.ProductItemResponse;
 import com.foxwear.common.dto.response.ProductResponse;
 import com.foxwear.productservice.dto.request.ProductUserFilterRequest;
 import com.foxwear.productservice.dto.response.*;
@@ -34,11 +35,21 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @Operation(summary = "Get basic product info", description = "Retrieves basic product information using a specific product item ID.")
     @GetMapping("/basic/{itemId}")
     public ResponseEntity<ApiResponse<ProductResponse>> getProduct(
             @Parameter(description = "ID of the product item") @PathVariable Long itemId
     ) {
         var response = productService.getProductWithItemId(itemId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @Operation(summary = "Get product items by IDs", description = "Retrieves a list of product item details for the provided list of IDs.")
+    @GetMapping("/items/by-ids")
+    public ResponseEntity<ApiResponse<List<ProductItemResponse>>> getProductItemsByIds(
+            @Parameter(description = "List of product item IDs") @RequestParam List<Long> ids
+    ) {
+        var response = productService.getProductItemsByIds(ids);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

@@ -3,6 +3,7 @@ package com.foxwear.orderservice.controller.admin;
 import com.foxwear.common.dto.ApiResponse;
 import com.foxwear.orderservice.dto.response.DashboardSummaryResponse;
 import com.foxwear.orderservice.dto.response.SalesDataDTO;
+import com.foxwear.orderservice.dto.response.TopProductResponse;
 import com.foxwear.orderservice.service.DashboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -34,4 +36,14 @@ public class AdminDashboardController {
         var response = dashboardService.getCombinedSalesOverview();
         return ResponseEntity.ok(ApiResponse.success(response));
     }
+
+    @Operation(summary = "Get top selling products", description = "Returns a list of top selling products based on order quantity")
+    @GetMapping("/top-products")
+    public ResponseEntity<ApiResponse<List<TopProductResponse>>> getTopProducts(
+            @RequestParam(defaultValue = "5") int limit
+    ) {
+        var response = dashboardService.getTopProducts(limit);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
 }

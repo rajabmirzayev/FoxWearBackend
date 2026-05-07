@@ -55,4 +55,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "GROUP BY CAST(o.createdAt AS date)")
     List<SalesDataDTO> getDailyStats(@Param("startDate") LocalDateTime startDate);
 
+    @Query("SELECT oi.productItemId, SUM(oi.quantity), SUM(oi.subTotal) " +
+            "FROM OrderItem oi " +
+            "GROUP BY oi.productItemId " +
+            "ORDER BY SUM(oi.quantity) DESC")
+    List<Object[]> getTopSellingProductIdsFromOrders(Pageable pageable);
+
 }

@@ -1,6 +1,7 @@
 package com.foxwear.productservice.service;
 
 import com.foxwear.common.dto.ApiResponse;
+import com.foxwear.common.dto.response.ProductItemResponse;
 import com.foxwear.common.dto.response.ProductResponse;
 import com.foxwear.common.exception.InvalidArgumentException;
 import com.foxwear.common.exception.UnauthorizedException;
@@ -210,6 +211,22 @@ public class ProductService {
         response.setSize(item.getProductSize().getSizeValue());
 
         return response;
+    }
+
+    /**
+     * Retrieves a list of product item details (ID, title, and image) for a given list of item IDs.
+     * This is used for bulk fetching product metadata, often for display in summaries or logs.
+     */
+    @Transactional(readOnly = true)
+    public List<ProductItemResponse> getProductItemsByIds(List<Long> ids) {
+        return productItemRepository.findAllById(ids).stream()
+                .map(item -> ProductItemResponse.builder()
+                        .id(item.getId())
+                        .title(item.getColorOption().getProduct().getTitle())
+                        .productSlug(item.getColorOption().getProduct().getSlug())
+                        .imageUrl(item.getColorOption().getImages().getFirst().getImage())
+                        .build())
+                .toList();
     }
 
     /**

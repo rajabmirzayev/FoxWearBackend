@@ -1,11 +1,18 @@
 package com.foxwear.orderservice.service;
 
+import com.foxwear.common.dto.response.ProductItemResponse;
+import com.foxwear.common.dto.response.ProductResponse;
+import com.foxwear.orderservice.client.ProductClient;
 import com.foxwear.orderservice.dto.response.DashboardSummaryResponse;
 import com.foxwear.orderservice.dto.response.SalesDataDTO;
+import com.foxwear.orderservice.dto.response.TopProductResponse;
 import com.foxwear.orderservice.repository.OrderRepository;
+import com.foxwear.orderservice.repository.SaleItemRepository;
 import com.foxwear.orderservice.repository.SaleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -22,6 +30,8 @@ import java.util.*;
 public class DashboardService {
     private final OrderRepository orderRepository;
     private final SaleRepository saleRepository;
+    private final SaleItemRepository saleItemRepository;
+    private final ProductClient productClient;
 
     /**
      * Retrieves a summary of business performance including revenue and order growth.
@@ -84,6 +94,60 @@ public class DashboardService {
                 .map(entry -> new SalesDataDTO(
                         entry.getKey().format(formatter),
                         entry.getValue()))
+                .toList();
+    }
+
+    /**
+     * Retrieves the top-selling products by aggregating data from both online orders and physical sales.
+     * Fetches product details (name, image) from the Product Microservice.
+     *
+     * @param limit The maximum number of top products to return.
+     * @return A list of TopProductResponse containing sales volume and product details.
+     */
+    @Transactional(readOnly = true)
+    public List<TopProductResponse> getTopProducts(int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        Map<Long, TopProductResponse> combinedMap = new HashMap<>();
+
+        orderRepository.getTopSellingProductIdsFromOrders(pageable).forEach(row -> {
+            Long id = (Long) row[0];
+            combinedMap.put(id, TopProductResponse.builder()
+                    .productItemId(id)
+                    .totalQuantity(((Long) row[1]).intValue())
+                    .totalRevenue((BigDecimal) row[2])
+                    .build());
+        });
+
+        saleItemRepository.getTopSellingProductIdsFromSales(pageable).forEach(row -> {
+            Long id = (Long) row[0];
+            Integer qty = ((Long) row[1]).intValue();
+            BigDecimal revenue = (BigDecimal) row[2];
+
+            combinedMap.merge(id,
+                    TopProductResponse.builder().productItemId(id).totalQuantity(qty).totalRevenue(revenue).build(),
+                    (oldV, newV) -> {
+                        oldV.setTotalQuantity(oldV.getTotalQuantity() + newV.getTotalQuantity());
+                        oldV.setTotalRevenue(oldV.getTotalRevenue().add(newV.getTotalRevenue()));
+                        return oldV;
+                    });
+        });
+
+        List<Long> productItemIds = combinedMap.keySet().stream().toList();
+
+        Map<Long, ProductItemResponse> detailsMap = productClient.getProductItemsByIds(productItemIds).getData()
+                .stream().collect(Collectors.toMap(ProductItemResponse::getId, d -> d));
+
+        return combinedMap.values().stream()
+                .peek(dto -> {
+                    ProductItemResponse detail = detailsMap.get(dto.getProductItemId());
+                    if (detail != null) {
+                        dto.setProductName(detail.getTitle());
+                        dto.setImageUrl(detail.getImageUrl());
+                        dto.setProductSlug(detail.getProductSlug());
+                    }
+                })
+                .sorted(Comparator.comparing(TopProductResponse::getTotalQuantity).reversed())
+                .limit(limit)
                 .toList();
     }
 
