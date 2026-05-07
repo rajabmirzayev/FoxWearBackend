@@ -1,5 +1,6 @@
 package com.foxwear.orderservice.repository;
 
+import com.foxwear.orderservice.dto.response.SalesDataDTO;
 import com.foxwear.orderservice.entity.Sale;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface SaleRepository extends JpaRepository<Sale, Long> {
@@ -25,5 +27,12 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 
     @Query("SELECT SUM(s.totalAmount) FROM Sale s WHERE s.createdAt BETWEEN :start AND :end")
     BigDecimal sumRevenueByDateRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query("SELECT new com.foxwear.orderservice.dto.response.SalesDataDTO(" +
+            "CAST(s.createdAt AS date), SUM(s.totalAmount)) " +
+            "FROM Sale s " +
+            "WHERE s.createdAt >= :startDate " +
+            "GROUP BY CAST(s.createdAt AS date)")
+    List<SalesDataDTO> getDailyStats(@Param("startDate") LocalDateTime startDate);
 
 }

@@ -1,6 +1,7 @@
 package com.foxwear.orderservice.service;
 
 import com.foxwear.orderservice.dto.response.DashboardSummaryResponse;
+import com.foxwear.orderservice.dto.response.SalesDataDTO;
 import com.foxwear.orderservice.repository.OrderRepository;
 import com.foxwear.orderservice.repository.SaleRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,8 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -47,6 +50,60 @@ public class DashboardService {
                         BigDecimal.valueOf(currentOrders),
                         BigDecimal.valueOf(previousOrders)))
                 .build();
+    }
+
+    /**
+     * Retrieves combined sales and order statistics for the last 7 days.
+     *
+     * @return List of SalesDataDTO containing daily revenue totals.
+     */
+    @Transactional(readOnly = true)
+    public List<SalesDataDTO> getCombinedSalesOverview() {
+        log.info("Fetching combined sales and order statistics for the last 7 days");
+
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(6).withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+        List<SalesDataDTO> orderStats = orderRepository.getDailyStats(sevenDaysAgo);
+        List<SalesDataDTO> saleStats = saleRepository.getDailyStats(sevenDaysAgo);
+
+        // Initialize map with last 7 days to ensure all days are present even with zero revenue
+        Map<LocalDate, BigDecimal> combinedMap = new TreeMap<>();
+
+        for (int i = 0; i <= 6; i++) {
+            combinedMap.put(LocalDate.now().minusDays(i), BigDecimal.ZERO);
+        }
+
+        log.debug("Processing and merging statistics from orders and sales");
+        // Merge data from both repositories into the map
+        processStats(orderStats, combinedMap);
+        processStats(saleStats, combinedMap);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE", Locale.ENGLISH);
+
+        return combinedMap.entrySet().stream()
+                .map(entry -> new SalesDataDTO(
+                        entry.getKey().format(formatter),
+                        entry.getValue()))
+                .toList();
+    }
+
+    /**
+     * Processes raw statistics and merges them into the provided map.
+     *
+     * @param stats List of raw sales data from repository
+     * @param map   The target map to accumulate values
+     */
+    private void processStats(List<SalesDataDTO> stats, Map<LocalDate, BigDecimal> map) {
+        if (stats == null) return;
+
+        for (SalesDataDTO stat : stats) {
+            if (stat.getDay() != null) {
+                LocalDate date = LocalDate.parse(stat.getDay().trim());
+                if (map.containsKey(date)) {
+                    map.merge(date, stat.getAmount(), BigDecimal::add);
+                }
+            }
+        }
     }
 
     /**

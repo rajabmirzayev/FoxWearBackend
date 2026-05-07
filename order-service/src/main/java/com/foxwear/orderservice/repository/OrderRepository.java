@@ -1,5 +1,6 @@
 package com.foxwear.orderservice.repository;
 
+import com.foxwear.orderservice.dto.response.SalesDataDTO;
 import com.foxwear.orderservice.entity.Order;
 import com.foxwear.orderservice.enums.OrderStatus;
 import org.jspecify.annotations.NullMarked;
@@ -46,5 +47,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT COUNT(o) FROM Order o WHERE o.createdAt >= :start AND o.createdAt < :end")
     long countOrdersByDateRange(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query("SELECT new com.foxwear.orderservice.dto.response.SalesDataDTO(" +
+            "CAST(o.createdAt AS date), SUM(o.totalDiscountPrice)) " +
+            "FROM Order o " +
+            "WHERE o.createdAt >= :startDate " +
+            "GROUP BY CAST(o.createdAt AS date)")
+    List<SalesDataDTO> getDailyStats(@Param("startDate") LocalDateTime startDate);
 
 }
