@@ -5,7 +5,6 @@ import com.foxwear.orderservice.dto.request.OrderCreateRequest;
 import com.foxwear.orderservice.dto.response.OrderCreateResponse;
 import com.foxwear.orderservice.dto.response.OrderGetAllResponse;
 import com.foxwear.orderservice.dto.response.OrderGetResponse;
-import com.foxwear.orderservice.enums.OrderStatus;
 import com.foxwear.orderservice.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,13 +36,6 @@ public class OrderController {
                 .body(ApiResponse.success(response));
     }
 
-    @Operation(summary = "Get pending orders", description = "Retrieves a list of all orders that are currently in PENDING status")
-    @GetMapping("/pending")
-    public ResponseEntity<ApiResponse<List<OrderGetAllResponse>>> getPendingOrders() {
-        var response = orderService.getOrdersByStatus(OrderStatus.PENDING);
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
     @Operation(summary = "Get my orders", description = "Retrieves a list of all orders belonging to the authenticated user")
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<List<OrderGetAllResponse>>> getMyOrders(
@@ -63,42 +55,13 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-
-    @Operation(summary = "Set order to preparing", description = "Updates the order status to PREPARING. Requires admin privileges.")
-    @PatchMapping("/preparing/{orderId}")
-    public ResponseEntity<ApiResponse<Void>> setPreparingOrder(
-            @Parameter(description = "ID of the order to update") @PathVariable Long orderId,
-            @RequestHeader("X-User-Id") Long adminId) {
-        orderService.setPreparingOrder(orderId, adminId);
-        return ResponseEntity.ok(ApiResponse.success(null));
-    }
-
-    @Operation(summary = "Set order to prepared", description = "Updates the order status to PREPARED. Requires admin privileges.")
-    @PatchMapping("/prepared/{orderId}")
-    public ResponseEntity<ApiResponse<Void>> setPreparedOrder(
-            @Parameter(description = "ID of the order to update") @PathVariable Long orderId,
-            @RequestHeader("X-User-Id") Long adminId) {
-        orderService.setPreparedOrder(orderId, adminId);
-        return ResponseEntity.ok(ApiResponse.success(null));
-    }
-
-    @Operation(summary = "Assign courier to order", description = "Assigns a courier to the specified order and updates status to ON_THE_WAY")
-    @PatchMapping("/assign/{orderId}")
-    public ResponseEntity<ApiResponse<Void>> assignCourier(
-            @Parameter(description = "ID of the order to assign") @PathVariable Long orderId,
-            @RequestHeader("X-User-Id") Long courierId) {
-        orderService.assignCourier(orderId, courierId);
-        return ResponseEntity.ok(ApiResponse.success(null));
-    }
-
-    @Operation(summary = "Mark order as delivered", description = "Updates the order status to DELIVERED")
-    @PatchMapping("/deliver/{orderId}")
-    public ResponseEntity<ApiResponse<Void>> deliverOrder(
-            @Parameter(description = "ID of the order to mark as delivered") @PathVariable Long orderId,
-            @RequestHeader("X-User-Id") Long courierId
+    @GetMapping("/data/{id}")
+    public ResponseEntity<ApiResponse<OrderGetResponse>> getOrderDetails(
+            @PathVariable Long id,
+            @RequestHeader("X-User-Id") Long userId
     ) {
-        orderService.deliverOrder(orderId, courierId);
-        return ResponseEntity.ok(ApiResponse.success(null));
+        OrderGetResponse response = orderService.getOrderById(id, userId);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
 }

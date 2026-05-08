@@ -67,7 +67,10 @@ public class GatewayConfig {
                                 "/api/v1/carts/**",
                                 "/api/v1/orders/**",
                                 "/api/v1/couriers/**",
-                                "/api/admin/orders/**"
+                                "/api/v1/sellers/**",
+                                "/api/admin/orders/**",
+                                "/api/admin/coupons/**",
+                                "/api/admin/sellers/**"
                         )
                         .filters(f -> f.filter(commonFilter))
                         .uri("lb://ORDER-SERVICE")

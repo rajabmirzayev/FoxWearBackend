@@ -47,6 +47,9 @@ public enum ErrorCode {
     // Cart related errors
     CART_NOT_FOUND("CART_001"),
 
+    // Sale related errors
+    SALE_NOT_FOUND("SALE_001"),
+
     // Order related errors
     ORDER_NOT_FOUND("ORDER_001"),
     UNPAID("ORDER_002"),

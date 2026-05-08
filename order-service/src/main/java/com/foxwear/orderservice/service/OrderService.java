@@ -2,6 +2,7 @@ package com.foxwear.orderservice.service;
 
 import com.foxwear.common.exception.InvalidArgumentException;
 import com.foxwear.common.exception.UnauthorizedException;
+import com.foxwear.common.utils.StringHelper;
 import com.foxwear.orderservice.dto.request.OrderCreateRequest;
 import com.foxwear.orderservice.dto.request.OrderFilterRequest;
 import com.foxwear.orderservice.dto.response.*;
@@ -28,7 +29,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -82,7 +82,7 @@ public class OrderService {
                 : PaymentStatus.UNPAID;
 
         Order order = Order.builder()
-                .orderNumber(generateOrderNumber())
+                .orderNumber(StringHelper.generateFWNumber())
                 .userId(userId)
                 .status(OrderStatus.PENDING)
                 .paymentStatus(initialPaymentStatus)
@@ -494,15 +494,6 @@ public class OrderService {
                 .subTotal(cartItem.getSubTotal())
                 .discountAtPurchase(cartItem.getOriginalSubTotal().subtract(cartItem.getSubTotal()))
                 .build();
-    }
-
-    /**
-     * Generates a unique order number based on the current timestamp.
-     *
-     * @return A string representing the unique order number
-     */
-    private String generateOrderNumber() {
-        return "FW-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
     }
 
     /**

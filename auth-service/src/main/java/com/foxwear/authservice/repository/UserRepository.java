@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
@@ -29,5 +30,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     Optional<UserEntity> findByIdentifier(@Param("identifier") String identifier);
 
     Page<UserEntity> findAll(Specification<UserEntity> spec, Pageable pageable);
+
+    @Query("SELECT COUNT(u) FROM UserEntity u WHERE u.createdAt >= :start AND u.createdAt < :end")
+    long countByCreatedAtBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
 }
